@@ -1,0 +1,18 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/**/*.js": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NEXT_BUILD_TIMEOUT": "300"
+  },
+  "build": {
+    "env": {
+      "NODE_OPTIONS": "--max_old_space_size=2048"
+    }
+  }
+}

@@ -1,0 +1,100 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import HostSidebar from '@/components/host/HostSidebar'
+import HostHeader from '@/components/host/HostHeader'
+
+export default function HostLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const pathname = usePathname()
+  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // 로그인 페이지에서는 인증 체크를 하지 않음
+    if (pathname === '/host/login') {
+      setIsLoading(false)
+      return
+    }
+    const checkAuth = () => {
+      try {
+        // 브라우저 환경에서만 sessionStorage 접근
+        if (typeof window === 'undefined') {
+          setIsLoading(false)
+          return
+        }
+
+        const hostUser = sessionStorage.getItem('hostUser')
+        
+        if (!hostUser) {
+          // 로그인 안되어 있으면 로그인 페이지로 리다이렉트
+          router.push('/host/login')
+          return
+        }
+
+        const hostData = JSON.parse(hostUser)
+        
+        // 유효한 호스트인지 확인
+        if (hostData.role === 'admin' || hostData.role === 'host' || hostData.isAdmin) {
+          setIsAuthenticated(true)
+        } else {
+          // 유효하지 않은 계정이면 로그인 페이지로
+          sessionStorage.removeItem('hostUser')
+          router.push('/host/login')
+        }
+      } catch (error) {
+        console.error('호스트 인증 체크 오류:', error)
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('hostUser')
+        }
+        router.push('/host/login')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    // 컴포넌트가 마운트된 후에 실행
+    checkAuth()
+  }, [pathname, router])
+
+  // 로그인 페이지에서는 레이아웃 없이 순수한 페이지만 렌더링
+  if (pathname === '/host/login') {
+    return <>{children}</>
+  }
+
+  // 로딩 중일 때
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600"></div>
+          <p className="mt-4 text-gray-600">인증 확인 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 인증되지 않았으면 아무것도 렌더링하지 않음 (리다이렉트 처리 중)
+  if (!isAuthenticated) {
+    return null
+  }
+
+  return (
+    <div className="host-layout flex h-screen bg-gray-50">
+      <HostSidebar />
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex-shrink-0">
+          <HostHeader />
+        </div>
+        <main className="flex-1 overflow-y-auto p-6 min-h-0">
+          {children}
+        </main>
+      </div>
+    </div>
+  )
+}

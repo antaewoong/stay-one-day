@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Prevent double scrollbars in admin/host layouts */
+html {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* For admin and host routes, prevent body scroll */
+.admin-layout, .host-layout {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* Stay-OneDay Design Tokens */
+:root {
+  --color-navy-900: #0B1A34;
+  --color-navy-800: #102347;
+  --color-navy-700: #16305E;
+  --color-mint-500: #00D4B3;
+  --color-gold-500: #C7A756;
+  --color-gray-900: #111111;
+  --color-gray-700: #333333;
+  --color-gray-600: #4D4D4D;
+  --color-gray-500: #666666;
+  --color-gray-300: #D9D9D9;
+  --color-gray-200: #EEEEEE;
+  --color-gray-100: #F7F7F8;
+  --color-white: #FFFFFF;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.12);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.16);
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --font-display: "Plus Jakarta Sans", "Noto Sans KR", system-ui, sans-serif;
+  --font-body: "Inter", "Noto Sans KR", system-ui, sans-serif;
+}

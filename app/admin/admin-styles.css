@@ -1,0 +1,25 @@
+/* 관리자와 호스트 페이지 전용 스타일 - 유저 페이지에 영향 없음 */
+.admin-page [data-radix-popper-content-wrapper],
+.host-page [data-radix-popper-content-wrapper] {
+  background-color: white !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.admin-page [role="combobox"] + [data-radix-popper-content-wrapper],
+.host-page [role="combobox"] + [data-radix-popper-content-wrapper] {
+  background-color: white !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.admin-page .select-content,
+.host-page .select-content {
+  background-color: white !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.admin-page .dialog-content,
+.host-page .dialog-content {
+  background-color: white !important;
+  border: 1px solid #e5e7eb !important;
+}

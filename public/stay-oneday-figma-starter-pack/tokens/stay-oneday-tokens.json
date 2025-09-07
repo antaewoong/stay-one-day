@@ -1,0 +1,195 @@
+{
+  "version": "1.0",
+  "meta": {
+    "name": "Stay-OneDay Tokens",
+    "source": "ChatGPT"
+  },
+  "values": {
+    "core": {
+      "color": {
+        "navy-900": {
+          "value": "#0B1A34"
+        },
+        "navy-800": {
+          "value": "#102347"
+        },
+        "navy-700": {
+          "value": "#16305E"
+        },
+        "mint-500": {
+          "value": "#00D4B3"
+        },
+        "gold-500": {
+          "value": "#C7A756"
+        },
+        "gray-900": {
+          "value": "#111111"
+        },
+        "gray-700": {
+          "value": "#333333"
+        },
+        "gray-600": {
+          "value": "#4D4D4D"
+        },
+        "gray-500": {
+          "value": "#666666"
+        },
+        "gray-300": {
+          "value": "#D9D9D9"
+        },
+        "gray-200": {
+          "value": "#EEEEEE"
+        },
+        "gray-100": {
+          "value": "#F7F7F8"
+        },
+        "white": {
+          "value": "#FFFFFF"
+        }
+      },
+      "radius": {
+        "xs": {
+          "value": "8"
+        },
+        "sm": {
+          "value": "12"
+        },
+        "md": {
+          "value": "16"
+        },
+        "lg": {
+          "value": "24"
+        },
+        "xl": {
+          "value": "32"
+        }
+      },
+      "shadow": {
+        "sm": {
+          "value": "0 2 8 0 rgba(0,0,0,0.08)"
+        },
+        "md": {
+          "value": "0 6 20 0 rgba(0,0,0,0.12)"
+        },
+        "lg": {
+          "value": "0 10 40 0 rgba(0,0,0,0.16)"
+        }
+      },
+      "spacing": {
+        "2": {
+          "value": "8"
+        },
+        "3": {
+          "value": "12"
+        },
+        "4": {
+          "value": "16"
+        },
+        "6": {
+          "value": "24"
+        },
+        "8": {
+          "value": "32"
+        },
+        "10": {
+          "value": "40"
+        },
+        "12": {
+          "value": "48"
+        },
+        "16": {
+          "value": "64"
+        },
+        "20": {
+          "value": "80"
+        }
+      }
+    },
+    "typography": {
+      "display": {
+        "fontFamily": {
+          "value": "Plus Jakarta Sans, Noto Sans KR"
+        },
+        "fontWeight": {
+          "value": "700"
+        },
+        "fontSize": {
+          "value": "56"
+        },
+        "lineHeight": {
+          "value": "68"
+        }
+      },
+      "h1": {
+        "fontFamily": {
+          "value": "Plus Jakarta Sans, Noto Sans KR"
+        },
+        "fontWeight": {
+          "value": "700"
+        },
+        "fontSize": {
+          "value": "44"
+        },
+        "lineHeight": {
+          "value": "54"
+        }
+      },
+      "h2": {
+        "fontFamily": {
+          "value": "Plus Jakarta Sans, Noto Sans KR"
+        },
+        "fontWeight": {
+          "value": "700"
+        },
+        "fontSize": {
+          "value": "36"
+        },
+        "lineHeight": {
+          "value": "44"
+        }
+      },
+      "h3": {
+        "fontFamily": {
+          "value": "Plus Jakarta Sans, Noto Sans KR"
+        },
+        "fontWeight": {
+          "value": "600"
+        },
+        "fontSize": {
+          "value": "28"
+        },
+        "lineHeight": {
+          "value": "36"
+        }
+      },
+      "body": {
+        "fontFamily": {
+          "value": "Inter, Noto Sans KR"
+        },
+        "fontWeight": {
+          "value": "400"
+        },
+        "fontSize": {
+          "value": "16"
+        },
+        "lineHeight": {
+          "value": "26"
+        }
+      },
+      "label": {
+        "fontFamily": {
+          "value": "Inter, Noto Sans KR"
+        },
+        "fontWeight": {
+          "value": "600"
+        },
+        "fontSize": {
+          "value": "14"
+        },
+        "lineHeight": {
+          "value": "20"
+        }
+      }
+    }
+  }
+}

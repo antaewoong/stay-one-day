@@ -1,0 +1,37 @@
+schemaname,tablename,policyname,permissive,roles,cmd,qual
+public,accommodations,누구나 활성화된 숙소 조회 가능,PERMISSIVE,{public},SELECT,(status = 'active'::text)
+public,accommodations,사업자는 자신의 숙소만 관리 가능,PERMISSIVE,{public},ALL,"(EXISTS ( SELECT 1
+   FROM business_accounts
+  WHERE ((business_accounts.id = accommodations.business_id) AND (business_accounts.user_id = auth.uid()))))"
+public,hosts,Anyone can insert host data,PERMISSIVE,{public},INSERT,null
+public,hosts,Users can update own host data,PERMISSIVE,{public},UPDATE,(auth.uid() = user_id)
+public,hosts,Users can view own host data,PERMISSIVE,{public},SELECT,(auth.uid() = user_id)
+public,notifications,사용자는 자신의 알림만 업데이트 가능,PERMISSIVE,{public},UPDATE,(user_id = auth.uid())
+public,notifications,사용자는 자신의 알림만 조회 가능,PERMISSIVE,{public},SELECT,(user_id = auth.uid())
+public,partner_inquiries,Admin can update partner inquiries,PERMISSIVE,{public},UPDATE,"(EXISTS ( SELECT 1
+   FROM auth.users
+  WHERE ((auth.uid() = users.id) AND ((users.email)::text = 'admin@stay-oneday.com'::text))))"
+public,partner_inquiries,Admin can view all partner inquiries,PERMISSIVE,{public},SELECT,"(EXISTS ( SELECT 1
+   FROM auth.users
+  WHERE ((auth.uid() = users.id) AND ((users.email)::text = 'admin@stay-oneday.com'::text))))"
+public,partner_inquiries,Anyone can submit partner inquiries,PERMISSIVE,{public},INSERT,null
+public,partnership_inquiries,Admin can update partnership inquiries,PERMISSIVE,{public},UPDATE,"(EXISTS ( SELECT 1
+   FROM auth.users
+  WHERE ((auth.uid() = users.id) AND ((users.email)::text = 'admin@stay-oneday.com'::text))))"
+public,partnership_inquiries,Admin can view all partnership inquiries,PERMISSIVE,{public},SELECT,"(EXISTS ( SELECT 1
+   FROM auth.users
+  WHERE ((auth.uid() = users.id) AND ((users.email)::text = 'admin@stay-oneday.com'::text))))"
+public,partnership_inquiries,Anyone can submit partnership inquiries,PERMISSIVE,{public},INSERT,null
+public,profiles,사용자는 자신의 프로필만 업데이트 가능,PERMISSIVE,{public},UPDATE,(auth.uid() = id)
+public,profiles,사용자는 자신의 프로필만 조회 가능,PERMISSIVE,{public},SELECT,(auth.uid() = id)
+public,reservations,사용자는 예약 생성 가능,PERMISSIVE,{public},INSERT,null
+public,reservations,사용자는 자신의 예약만 조회 가능,PERMISSIVE,{public},SELECT,(user_id = auth.uid())
+public,reviews,누구나 활성화된 리뷰 조회 가능,PERMISSIVE,{public},SELECT,(status = 'active'::text)
+public,reviews,사용자는 자신의 리뷰만 작성/수정 가능,PERMISSIVE,{public},ALL,(user_id = auth.uid())
+public,stays,Hosts can manage their stays,PERMISSIVE,{public},ALL,"(auth.uid() IN ( SELECT hosts.user_id
+   FROM hosts
+  WHERE (hosts.id = stays.host_id)))"
+public,stays,Stays are publicly readable,PERMISSIVE,{authenticated},SELECT,true
+public,users,Users can update own data,PERMISSIVE,{public},UPDATE,(auth.uid() = id)
+public,users,Users can view own data,PERMISSIVE,{public},SELECT,(auth.uid() = id)
+public,wishlists,사용자는 자신의 위시리스트만 관리 가능,PERMISSIVE,{public},ALL,(user_id = auth.uid())

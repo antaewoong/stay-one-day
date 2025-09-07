@@ -1,0 +1,30 @@
+column_name,data_type,is_nullable,column_default
+id,uuid,NO,gen_random_uuid()
+business_id,uuid,YES,null
+name,text,NO,null
+description,text,YES,null
+accommodation_type,text,NO,null
+address,text,NO,null
+detailed_address,text,YES,null
+latitude,numeric,YES,null
+longitude,numeric,YES,null
+region,text,NO,null
+max_capacity,integer,NO,null
+bedrooms,integer,YES,1
+bathrooms,integer,YES,1
+base_price,integer,NO,null
+weekend_price,integer,YES,null
+checkin_time,time without time zone,YES,'15:00:00'::time without time zone
+checkout_time,time without time zone,YES,'11:00:00'::time without time zone
+status,text,YES,'draft'::text
+is_featured,boolean,YES,false
+created_at,timestamp with time zone,YES,now()
+updated_at,timestamp with time zone,YES,now()
+usage_guide,text,YES,''::text
+refund_policy,text,YES,''::text
+seller_info,text,YES,''::text
+special_notes,text,YES,''::text
+amenities,jsonb,YES,'[]'::jsonb
+extra_options,jsonb,YES,'[]'::jsonb
+images,ARRAY,YES,'{}'::text[]
+host_id,uuid,YES,null

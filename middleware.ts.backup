@@ -1,0 +1,118 @@
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const response = NextResponse.next()
+
+  // Security Headers
+  addSecurityHeaders(response)
+  
+  // Rate limiting (basic implementation)
+  const rateLimitResult = checkRateLimit(request)
+  if (!rateLimitResult.allowed) {
+    return new NextResponse('Rate limit exceeded', { status: 429 })
+  }
+  
+  // Admin route protection
+  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+    // Real authentication check should be done at the page level with Supabase
+    // This is just for basic route awareness
+  }
+  
+  // Host route protection  
+  if (pathname.startsWith('/host') && !pathname.startsWith('/host/login')) {
+    // Real authentication check should be done at the page level with Supabase
+  }
+
+  // API route protection
+  if (pathname.startsWith('/api/')) {
+    // Add API-specific headers
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+  }
+
+  return response
+}
+
+function addSecurityHeaders(response: NextResponse) {
+  // Security headers
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+  response.headers.set(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.tosspayments.com https://vercel.live; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.tosspayments.com https://vercel.live; frame-src https://js.tosspayments.com;"
+  )
+  
+  // Remove CORS headers that might interfere with Vercel
+  // CORS is handled automatically by Vercel for production
+}
+
+// Simple in-memory rate limiting (in production, use Redis or similar)
+const rateLimitMap = new Map()
+
+function checkRateLimit(request: NextRequest): { allowed: boolean; limit?: number; remaining?: number } {
+  const ip = getClientIP(request)
+  const key = `rate_limit_${ip}`
+  const windowMs = 60 * 1000 // 1 minute
+  const maxRequests = 100 // 100 requests per minute
+  
+  const now = Date.now()
+  const windowStart = now - windowMs
+  
+  // Get or initialize rate limit data for this IP
+  let requestTimes = rateLimitMap.get(key) || []
+  
+  // Remove old requests outside the window
+  requestTimes = requestTimes.filter((time: number) => time > windowStart)
+  
+  // Check if limit exceeded
+  if (requestTimes.length >= maxRequests) {
+    return { allowed: false, limit: maxRequests, remaining: 0 }
+  }
+  
+  // Add current request
+  requestTimes.push(now)
+  rateLimitMap.set(key, requestTimes)
+  
+  // Clean up old entries periodically (simple cleanup)
+  if (Math.random() < 0.01) { // 1% chance
+    cleanupRateLimitMap(windowStart)
+  }
+  
+  return { 
+    allowed: true, 
+    limit: maxRequests, 
+    remaining: maxRequests - requestTimes.length 
+  }
+}
+
+function cleanupRateLimitMap(windowStart: number) {
+  for (const [key, times] of rateLimitMap.entries()) {
+    const validTimes = times.filter((time: number) => time > windowStart)
+    if (validTimes.length === 0) {
+      rateLimitMap.delete(key)
+    } else {
+      rateLimitMap.set(key, validTimes)
+    }
+  }
+}
+
+function getClientIP(request: NextRequest): string {
+  // Try to get real IP from various headers (for deployment behind proxies)
+  const forwarded = request.headers.get('x-forwarded-for')
+  const real = request.headers.get('x-real-ip')
+  const cfConnecting = request.headers.get('cf-connecting-ip')
+  
+  if (forwarded) return forwarded.split(',')[0].trim()
+  if (real) return real
+  if (cfConnecting) return cfConnecting
+  
+  // Fallback
+  return request.ip || 'unknown'
+}
+
+// Completely disable middleware to avoid Vercel authentication issues

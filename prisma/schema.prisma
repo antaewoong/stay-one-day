@@ -1,0 +1,217 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 사용자 (고객)
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  phone       String?
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // 관계
+  bookings    Booking[]
+  reviews     Review[]
+  
+  @@map("users")
+}
+
+// 사업자 (업체)
+model Business {
+  id              String            @id @default(cuid())
+  email           String            @unique
+  password        String
+  businessName    String
+  ownerName       String
+  phone           String
+  businessNumber  String?           // 사업자등록번호
+  address         String
+  status          BusinessStatus    @default(PENDING)
+  commissionRate  Float             @default(0.06) // 수수료율 (기본 6%)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  // 관계
+  spaces          Space[]
+  settlements     Settlement[]
+  
+  @@map("businesses")
+}
+
+// 공간 (풀빌라/독채)
+model Space {
+  id              String        @id @default(cuid())
+  businessId      String
+  name            String
+  description     String        @db.Text
+  address         String
+  latitude        Float?
+  longitude       Float?
+  maxCapacity     Int
+  basePrice       Int           // 기본가격 (4시간)
+  pricePerHour    Int?          // 시간당 추가요금
+  minHours        Int           @default(4)
+  maxHours        Int           @default(12)
+  checkIn         String        // "10:00"
+  checkOut        String        // "18:00"
+  amenities       String[]      // ["풀", "바베큐", "카라오케"]
+  rules           String[]      // ["금연", "애완동물 불가"]
+  images          String[]      // 이미지 URL 배열
+  isActive        Boolean       @default(false)
+  featured        Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // 관계
+  business        Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  bookings        Booking[]
+  reviews         Review[]
+  categories      SpaceCategory[]
+  
+  @@map("spaces")
+}
+
+// 공간 카테고리 (풀빌라, 독채, 펜션 등)
+model Category {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  description String?
+  icon        String?
+  
+  // 관계
+  spaces      SpaceCategory[]
+  
+  @@map("categories")
+}
+
+// 공간-카테고리 중간 테이블
+model SpaceCategory {
+  spaceId     String
+  categoryId  String
+  
+  space       Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@id([spaceId, categoryId])
+  @@map("space_categories")
+}
+
+// 예약
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  spaceId         String
+  date            DateTime      // 이용 날짜
+  startTime       String        // "10:00"
+  endTime         String        // "16:00"
+  duration        Int           // 이용 시간 (hours)
+  guestCount      Int
+  baseAmount      Int           // 기본 요금
+  extraAmount     Int           @default(0) // 추가 요금
+  totalAmount     Int           // 총 결제 금액
+  commission      Int           // 수수료 (플랫폼)
+  businessAmount  Int           // 사업자 정산 금액
+  status          BookingStatus @default(PENDING)
+  specialRequest  String?       @db.Text
+  paymentId       String?       // 결제 ID (토스페이먼츠)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // 관계
+  user            User          @relation(fields: [userId], references: [id])
+  space           Space         @relation(fields: [spaceId], references: [id])
+  reviews         Review[]
+  
+  @@map("bookings")
+}
+
+// 리뷰
+model Review {
+  id          String    @id @default(cuid())
+  userId      String
+  spaceId     String
+  bookingId   String    @unique
+  rating      Int       // 1-5점
+  comment     String?   @db.Text
+  images      String[]  // 리뷰 이미지
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // 관계
+  user        User      @relation(fields: [userId], references: [id])
+  space       Space     @relation(fields: [spaceId], references: [id])
+  booking     Booking   @relation(fields: [bookingId], references: [id])
+  
+  @@map("reviews")
+}
+
+// 정산
+model Settlement {
+  id              String      @id @default(cuid())
+  businessId      String
+  month           String      // "2024-01"
+  totalBookings   Int         @default(0)
+  totalRevenue    Int         @default(0)
+  totalCommission Int         @default(0)
+  netAmount       Int         @default(0)
+  status          SettlementStatus @default(PENDING)
+  paidAt          DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // 관계
+  business        Business    @relation(fields: [businessId], references: [id])
+  
+  @@unique([businessId, month])
+  @@map("settlements")
+}
+
+// 관리자
+model Admin {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  password    String
+  name        String
+  role        AdminRole @default(ADMIN)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@map("admins")
+}
+
+// Enums
+enum BusinessStatus {
+  PENDING   // 승인 대기
+  APPROVED  // 승인됨
+  REJECTED  // 거부됨
+  SUSPENDED // 정지됨
+}
+
+enum BookingStatus {
+  PENDING     // 결제 대기
+  CONFIRMED   // 확정
+  CANCELLED   // 취소
+  COMPLETED   // 이용완료
+  NO_SHOW     // 노쇼
+}
+
+enum SettlementStatus {
+  PENDING   // 정산 대기
+  PAID      // 정산 완료
+}
+
+enum AdminRole {
+  ADMIN     // 일반 관리자
+  SUPER     // 최고 관리자
+}
