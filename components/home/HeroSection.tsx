@@ -175,7 +175,7 @@ export default function HeroSection({ slides }: HeroSectionProps) {
 
   if (slides.length === 0) {
     return (
-      <section className="relative bg-gray-100 flex items-center justify-center" style={{ height: '50vh' }}>
+      <section className="relative bg-gray-100 flex items-center justify-center" style={{ height: '45vh' }}>
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-600 mb-4">히어로 슬라이드 로딩중...</h1>
           <p className="text-gray-500">관리자 페이지에서 슬라이드를 추가해보세요</p>
@@ -185,7 +185,7 @@ export default function HeroSection({ slides }: HeroSectionProps) {
   }
 
   return (
-    <section className="relative overflow-hidden bg-gray-900" style={{ height: '50vh' }}>
+    <section className="relative overflow-hidden bg-gray-900" style={{ height: '45vh' }}>
       {/* 배경 슬라이드들 */}
       <div className="absolute inset-0">
         {slides.map((slide, index) => (
