@@ -69,7 +69,7 @@ const HeroSection = memo(function HeroSection({
   setShowSearchModal
 }: HeroSectionProps) {
   return (
-    <section className="relative h-[75vh] sm:h-[70vh] md:h-[75vh] overflow-hidden">
+    <section className="relative h-[65vh] sm:h-[45vh] md:h-[45vh] lg:h-[50vh] overflow-hidden">
       {/* 배경 이미지 슬라이더 */}
       <motion.div 
         className="absolute inset-0"
