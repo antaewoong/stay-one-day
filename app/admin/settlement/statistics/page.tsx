@@ -50,7 +50,7 @@ export default function SettlementStatisticsPage() {
             <SelectTrigger className="w-[120px]">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border border-gray-200 shadow-lg">
               <SelectItem value="week">주간</SelectItem>
               <SelectItem value="month">월간</SelectItem>
               <SelectItem value="year">연간</SelectItem>
@@ -60,7 +60,7 @@ export default function SettlementStatisticsPage() {
             <SelectTrigger className="w-[100px]">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border border-gray-200 shadow-lg">
               <SelectItem value="2024">2024</SelectItem>
               <SelectItem value="2023">2023</SelectItem>
             </SelectContent>

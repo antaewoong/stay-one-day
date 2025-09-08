@@ -361,7 +361,7 @@ export default function CheckOutSMSPage() {
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="카테고리" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   {categories.map(category => (
                     <SelectItem key={category.value} value={category.value}>
                       {category.label}
@@ -491,7 +491,7 @@ export default function CheckOutSMSPage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle>
               {selectedTemplate ? '템플릿 수정' : '새 템플릿 추가'}
@@ -505,7 +505,7 @@ export default function CheckOutSMSPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="객실을 선택하세요" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
                     <SelectItem value="1">구공스테이 청주 본디</SelectItem>
                     <SelectItem value="2">구공스테이 소소한옥</SelectItem>
                     <SelectItem value="3">구공스테이 옥천 키즈</SelectItem>
@@ -531,7 +531,7 @@ export default function CheckOutSMSPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="카테고리 선택" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
                     <SelectItem value="thanks">감사 인사</SelectItem>
                     <SelectItem value="checklist">퇴실 체크리스트</SelectItem>
                     <SelectItem value="review">리뷰 요청</SelectItem>
@@ -545,7 +545,7 @@ export default function CheckOutSMSPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="우선순위 선택" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
                     <SelectItem value="high">높음</SelectItem>
                     <SelectItem value="normal">보통</SelectItem>
                     <SelectItem value="low">낮음</SelectItem>
@@ -576,7 +576,7 @@ export default function CheckOutSMSPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="발송 시점 선택" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
                     {sendTimingOptions.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}

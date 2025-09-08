@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { trackBookingCompleted, trackBookingStarted } from '@/lib/analytics/booking-tracker'
 
 interface Accommodation {
   id: string
@@ -85,6 +86,17 @@ export default function ReservationPageContent() {
   useEffect(() => {
     if (accommodationId) {
       loadAccommodation()
+      
+      // 🎯 예약 시작 추적
+      if (checkinDate && checkoutDate) {
+        trackBookingStarted({
+          accommodationId,
+          accommodationName: '',
+          checkInDate: checkinDate,
+          checkOutDate: checkoutDate,
+          guestCount
+        })
+      }
     }
   }, [accommodationId])
 
@@ -139,7 +151,7 @@ export default function ReservationPageContent() {
       // 예약 번호 생성
       const reservationNumber = `RSV-${Date.now()}`
       
-      const { error } = await supabase
+      const { data: newReservation, error } = await supabase
         .from('reservations')
         .insert({
           reservation_number: reservationNumber,
@@ -147,11 +159,38 @@ export default function ReservationPageContent() {
           payment_status: 'pending',
           status: 'pending'
         })
+        .select()
+        .single()
 
       if (error) {
         console.error('예약 생성 실패:', error)
         alert('예약 처리 중 오류가 발생했습니다.')
         return
+      }
+
+      // 🎯 예약 완료 추적 실행
+      if (newReservation && accommodation) {
+        try {
+          await trackBookingCompleted({
+            reservationId: newReservation.reservation_number,
+            accommodationId: accommodation.id,
+            accommodationName: accommodation.name,
+            hostId: accommodation.host_id || '',
+            guestName: reservationData.guest_name,
+            guestEmail: reservationData.guest_email,
+            guestPhone: reservationData.guest_phone,
+            totalAmount: reservationData.total_amount,
+            checkInDate: reservationData.checkin_date,
+            checkOutDate: reservationData.checkout_date,
+            guestCount: reservationData.guest_count,
+            location: accommodation.region,
+            bookingAt: new Date()
+          })
+          console.log('✅ 예약 완료 추적 성공')
+        } catch (trackingError) {
+          console.error('⚠️ 예약 추적 실패 (예약은 성공):', trackingError)
+          // 추적 실패해도 예약 성공은 유지
+        }
       }
 
       alert('예약이 성공적으로 접수되었습니다! 확인 후 연락드리겠습니다.')

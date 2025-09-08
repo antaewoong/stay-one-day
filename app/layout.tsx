@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Noto_Sans_KR } from 'next/font/google'
 import { generateMetadata, jsonLd } from '@/lib/seo'
 import ClientLayout from '@/components/client-layout'
+import { GoogleAnalytics } from '@/lib/analytics/ga4-setup'
 import './globals.css'
 
 const notoSansKR = Noto_Sans_KR({ 
@@ -40,6 +41,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//images.unsplash.com" />
         <link rel="preconnect" href="https://supabase.co" />
         <link rel="preconnect" href="https://fcmauibvdqbocwhloqov.supabase.co" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
         
         {/* PWA 설정 */}
         <meta name="theme-color" content="#3B82F6" />
@@ -55,6 +57,9 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body className={notoSansKR.className}>
+        {/* 🎯 Google Analytics 4 추적 */}
+        <GoogleAnalytics />
+        
         <ClientLayout>
           {children}
         </ClientLayout>
@@ -63,14 +68,45 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Core Web Vitals 측정
+              // Core Web Vitals 측정 + GA4 연동
               if ('web-vital' in window) {
                 import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-                  getCLS(console.log);
-                  getFID(console.log);
-                  getFCP(console.log);
-                  getLCP(console.log);
-                  getTTFB(console.log);
+                  // Core Web Vitals를 GA4로 전송
+                  getCLS((metric) => {
+                    if (window.gtag) {
+                      window.gtag('event', 'web_vitals', {
+                        event_category: 'performance',
+                        event_label: 'CLS',
+                        value: Math.round(metric.value * 1000),
+                        non_interaction: true
+                      });
+                    }
+                    console.log('CLS:', metric);
+                  });
+                  
+                  getFID((metric) => {
+                    if (window.gtag) {
+                      window.gtag('event', 'web_vitals', {
+                        event_category: 'performance',
+                        event_label: 'FID',
+                        value: Math.round(metric.value),
+                        non_interaction: true
+                      });
+                    }
+                    console.log('FID:', metric);
+                  });
+                  
+                  getLCP((metric) => {
+                    if (window.gtag) {
+                      window.gtag('event', 'web_vitals', {
+                        event_category: 'performance',
+                        event_label: 'LCP',
+                        value: Math.round(metric.value),
+                        non_interaction: true
+                      });
+                    }
+                    console.log('LCP:', metric);
+                  });
                 });
               }
             `,

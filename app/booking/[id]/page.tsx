@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { calculateDayPrice, getPriceType, getPriceTypeLabel } from '@/lib/pricing'
 import Header from '@/components/header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,6 +37,8 @@ interface Accommodation {
   address: string
   region: string
   base_price: number
+  weekend_price: number
+  peak_season_price: number
   max_capacity: number
   images: string[]
   checkin_time: string

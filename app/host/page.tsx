@@ -15,9 +15,12 @@ import {
   Users,
   Building2,
   Eye,
-  Edit
+  Edit,
+  Settings,
+  Phone
 } from 'lucide-react'
 import Link from 'next/link'
+import MobileQuickActions from '@/components/host/MobileQuickActions'
 
 interface HostStats {
   totalEarnings: number
@@ -47,6 +50,7 @@ export default function HostPage() {
   const [recentBookings, setRecentBookings] = useState<any[]>([])
   const [recentReviews, setRecentReviews] = useState<any[]>([])
   const [hostData, setHostData] = useState<any>(null)
+  const [dashboardData, setDashboardData] = useState<any>(null)
 
   useEffect(() => {
     // 호스트 정보 확인
@@ -60,148 +64,27 @@ export default function HostPage() {
 
   const loadDashboardData = async (hostId: string) => {
     try {
-      // 호스트별로 다른 더미 데이터 제공
-      const hostSpecificData = getHostSpecificData(hostId)
+      // 실제 데이터베이스에서 데이터 가져오기
+      const response = await fetch(`/api/host/dashboard?hostId=${hostId}`)
+      const result = await response.json()
       
-      setStats(hostSpecificData.stats)
-      setRecentBookings(hostSpecificData.bookings)
-      setRecentReviews(hostSpecificData.reviews)
+      if (result.success) {
+        setStats(result.data.stats)
+        setRecentBookings(result.data.recentBookings)
+        setRecentReviews(result.data.recentReviews)
+        setDashboardData(result.data)
+      } else {
+        console.error('Dashboard data load failed:', result.error)
+        // 실패시 기본값 유지
+      }
     } catch (error) {
       console.error('대시보드 데이터 로드 실패:', error)
+      // 에러시 기본값 유지
     } finally {
       setLoading(false)
     }
   }
 
-  // 호스트별 데이터 분리 함수
-  const getHostSpecificData = (hostId: string) => {
-    const hostDataMap: Record<string, any> = {
-      'host-1': {
-        stats: {
-          totalEarnings: 8500000,
-          monthlyEarnings: 1800000,
-          totalBookings: 89,
-          monthlyBookings: 15,
-          averageRating: 4.9,
-          occupancyRate: 82,
-          totalProperties: 3,
-          activeProperties: 3
-        },
-        bookings: [
-          {
-            id: 1,
-            guestName: '김민수',
-            propertyName: '구공스테이 풀빌라',
-            checkIn: '2024-02-15',
-            checkOut: '2024-02-17',
-            amount: 360000,
-            status: 'confirmed'
-          },
-          {
-            id: 2,
-            guestName: '박지영',
-            propertyName: '구공스테이 독채',
-            checkIn: '2024-02-20',
-            checkOut: '2024-02-22',
-            amount: 280000,
-            status: 'pending'
-          }
-        ],
-        reviews: [
-          {
-            id: 1,
-            guestName: '김민수',
-            propertyName: '구공스테이 풀빌라',
-            rating: 5,
-            comment: '정말 깨끗하고 시설이 훌륭했습니다. 풀장이 최고였어요!',
-            date: '2024-02-10'
-          }
-        ]
-      },
-      'host-2': {
-        stats: {
-          totalEarnings: 6200000,
-          monthlyEarnings: 1200000,
-          totalBookings: 67,
-          monthlyBookings: 8,
-          averageRating: 4.7,
-          occupancyRate: 74,
-          totalProperties: 2,
-          activeProperties: 2
-        },
-        bookings: [
-          {
-            id: 3,
-            guestName: '이준호',
-            propertyName: '스테이도고 펜션',
-            checkIn: '2024-02-18',
-            checkOut: '2024-02-19',
-            amount: 150000,
-            status: 'completed'
-          }
-        ],
-        reviews: [
-          {
-            id: 2,
-            guestName: '이준호',
-            propertyName: '스테이도고 펜션',
-            rating: 4,
-            comment: '조용하고 편안한 휴식 공간이었습니다.',
-            date: '2024-02-08'
-          }
-        ]
-      },
-      'host-3': {
-        stats: {
-          totalEarnings: 4800000,
-          monthlyEarnings: 950000,
-          totalBookings: 45,
-          monthlyBookings: 6,
-          averageRating: 4.6,
-          occupancyRate: 68,
-          totalProperties: 2,
-          activeProperties: 1
-        },
-        bookings: [
-          {
-            id: 4,
-            guestName: '최서연',
-            propertyName: '마담아네뜨 글램핑',
-            checkIn: '2024-02-25',
-            checkOut: '2024-02-26',
-            amount: 180000,
-            status: 'confirmed'
-          }
-        ],
-        reviews: [
-          {
-            id: 3,
-            guestName: '최서연',
-            propertyName: '마담아네뜨 글램핑',
-            rating: 5,
-            comment: '자연 속에서의 특별한 경험이었습니다!',
-            date: '2024-02-12'
-          }
-        ]
-      }
-    }
-
-    // 기본값 (관리자나 알 수 없는 호스트)
-    return hostDataMap[hostId] || {
-      stats: {
-        totalEarnings: 0,
-        monthlyEarnings: 0,
-        totalBookings: 0,
-        monthlyBookings: 0,
-        averageRating: 0,
-        occupancyRate: 0,
-        totalProperties: 0,
-        activeProperties: 0
-      },
-      bookings: [],
-      reviews: []
-    }
-  }
 
   if (loading) {
     return (
@@ -216,8 +99,69 @@ export default function HostPage() {
 
   return (
     <div className="space-y-6">
-      {/* 페이지 헤더 */}
-      <div className="flex items-center justify-between">
+      {/* 모바일 간편 메뉴 - 모바일에서만 표시 */}
+      <div className="block md:hidden px-4">
+        <MobileQuickActions 
+          todayCheckins={dashboardData?.today?.checkins || 0}
+          todayCheckouts={dashboardData?.today?.checkouts || 0}
+          pendingBookings={dashboardData?.today?.pendingBookings || 0}
+          rooms={dashboardData?.accommodations || []}
+          hostId={hostData?.host_id}
+        />
+      </div>
+
+      {/* 모바일용 최근 예약 간단 목록 */}
+      <div className="block md:hidden px-4">
+        <Card className="border shadow-sm">
+          <CardHeader className="border-b bg-gray-50 pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base text-gray-900">최근 예약</CardTitle>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/host/reservations" className="text-xs">전체보기</Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="divide-y divide-gray-100">
+              {recentBookings.slice(0, 3).map((booking) => (
+                <div key={booking.id} className="p-3 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Users className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900 text-sm">{booking.guestName}</h4>
+                          <p className="text-xs text-gray-600">{booking.propertyName}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center text-xs text-gray-500 ml-10">
+                        <span>{booking.checkIn} ~ {booking.checkOut}</span>
+                        <span className="mx-2">•</span>
+                        <span>₩{booking.amount.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <Badge 
+                      className={`text-xs ${
+                        booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                        booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {booking.status === 'confirmed' ? '확정' :
+                       booking.status === 'pending' ? '대기' : '완료'}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* PC용 페이지 헤더 - 데스크톱에서만 표시 */}
+      <div className="hidden md:flex items-center justify-between px-4 lg:px-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">호스트 대시보드</h1>
           <p className="text-sm mt-1 text-gray-600">
@@ -237,8 +181,8 @@ export default function HostPage() {
         </div>
       </div>
 
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* 통계 카드 - PC에서만 표시 */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4 lg:px-8">
         <Card className="border-0 shadow-sm overflow-hidden">
           <div className="h-1 bg-green-500"></div>
           <CardContent className="p-6 bg-green-50">
@@ -322,8 +266,8 @@ export default function HostPage() {
         </Card>
       </div>
 
-      {/* 메인 콘텐츠 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* 메인 콘텐츠 - PC에서만 표시 */}
+      <div className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 lg:px-8">
         
         {/* 최근 예약 */}
         <Card className="lg:col-span-2 border shadow-sm">
@@ -375,34 +319,103 @@ export default function HostPage() {
 
         {/* 사이드 패널 */}
         <div className="space-y-6">
-          {/* 빠른 작업 */}
+          {/* PC용 완전한 호스트 관리 메뉴 */}
           <Card className="border shadow-sm">
             <CardHeader className="bg-gray-50">
-              <CardTitle className="text-base text-gray-900">빠른 작업</CardTitle>
+              <CardTitle className="text-base text-gray-900 flex items-center">
+                <Building2 className="w-4 h-4 mr-2" />
+                숙소 운영 관리
+              </CardTitle>
             </CardHeader>
-            <CardContent className="p-4 space-y-3">
-              <Button asChild variant="outline" className="w-full justify-start">
-                <Link href="/host/calendar">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  예약 달력
+            <CardContent className="p-4 space-y-2">
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
+                <Link href="/host/accommodations">
+                  <Building2 className="w-4 h-4 mr-2" />
+                  숙소 정보 관리
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-start">
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
+                <Link href="/host/rooms">
+                  <Settings className="w-4 h-4 mr-2" />
+                  객실 관리 (방막기/방열기)
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
+                <Link href="/host/photos">
+                  <Eye className="w-4 h-4 mr-2" />
+                  사진 관리
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
+                <Link href="/host/amenities">
+                  <Plus className="w-4 h-4 mr-2" />
+                  편의시설 관리
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* 예약 및 고객 관리 */}
+          <Card className="border shadow-sm">
+            <CardHeader className="bg-gray-50">
+              <CardTitle className="text-base text-gray-900 flex items-center">
+                <Calendar className="w-4 h-4 mr-2" />
+                예약 및 고객 관리
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-2">
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
                 <Link href="/host/reservations">
                   <Calendar className="w-4 h-4 mr-2" />
-                  예약 관리
+                  예약 현황
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-start">
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
+                <Link href="/host/calendar">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  달력 관리
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
+                <Link href="/host/reservations/new">
+                  <Phone className="w-4 h-4 mr-2" />
+                  전화 예약 등록
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
                 <Link href="/host/reviews">
                   <Star className="w-4 h-4 mr-2" />
                   리뷰 관리
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-start">
-                <Link href="/host/photos">
-                  <Eye className="w-4 h-4 mr-2" />
-                  사진 관리
+            </CardContent>
+          </Card>
+
+          {/* 수익 및 정산 */}
+          <Card className="border shadow-sm">
+            <CardHeader className="bg-gray-50">
+              <CardTitle className="text-base text-gray-900 flex items-center">
+                <DollarSign className="w-4 h-4 mr-2" />
+                수익 및 정산
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-2">
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
+                <Link href="/host/analytics">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  수익 분석
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
+                <Link href="/host/settlements">
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  정산 관리
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9">
+                <Link href="/host/pricing">
+                  <Edit className="w-4 h-4 mr-2" />
+                  요금 관리
                 </Link>
               </Button>
             </CardContent>

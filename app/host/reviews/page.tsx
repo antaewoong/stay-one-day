@@ -44,98 +44,52 @@ export default function HostReviewsPage() {
     try {
       setLoading(true)
       
-      // 호스트별 더미 리뷰 데이터
-      const hostReviewsData = getHostReviews(hostId)
+      let url = `/api/reviews?hostId=${hostId}&limit=50`
       
-      let filteredReviews = hostReviewsData
-
-      // 평점 필터 적용
       if (ratingFilter !== 'all') {
-        const rating = parseInt(ratingFilter)
-        filteredReviews = filteredReviews.filter(r => r.rating === rating)
+        url += `&rating=${ratingFilter}`
       }
+      
+      const response = await fetch(url)
+      const result = await response.json()
+      
+      if (result.data && result.data.length >= 0) {
+        const mappedReviews = result.data.map((review: any) => ({
+          id: review.id,
+          guest_name: review.reservations?.guest_name || '게스트',
+          accommodation_name: review.accommodations?.name || '숙소',
+          rating: review.rating,
+          comment: review.comment,
+          created_at: review.created_at,
+          reply: review.host_reply,
+          reply_date: review.reply_date,
+          images: review.images || []
+        }))
+        
+        let filteredReviews = mappedReviews
 
-      // 검색 필터 적용
-      if (searchQuery) {
-        filteredReviews = filteredReviews.filter(r => 
-          r.guest_name.includes(searchQuery) || 
-          r.accommodation_name.includes(searchQuery) ||
-          r.comment.includes(searchQuery)
-        )
+        // 검색 필터 적용
+        if (searchQuery) {
+          filteredReviews = filteredReviews.filter((r: any) => 
+            r.guest_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            r.accommodation_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            r.comment.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        }
+
+        setReviews(filteredReviews)
+      } else {
+        console.log('리뷰가 없거나 API 호출 실패')
+        setReviews([])
       }
-
-      setReviews(filteredReviews)
     } catch (error) {
       console.error('리뷰 목록 로드 실패:', error)
+      setReviews([])
     } finally {
       setLoading(false)
     }
   }
 
-  const getHostReviews = (hostId: string): Review[] => {
-    const reviewDataMap: Record<string, Review[]> = {
-      'host-1': [
-        {
-          id: '1',
-          guest_name: '김민수',
-          accommodation_name: '구공스테이 풀빌라',
-          rating: 5,
-          comment: '정말 깨끗하고 시설이 훌륭했습니다. 풀장이 최고였어요! 다음에도 꼭 이용하고 싶습니다.',
-          created_at: '2024-02-10T15:30:00Z',
-          reply: '소중한 후기 감사합니다. 다음에도 더 좋은 서비스로 모시겠습니다!',
-          reply_date: '2024-02-11T09:00:00Z'
-        },
-        {
-          id: '2',
-          guest_name: '박지영',
-          accommodation_name: '구공스테이 독채',
-          rating: 4,
-          comment: '위치가 좋고 조용해서 휴식하기 좋았습니다. 다만 와이파이가 조금 느렸어요.',
-          created_at: '2024-02-08T12:15:00Z'
-        },
-        {
-          id: '3',
-          guest_name: '최서연',
-          accommodation_name: '구공스테이 풀빌라',
-          rating: 5,
-          comment: '가족 여행으로 정말 만족스러웠습니다. 바베큐 시설도 잘 되어있고 아이들이 너무 좋아했어요.',
-          created_at: '2024-01-28T14:20:00Z',
-          reply: '가족분들이 즐거워하셨다니 저희도 기쁩니다. 감사합니다!',
-          reply_date: '2024-01-29T10:30:00Z'
-        }
-      ],
-      'host-2': [
-        {
-          id: '4',
-          guest_name: '이준호',
-          accommodation_name: '스테이도고 펜션',
-          rating: 4,
-          comment: '조용하고 편안한 휴식 공간이었습니다. 자연 경치가 아름다웠어요.',
-          created_at: '2024-02-08T16:45:00Z'
-        },
-        {
-          id: '5',
-          guest_name: '정미영',
-          accommodation_name: '스테이도고 펜션',
-          rating: 3,
-          comment: '전반적으로는 좋았지만 침구류가 조금 오래된 것 같아요.',
-          created_at: '2024-02-05T11:20:00Z'
-        }
-      ],
-      'host-3': [
-        {
-          id: '6',
-          guest_name: '강동욱',
-          accommodation_name: '마담아네뜨 글램핑',
-          rating: 5,
-          comment: '자연 속에서의 특별한 경험이었습니다! 별보기도 환상적이었어요.',
-          created_at: '2024-02-01T19:30:00Z'
-        }
-      ]
-    }
-
-    return reviewDataMap[hostId] || []
-  }
 
   useEffect(() => {
     if (hostData) {
@@ -151,18 +105,28 @@ export default function HostReviewsPage() {
     if (!replyText.trim()) return
 
     try {
-      // 실제 환경에서는 Supabase에서 답글 저장
-      setReviews(prev => 
-        prev.map(r => r.id === reviewId ? { 
-          ...r, 
+      const response = await fetch(`/api/reviews/${reviewId}/reply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           reply: replyText,
-          reply_date: new Date().toISOString()
-        } : r)
-      )
-      
-      setReplyingTo(null)
-      setReplyText('')
-      alert('답글이 등록되었습니다.')
+          hostId: hostData?.host_id || 'host-001',
+          hostName: hostData?.host_name || '호스트'
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        await loadReviews(hostData?.host_id)
+        setReplyingTo(null)
+        setReplyText('')
+        alert('답글이 등록되었습니다.')
+      } else {
+        alert('답글 등록에 실패했습니다.')
+      }
     } catch (error) {
       console.error('답글 등록 실패:', error)
       alert('답글 등록에 실패했습니다.')
@@ -226,7 +190,7 @@ export default function HostReviewsPage() {
               <SelectTrigger className="w-full md:w-[150px] border-gray-300 bg-white">
                 <SelectValue placeholder="평점 필터" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 평점</SelectItem>
                 <SelectItem value="5">5점</SelectItem>
                 <SelectItem value="4">4점</SelectItem>

@@ -336,7 +336,7 @@ export default function HeroTextsManagementPage() {
 
       {/* 추가/편집 다이얼로그 */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-white">
           <DialogHeader>
             <DialogTitle>
               {editingText ? '히어로 텍스트 편집' : '새 히어로 텍스트 추가'}

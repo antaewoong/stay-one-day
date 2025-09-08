@@ -19,7 +19,8 @@ import {
   Monitor,
   Layout,
   Type,
-  Star
+  Star,
+  TrendingUp
 } from 'lucide-react'
 
 interface MenuItem {
@@ -62,6 +63,16 @@ const menuItems: MenuItem[] = [
     children: [
       { title: '관리자 목록', href: '/admin/admins', icon: <></> }
     ]
+  },
+  {
+    title: '통합 CRM',
+    href: '/admin/crm',
+    icon: <Users className="w-4 h-4" />
+  },
+  {
+    title: '마케팅 분석',
+    href: '/admin/marketing',
+    icon: <TrendingUp className="w-4 h-4" />
   },
   {
     title: '점주 공지사항',

@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { createClient } from '@/lib/supabase/client'
-import { Save, Upload, Trash2, Plus, Info, AlertCircle, ImageIcon, Shield } from 'lucide-react'
+import { Save, Upload, Trash2, Plus, Info, AlertCircle, ImageIcon, Shield, Ban } from 'lucide-react'
 
 interface HostAccommodation {
   id: string
@@ -25,13 +25,17 @@ interface HostAccommodation {
   check_out_time: string
   base_price: number
   weekend_price: number
-  peak_season_price: number
   guidelines: string
   house_rules: string
   amenities: string[]
   host_id: string
   images: string[]
   option_products: OptionProduct[]
+  extra_options: { name: string; price: number }[]
+  usage_guide: string
+  refund_policy: string
+  seller_info: string
+  special_notes: string
   created_at: string
 }
 
@@ -78,89 +82,68 @@ export default function HostEditAccommodationPage() {
     available: true
   })
   const [showAddOption, setShowAddOption] = useState(false)
-
-  // Mock data for demo (현재 로그인된 호스트의 숙소만)
-  const mockCurrentHostId = 'host-123'
-  const mockAccommodation: HostAccommodation = {
-    id: params.id as string,
-    name: '구공스테이 청주점',
-    accommodation_type: '독채',
-    region: '충북 청주',
-    address: '충북 청주시 서원구 모충동 123-45',
-    max_capacity: 6,
-    description: '아름다운 자연 속에서 편안한 휴식을 즐길 수 있는 독채 숙소입니다.',
+  const [showDeleteRequest, setShowDeleteRequest] = useState(false)
+  const [deleteReason, setDeleteReason] = useState('')
+  const [submittingDeleteRequest, setSubmittingDeleteRequest] = useState(false)
+  const [pricingChanges, setPricingChanges] = useState({
+    base_price: 0,
+    weekend_price: 0,
     check_in_time: '15:00',
-    check_out_time: '11:00',
-    base_price: 550000,
-    weekend_price: 650000,
-    peak_season_price: 750000,
-    guidelines: '체크인 시 신분증을 지참해주세요.\n숙소 내 금연입니다.\n반려동물 동반 불가합니다.\n정숙시간은 22:00~08:00입니다.',
-    house_rules: '- 실내화 착용 부탁드립니다.\n- 쓰레기는 분리수거해주세요.\n- 에어컨 사용 후 전원을 꺼주세요.\n- 퇴실 시 간단한 정리정돈 부탁드립니다.',
-    amenities: ['무료 WiFi', '주차장', '에어컨', '난방', '키친', '바베큐', '수영장'],
-    host_id: mockCurrentHostId, // 현재 호스트와 일치
-    images: [
-      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&crop=center',
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&crop=center',
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop&crop=center'
-    ],
-    option_products: [
-      {
-        id: '1',
-        accommodation_id: params.id as string,
-        name: '바베큐 세트',
-        description: '고기, 야채, 숯, 그릴 포함',
-        price: 50000,
-        is_required: false,
-        category: 'food',
-        available: true
-      },
-      {
-        id: '2',
-        accommodation_id: params.id as string,
-        name: '레이트 체크아웃',
-        description: '13시까지 체크아웃 연장',
-        price: 30000,
-        is_required: false,
-        category: 'service',
-        available: true
-      },
-      {
-        id: '3',
-        accommodation_id: params.id as string,
-        name: '얼리 체크인',
-        description: '13시부터 체크인 가능',
-        price: 20000,
-        is_required: false,
-        category: 'service',
-        available: true
-      }
-    ],
-    created_at: '2024-01-01T00:00:00.000Z'
-  }
+    check_out_time: '23:00'
+  })
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  
+  // 옵션 상품 관리
+  const [extraOptions, setExtraOptions] = useState<{ name: string; price: number }[]>([])
+  
+  // 이용안내 관리
+  const [guideInfo, setGuideInfo] = useState({
+    usage_guide: '',
+    refund_policy: '',
+    seller_info: '',
+    special_notes: ''
+  })
+
+  const [hostData, setHostData] = useState<any>(null)
 
   useEffect(() => {
-    checkAuthAndLoadAccommodation()
-  }, [params.id])
+    // 호스트 정보 초기화
+    const userData = sessionStorage.getItem('hostUser')
+    if (userData) {
+      setHostData(JSON.parse(userData))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (hostData) {
+      checkAuthAndLoadAccommodation()
+    }
+  }, [params.id, hostData])
 
   const checkAuthAndLoadAccommodation = async () => {
     try {
       setLoading(true)
       
-      // 현재 로그인된 호스트 확인
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      if (!hostData?.host_id) {
+        console.error('호스트 정보가 없습니다')
         router.push('/host/login')
         return
       }
 
-      // 호스트 정보 가져오기
-      const { data: hostData, error: hostError } = await supabase
+      // 호스트 UUID 가져오기
+      const { data: hostIdData, error: hostError } = await supabase
         .from('hosts')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('host_id', hostData.host_id)
         .single()
 
-      const hostId = hostData?.id || mockCurrentHostId
+      if (hostError || !hostIdData) {
+        console.error('호스트 정보를 찾을 수 없습니다:', hostError)
+        setAccessDenied(true)
+        return
+      }
+
+      const hostId = hostIdData.id
       setCurrentHostId(hostId)
 
       // 숙소 정보 로드 (본인 숙소인지 확인)
@@ -172,72 +155,108 @@ export default function HostEditAccommodationPage() {
         .single()
 
       if (error || !data) {
-        // 실제 환경에서는 error 확인, 현재는 mock data로 권한 체크
-        if (params.id === 'unauthorized-test') {
-          setAccessDenied(true)
-          return
-        }
-        console.warn('Using mock data:', error)
-        if (mockAccommodation.host_id !== hostId) {
-          setAccessDenied(true)
-          return
-        }
-        setAccommodation(mockAccommodation)
-      } else {
-        setAccommodation(data)
+        console.error('숙소 정보를 찾을 수 없거나 접근 권한이 없습니다:', error)
+        // 디버깅을 위해 더 자세한 로그
+        console.log('Host ID:', hostId)
+        console.log('Accommodation ID:', params.id)
+        console.log('Query Error:', error)
+        console.log('Query Data:', data)
+        setAccessDenied(true)
+        return
       }
+
+      setAccommodation({
+        ...data,
+        option_products: data.option_products || [],
+        extra_options: data.extra_options || [],
+        accommodation_images: data.accommodation_images || [],
+        images: data.images || [],
+        amenities: data.amenities || [],
+        usage_guide: data.usage_guide || '',
+        refund_policy: data.refund_policy || '',
+        seller_info: data.seller_info || '',
+        special_notes: data.special_notes || ''
+      })
+      
+      // 가격 정보 초기화
+      setPricingChanges({
+        base_price: data.base_price || 0,
+        weekend_price: data.weekend_price || 0,
+        check_in_time: data.checkin_time || '15:00',
+        check_out_time: data.checkout_time || '23:00'
+      })
     } catch (error) {
       console.error('권한 확인 및 숙소 정보 로드 실패:', error)
-      // Mock 권한 체크
-      if (mockCurrentHostId === mockAccommodation.host_id) {
-        setAccommodation(mockAccommodation)
-        setCurrentHostId(mockCurrentHostId)
-      } else {
-        setAccessDenied(true)
-      }
+      setAccessDenied(true)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleSaveBasicInfo = async (field: string, value: any) => {
-    if (!accommodation || accessDenied) return
+  const handleSavePricing = async () => {
+    if (!accommodation || accessDenied || !currentHostId) return
 
     try {
       setSaving(true)
       
-      if (field === 'amenities') {
-        // 편의시설은 별도 API 호출로 처리
-        const response = await fetch(`/api/accommodations/${params.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ amenities: value })
+      // API를 통해 업데이트
+      const response = await fetch(`/api/accommodations/${params.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          ...pricingChanges,
+          host_id: currentHostId
         })
-        
-        if (!response.ok) {
-          throw new Error('편의시설 업데이트 실패')
-        }
-        
-        alert('편의시설이 성공적으로 업데이트되었습니다.')
-      } else {
-        const { error } = await supabase
-          .from('accommodations')
-          .update({ [field]: value })
-          .eq('id', params.id)
-          .eq('host_id', currentHostId) // 추가 보안: 본인 숙소만 수정 가능
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || '가격 업데이트 실패')
+      }
 
-        if (error) throw error
+      setAccommodation(prev => prev ? { ...prev, ...pricingChanges } : null)
+      setHasUnsavedChanges(false)
+      alert('가격 정보가 성공적으로 저장되었습니다.')
+      
+    } catch (error) {
+      console.error('가격 저장 실패:', error)
+      alert('가격 저장 중 오류가 발생했습니다: ' + (error instanceof Error ? error.message : '알 수 없는 오류'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSaveBasicInfo = async (field: string, value: any) => {
+    if (!accommodation || accessDenied || !currentHostId) return
+
+    try {
+      setSaving(true)
+      
+      // API를 통해 업데이트
+      const response = await fetch(`/api/accommodations/${params.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          [field]: value,
+          host_id: currentHostId // 호스트 권한 확인을 위해 host_id 전송
+        })
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || '업데이트 실패')
       }
 
       setAccommodation(prev => prev ? { ...prev, [field]: value } : null)
+      alert(`${field === 'amenities' ? '편의시설' : '정보'}이 성공적으로 업데이트되었습니다.`)
       
     } catch (error) {
       console.error('저장 실패:', error)
-      alert('저장 중 오류가 발생했습니다: ' + error.message)
-      // Mock update for demo
-      setAccommodation(prev => prev ? { ...prev, [field]: value } : null)
+      alert('저장 중 오류가 발생했습니다: ' + (error instanceof Error ? error.message : '알 수 없는 오류'))
     } finally {
       setSaving(false)
     }
@@ -263,10 +282,10 @@ export default function HostEditAccommodationPage() {
       
     } catch (error) {
       console.error('이미지 삭제 실패:', error)
-      // Mock delete for demo
+      // Mock delete for demo - Images are stored as URL strings
       setAccommodation(prev => prev ? {
         ...prev,
-        accommodation_images: prev.accommodation_images.filter(img => img.id !== imageId)
+        images: prev.images.filter((_, index) => index.toString() !== imageId)
       } : null)
     }
   }
@@ -280,8 +299,9 @@ export default function HostEditAccommodationPage() {
       const fileArray = Array.from(files)
       
       // 파일 개수 검증
-      if (accommodation.images.length + fileArray.length > 10) {
-        alert(`최대 10개의 이미지까지만 업로드할 수 있습니다. 현재 ${accommodation.images.length}개 등록됨`)
+      const currentImageCount = accommodation.accommodation_images?.length || accommodation.images?.length || 0
+      if (currentImageCount + fileArray.length > 10) {
+        alert(`최대 10개의 이미지까지만 업로드할 수 있습니다. 현재 ${currentImageCount}개 등록됨`)
         setUploadingImages(false)
         return
       }
@@ -320,15 +340,18 @@ export default function HostEditAccommodationPage() {
       }
       
       // Mock upload for demo (실제로는 Supabase Storage 업로드)
-      const newImages = validFiles.map((file, index) => ({
-        id: `new-${Date.now()}-${index}`,
-        image_url: URL.createObjectURL(file),
-        image_order: accommodation.accommodation_images.length + index + 1
-      }))
+      const newImageUrls = validFiles.map(file => URL.createObjectURL(file))
 
       setAccommodation(prev => prev ? {
         ...prev,
-        images: [...prev.images, ...newImageUrls]
+        accommodation_images: [
+          ...(prev.accommodation_images || []),
+          ...validFiles.map((file, index) => ({
+            id: `new-${Date.now()}-${index}`,
+            image_url: URL.createObjectURL(file),
+            image_order: (prev.accommodation_images?.length || 0) + index + 1
+          }))
+        ]
       } : null)
 
       // 성공 알림
@@ -371,7 +394,7 @@ export default function HostEditAccommodationPage() {
 
       setAccommodation(prev => prev ? {
         ...prev,
-        option_products: [...prev.option_products, newOption]
+        option_products: [...(prev.option_products || []), newOption]
       } : null)
 
       setNewOptionProduct({
@@ -395,7 +418,7 @@ export default function HostEditAccommodationPage() {
 
       setAccommodation(prev => prev ? {
         ...prev,
-        option_products: [...prev.option_products, newOption]
+        option_products: [...(prev.option_products || []), newOption]
       } : null)
 
       setNewOptionProduct({
@@ -424,7 +447,7 @@ export default function HostEditAccommodationPage() {
 
       setAccommodation(prev => prev ? {
         ...prev,
-        option_products: prev.option_products.map(opt => 
+        option_products: (prev.option_products || []).map(opt => 
           opt.id === optionId ? { ...opt, ...updates } : opt
         )
       } : null)
@@ -434,7 +457,7 @@ export default function HostEditAccommodationPage() {
       // Mock update for demo
       setAccommodation(prev => prev ? {
         ...prev,
-        option_products: prev.option_products.map(opt => 
+        option_products: (prev.option_products || []).map(opt => 
           opt.id === optionId ? { ...opt, ...updates } : opt
         )
       } : null)
@@ -456,7 +479,7 @@ export default function HostEditAccommodationPage() {
 
       setAccommodation(prev => prev ? {
         ...prev,
-        option_products: prev.option_products.filter(opt => opt.id !== optionId)
+        option_products: (prev.option_products || []).filter(opt => opt.id !== optionId)
       } : null)
       
     } catch (error) {
@@ -464,8 +487,48 @@ export default function HostEditAccommodationPage() {
       // Mock delete for demo
       setAccommodation(prev => prev ? {
         ...prev,
-        option_products: prev.option_products.filter(opt => opt.id !== optionId)
+        option_products: (prev.option_products || []).filter(opt => opt.id !== optionId)
       } : null)
+    }
+  }
+
+  const handleDeleteRequest = async () => {
+    if (!accommodation || !currentHostId || !deleteReason.trim()) {
+      alert('삭제 사유를 입력해주세요.')
+      return
+    }
+
+    try {
+      setSubmittingDeleteRequest(true)
+
+      const response = await fetch('/api/admin/delete-requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          request_type: 'accommodation',
+          target_id: params.id,
+          reason: deleteReason,
+          host_id: currentHostId
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || '삭제 요청 실패')
+      }
+
+      alert('숙소 삭제 요청이 성공적으로 제출되었습니다. 관리자 승인 후 삭제가 진행됩니다.')
+      setShowDeleteRequest(false)
+      setDeleteReason('')
+      router.push('/host/accommodations')
+
+    } catch (error) {
+      console.error('삭제 요청 실패:', error)
+      alert('삭제 요청 중 오류가 발생했습니다: ' + (error instanceof Error ? error.message : '알 수 없는 오류'))
+    } finally {
+      setSubmittingDeleteRequest(false)
     }
   }
 
@@ -500,9 +563,20 @@ export default function HostEditAccommodationPage() {
           <h1 className="text-2xl font-bold">{accommodation.name} 관리</h1>
           <p className="text-gray-600">{accommodation.accommodation_type} • {accommodation.region}</p>
         </div>
-        <Button variant="outline" onClick={() => router.back()}>
-          뒤로 가기
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="destructive" 
+            size="sm"
+            onClick={() => setShowDeleteRequest(true)}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            <Ban className="w-4 h-4 mr-2" />
+            삭제 요청
+          </Button>
+          <Button variant="outline" onClick={() => router.back()}>
+            뒤로 가기
+          </Button>
+        </div>
       </div>
 
       {/* 보안 및 권한 안내 */}
@@ -617,7 +691,9 @@ export default function HostEditAccommodationPage() {
                     onClick={() => {
                       setIsEditingAmenities(!isEditingAmenities)
                       if (!isEditingAmenities) {
-                        setSelectedAmenities(accommodation.amenities)
+                        setSelectedAmenities((accommodation.amenities || []).map(amenity => 
+                          typeof amenity === 'string' ? amenity : amenity.name || amenity.amenity_name || '편의시설'
+                        ))
                       }
                     }}
                     className="text-sm"
@@ -673,7 +749,9 @@ export default function HostEditAccommodationPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          setSelectedAmenities(accommodation.amenities)
+                          setSelectedAmenities((accommodation.amenities || []).map(amenity => 
+                          typeof amenity === 'string' ? amenity : amenity.name || amenity.amenity_name || '편의시설'
+                        ))
                           setIsEditingAmenities(false)
                         }}
                       >
@@ -684,10 +762,10 @@ export default function HostEditAccommodationPage() {
                 ) : (
                   <div className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 min-h-[80px]">
                     <div className="flex flex-wrap gap-2">
-                      {accommodation.amenities.length > 0 ? (
-                        accommodation.amenities.map((amenity, index) => (
+                      {(accommodation.amenities || []).length > 0 ? (
+                        (accommodation.amenities || []).map((amenity, index) => (
                           <Badge key={index} variant="secondary" className="bg-white">
-                            {amenity}
+                            {typeof amenity === 'string' ? amenity : amenity.name || amenity.amenity_name || '편의시설'}
                           </Badge>
                         ))
                       ) : (
@@ -724,17 +802,50 @@ export default function HostEditAccommodationPage() {
         <TabsContent value="pricing">
           <Card>
             <CardHeader>
-              <CardTitle>가격 설정</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>가격 설정</CardTitle>
+                {hasUnsavedChanges && (
+                  <Button 
+                    onClick={handleSavePricing}
+                    disabled={saving}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {saving ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        저장 중...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        저장
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="space-y-6">
+              {hasUnsavedChanges && (
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-sm text-orange-800">
+                    ⚠️ 저장되지 않은 변경사항이 있습니다. 우측 상단의 저장 버튼을 클릭하세요.
+                  </p>
+                </div>
+              )}
+              
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="base_price">기본 요금 (평일)</Label>
                   <Input
                     id="base_price"
                     type="number"
-                    value={accommodation.base_price}
-                    onChange={(e) => handleSaveBasicInfo('base_price', parseInt(e.target.value) || 0)}
+                    value={pricingChanges.base_price}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => {
+                      setPricingChanges(prev => ({ ...prev, base_price: parseInt(e.target.value) || 0 }))
+                      setHasUnsavedChanges(true)
+                    }}
                     className="mt-1"
                   />
                   <p className="text-sm text-gray-500 mt-1">월~목요일 기준</p>
@@ -745,23 +856,15 @@ export default function HostEditAccommodationPage() {
                   <Input
                     id="weekend_price"
                     type="number"
-                    value={accommodation.weekend_price}
-                    onChange={(e) => handleSaveBasicInfo('weekend_price', parseInt(e.target.value) || 0)}
+                    value={pricingChanges.weekend_price}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => {
+                      setPricingChanges(prev => ({ ...prev, weekend_price: parseInt(e.target.value) || 0 }))
+                      setHasUnsavedChanges(true)
+                    }}
                     className="mt-1"
                   />
                   <p className="text-sm text-gray-500 mt-1">금~일요일 기준</p>
-                </div>
-                
-                <div>
-                  <Label htmlFor="peak_season_price">성수기 요금</Label>
-                  <Input
-                    id="peak_season_price"
-                    type="number"
-                    value={accommodation.peak_season_price}
-                    onChange={(e) => handleSaveBasicInfo('peak_season_price', parseInt(e.target.value) || 0)}
-                    className="mt-1"
-                  />
-                  <p className="text-sm text-gray-500 mt-1">휴가철, 연휴 기준</p>
                 </div>
               </div>
 
@@ -771,8 +874,11 @@ export default function HostEditAccommodationPage() {
                   <Input
                     id="check_in_time"
                     type="time"
-                    value={accommodation.check_in_time}
-                    onChange={(e) => handleSaveBasicInfo('check_in_time', e.target.value)}
+                    value={pricingChanges.check_in_time}
+                    onChange={(e) => {
+                      setPricingChanges(prev => ({ ...prev, check_in_time: e.target.value }))
+                      setHasUnsavedChanges(true)
+                    }}
                     className="mt-1"
                   />
                 </div>
@@ -782,10 +888,27 @@ export default function HostEditAccommodationPage() {
                   <Input
                     id="check_out_time"
                     type="time"
-                    value={accommodation.check_out_time}
-                    onChange={(e) => handleSaveBasicInfo('check_out_time', e.target.value)}
+                    value={pricingChanges.check_out_time}
+                    onChange={(e) => {
+                      setPricingChanges(prev => ({ ...prev, check_out_time: e.target.value }))
+                      setHasUnsavedChanges(true)
+                    }}
                     className="mt-1"
                   />
+                </div>
+              </div>
+
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium mb-2">가격 적용 규칙</p>
+                    <ul className="space-y-1">
+                      <li>• <strong>성수기 요금</strong>: 공휴일, 여름휴가철(7/15~8/31), 연말연시(12/23~1/3)</li>
+                      <li>• <strong>주말 요금</strong>: 금요일, 토요일, 일요일</li>
+                      <li>• <strong>기본 요금</strong>: 월~목요일 (성수기 제외)</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 
@@ -811,7 +934,7 @@ export default function HostEditAccommodationPage() {
                 <p className="text-sm text-gray-600">기존 이미지 확인, 삭제 및 새 이미지 추가가 가능합니다.</p>
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="text-xs">
-                    현재 {accommodation.accommodation_images.length}개 이미지 등록됨
+                    현재 {(accommodation.accommodation_images?.length || accommodation.images?.length || 0)}개 이미지 등록됨
                   </Badge>
                   <Badge variant="outline" className="text-xs">
                     최대 10개까지 등록 가능
@@ -822,20 +945,32 @@ export default function HostEditAccommodationPage() {
             <CardContent>
               <div className="space-y-6">
                 {/* 현재 등록된 이미지들 */}
-                {accommodation.accommodation_images.length > 0 ? (
+                {((accommodation.accommodation_images?.length || 0) > 0 || (accommodation.images?.length || 0) > 0) ? (
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-sm font-medium text-gray-900">등록된 이미지</h3>
                       <p className="text-xs text-gray-500">이미지에 마우스를 올리면 삭제 버튼이 나타납니다</p>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {accommodation.accommodation_images.map((image) => (
-                        <div key={image.id} className="relative group">
+                      {/* accommodation_images가 있으면 사용하고, 없으면 images 배열 사용 */}
+                      {(accommodation.accommodation_images && accommodation.accommodation_images.length > 0 
+                        ? accommodation.accommodation_images 
+                        : (accommodation.images || []).map((url, index) => ({
+                            id: index.toString(),
+                            image_url: url,
+                            image_order: index + 1
+                          }))
+                      ).map((image, index) => (
+                        <div key={image.id || index} className="relative group">
                           <div className="aspect-square overflow-hidden rounded-lg border-2 border-gray-200">
                             <img
                               src={image.image_url}
-                              alt={`숙소 이미지 ${image.image_order}`}
+                              alt={`숙소 이미지 ${image.image_order || index + 1}`}
                               className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                              onError={(e) => {
+                                console.error('이미지 로드 실패:', image.image_url)
+                                e.currentTarget.style.display = 'none'
+                              }}
                             />
                           </div>
                           
@@ -845,7 +980,7 @@ export default function HostEditAccommodationPage() {
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                onClick={() => handleImageDelete(image.id)}
+                                onClick={() => handleImageDelete(image.id || index.toString())}
                                 className="bg-red-600 hover:bg-red-700"
                               >
                                 <Trash2 className="w-4 h-4 mr-1" />
@@ -857,11 +992,11 @@ export default function HostEditAccommodationPage() {
                           
                           {/* 이미지 순서 배지 */}
                           <Badge className="absolute top-2 left-2 bg-blue-600 text-white text-xs">
-                            #{image.image_order}
+                            #{image.image_order || index + 1}
                           </Badge>
                           
                           {/* 대표 이미지 표시 */}
-                          {image.image_order === 1 && (
+                          {(image.image_order || index + 1) === 1 && (
                             <Badge className="absolute top-2 right-2 bg-green-600 text-white text-xs">
                               대표
                             </Badge>
@@ -888,7 +1023,7 @@ export default function HostEditAccommodationPage() {
                     
                     <label htmlFor="image-upload" className="cursor-pointer inline-block">
                       <Button 
-                        disabled={uploadingImages || accommodation.accommodation_images.length >= 10} 
+                        disabled={uploadingImages || (accommodation.accommodation_images?.length || 0) >= 10} 
                         size="lg"
                         className={uploadingImages ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}
                         asChild
@@ -899,7 +1034,7 @@ export default function HostEditAccommodationPage() {
                               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                               업로드 중...
                             </>
-                          ) : accommodation.accommodation_images.length >= 10 ? (
+                          ) : (accommodation.accommodation_images?.length || 0) >= 10 ? (
                             '최대 업로드 개수 도달'
                           ) : (
                             <>
@@ -918,7 +1053,7 @@ export default function HostEditAccommodationPage() {
                       accept="image/jpeg,image/jpg,image/png,image/webp"
                       className="hidden"
                       onChange={(e) => e.target.files && handleImageUpload(e.target.files)}
-                      disabled={uploadingImages || accommodation.accommodation_images.length >= 10}
+                      disabled={uploadingImages || (accommodation.accommodation_images?.length || 0) >= 10}
                     />
                   </div>
                   
@@ -973,7 +1108,7 @@ export default function HostEditAccommodationPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {accommodation.option_products.map((option) => (
+                {(accommodation.option_products || []).map((option) => (
                   <div key={option.id} className="border rounded-lg p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1053,7 +1188,7 @@ export default function HostEditAccommodationPage() {
                   </div>
                 ))}
                 
-                {accommodation.option_products.length === 0 && (
+                {(accommodation.option_products || []).length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     등록된 옵션 상품이 없습니다.
                   </div>
@@ -1109,7 +1244,7 @@ export default function HostEditAccommodationPage() {
 
       {/* 옵션 상품 추가 모달 */}
       <Dialog open={showAddOption} onOpenChange={setShowAddOption}>
-        <DialogContent>
+        <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>새 옵션 상품 추가</DialogTitle>
           </DialogHeader>
@@ -1128,6 +1263,7 @@ export default function HostEditAccommodationPage() {
                 <Input
                   type="number"
                   value={newOptionProduct.price}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setNewOptionProduct(prev => ({ ...prev, price: parseInt(e.target.value) || 0 }))}
                   placeholder="50000"
                 />
@@ -1185,6 +1321,85 @@ export default function HostEditAccommodationPage() {
               <Button onClick={handleAddOptionProduct}>
                 <Save className="w-4 h-4 mr-2" />
                 추가
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 삭제 요청 모달 */}
+      <Dialog open={showDeleteRequest} onOpenChange={setShowDeleteRequest}>
+        <DialogContent className="bg-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Ban className="w-5 h-5" />
+              숙소 삭제 요청
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-red-800">
+                  <p className="font-medium mb-1">주의사항</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>삭제 요청은 관리자 승인이 필요합니다</li>
+                    <li>활성 예약이 있는 경우 즉시 삭제되지 않습니다</li>
+                    <li>승인된 삭제는 되돌릴 수 없습니다</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="delete-reason">삭제 사유 (필수)</Label>
+              <Textarea
+                id="delete-reason"
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                placeholder="숙소를 삭제하려는 사유를 상세히 입력해주세요..."
+                rows={4}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                관리자가 검토할 때 참고하는 내용입니다.
+              </p>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p className="text-sm text-amber-800">
+                <strong>참고:</strong> 활성 예약이 있는 경우 예약 완료 후 삭제가 진행됩니다.
+              </p>
+            </div>
+            
+            <div className="flex justify-end gap-2 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowDeleteRequest(false)
+                  setDeleteReason('')
+                }}
+                disabled={submittingDeleteRequest}
+              >
+                취소
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={handleDeleteRequest}
+                disabled={submittingDeleteRequest || !deleteReason.trim()}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {submittingDeleteRequest ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    요청 중...
+                  </>
+                ) : (
+                  <>
+                    <Ban className="w-4 h-4 mr-2" />
+                    삭제 요청
+                  </>
+                )}
               </Button>
             </div>
           </div>

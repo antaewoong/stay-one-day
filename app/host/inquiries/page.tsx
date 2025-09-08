@@ -58,115 +58,66 @@ export default function HostInquiriesPage() {
     try {
       setLoading(true)
       
-      // 호스트별 더미 문의 데이터
-      const hostInquiriesData = getHostInquiries(hostId)
+      let url = `/api/inquiries?userId=${hostId}&limit=100`
       
-      let filteredInquiries = hostInquiriesData
-
-      // 상태 필터 적용
       if (statusFilter !== 'all') {
-        filteredInquiries = filteredInquiries.filter(i => i.status === statusFilter)
+        url += `&status=${statusFilter}`
       }
+      
+      const response = await fetch(url)
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        const mappedInquiries = result.data.map((inquiry: any) => ({
+          id: inquiry.id,
+          guest_name: inquiry.inquirer_name,
+          guest_phone: inquiry.inquirer_phone || '',
+          guest_email: inquiry.inquirer_email,
+          accommodation_name: inquiry.accommodation_name,
+          subject: inquiry.title,
+          message: inquiry.content,
+          status: inquiry.status,
+          priority: inquiry.priority || 'medium',
+          created_at: inquiry.created_at,
+          reply: inquiry.inquiry_replies && inquiry.inquiry_replies.length > 0 
+            ? inquiry.inquiry_replies[inquiry.inquiry_replies.length - 1].content 
+            : undefined,
+          reply_date: inquiry.inquiry_replies && inquiry.inquiry_replies.length > 0 
+            ? inquiry.inquiry_replies[inquiry.inquiry_replies.length - 1].created_at
+            : undefined
+        }))
+        
+        let filteredInquiries = mappedInquiries
 
-      // 우선순위 필터 적용
-      if (priorityFilter !== 'all') {
-        filteredInquiries = filteredInquiries.filter(i => i.priority === priorityFilter)
+        // 우선순위 필터 적용
+        if (priorityFilter !== 'all') {
+          filteredInquiries = filteredInquiries.filter((i: any) => i.priority === priorityFilter)
+        }
+
+        // 검색 필터 적용
+        if (searchQuery) {
+          filteredInquiries = filteredInquiries.filter((i: any) => 
+            i.guest_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            i.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            i.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            i.guest_phone.includes(searchQuery) ||
+            i.guest_email.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        }
+
+        setInquiries(filteredInquiries)
+      } else {
+        console.log('문의사항이 없거나 API 호출 실패')
+        setInquiries([])
       }
-
-      // 검색 필터 적용
-      if (searchQuery) {
-        filteredInquiries = filteredInquiries.filter(i => 
-          i.guest_name.includes(searchQuery) || 
-          i.subject.includes(searchQuery) ||
-          i.message.includes(searchQuery) ||
-          i.guest_phone.includes(searchQuery) ||
-          i.guest_email.includes(searchQuery)
-        )
-      }
-
-      setInquiries(filteredInquiries)
     } catch (error) {
       console.error('문의 목록 로드 실패:', error)
+      setInquiries([])
     } finally {
       setLoading(false)
     }
   }
 
-  const getHostInquiries = (hostId: string): Inquiry[] => {
-    const inquiryDataMap: Record<string, Inquiry[]> = {
-      'host-1': [
-        {
-          id: '1',
-          guest_name: '김민수',
-          guest_phone: '010-1234-5678',
-          guest_email: 'kim@example.com',
-          accommodation_name: '구공스테이 풀빌라',
-          subject: '조기 체크인 가능 여부',
-          message: '안녕하세요. 2월 15일 예약자입니다. 오전 11시경 도착 예정인데 조기 체크인이 가능한지 문의드립니다.',
-          status: 'answered',
-          priority: 'medium',
-          created_at: '2024-02-13T09:30:00Z',
-          reply: '안녕하세요. 조기 체크인은 오전 12시부터 가능합니다. 별도 추가 요금은 없으니 편하게 연락주세요.',
-          reply_date: '2024-02-13T10:15:00Z'
-        },
-        {
-          id: '2',
-          guest_name: '박지영',
-          guest_phone: '010-2345-6789',
-          guest_email: 'park@example.com',
-          accommodation_name: '구공스테이 독채',
-          subject: '바베큐 이용 문의',
-          message: '바베큐 시설 이용시 숯은 별도로 준비해야 하나요? 또한 고기는 미리 주문할 수 있는지 궁금합니다.',
-          status: 'pending',
-          priority: 'low',
-          created_at: '2024-02-18T16:20:00Z'
-        },
-        {
-          id: '3',
-          guest_name: '이서준',
-          guest_phone: '010-3456-7890',
-          guest_email: 'lee@example.com',
-          subject: '취소 및 환불 문의',
-          message: '갑작스러운 가족 응급상황으로 예약을 취소해야 할 것 같습니다. 환불 정책이 어떻게 되는지 알려주세요.',
-          status: 'pending',
-          priority: 'high',
-          created_at: '2024-02-19T08:45:00Z'
-        }
-      ],
-      'host-2': [
-        {
-          id: '4',
-          guest_name: '정미영',
-          guest_phone: '010-5678-9012',
-          guest_email: 'jung@example.com',
-          accommodation_name: '스테이도고 펜션',
-          subject: '주변 관광지 문의',
-          message: '펜션 주변에 아이들과 함께 갈 수 있는 관광지가 있는지 추천해주세요.',
-          status: 'answered',
-          priority: 'low',
-          created_at: '2024-02-17T14:30:00Z',
-          reply: '차로 10분 거리에 체험농장이 있고, 20분 거리에 자연휴양림이 있습니다. 자세한 정보는 체크인시 안내해드리겠습니다.',
-          reply_date: '2024-02-17T15:45:00Z'
-        }
-      ],
-      'host-3': [
-        {
-          id: '5',
-          guest_name: '강동욱',
-          guest_phone: '010-6789-0123',
-          guest_email: 'kang@example.com',
-          accommodation_name: '마담아네뜨 글램핑',
-          subject: '애완동물 동반 문의',
-          message: '소형견 1마리 동반 예정입니다. 추가 요금이나 특별한 규칙이 있는지 알려주세요.',
-          status: 'pending',
-          priority: 'medium',
-          created_at: '2024-02-20T11:15:00Z'
-        }
-      ]
-    }
-
-    return inquiryDataMap[hostId] || []
-  }
 
   useEffect(() => {
     if (hostData) {
@@ -182,19 +133,29 @@ export default function HostInquiriesPage() {
     if (!replyText.trim()) return
 
     try {
-      // 실제 환경에서는 Supabase에서 답변 저장
-      setInquiries(prev => 
-        prev.map(i => i.id === inquiryId ? { 
-          ...i, 
-          reply: replyText,
-          reply_date: new Date().toISOString(),
-          status: 'answered' as const
-        } : i)
-      )
-      
-      setReplyingTo(null)
-      setReplyText('')
-      alert('답변이 등록되었습니다.')
+      const response = await fetch(`/api/inquiries/${inquiryId}/replies`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: replyText,
+          authorId: hostData?.host_id || 'host-001',
+          authorName: hostData?.host_name || '호스트',
+          isAdminReply: false
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        await loadInquiries(hostData?.host_id)
+        setReplyingTo(null)
+        setReplyText('')
+        alert('답변이 등록되었습니다.')
+      } else {
+        alert('답변 등록에 실패했습니다.')
+      }
     } catch (error) {
       console.error('답변 등록 실패:', error)
       alert('답변 등록에 실패했습니다.')
@@ -203,10 +164,24 @@ export default function HostInquiriesPage() {
 
   const handleStatusChange = async (inquiryId: string, newStatus: string) => {
     try {
-      setInquiries(prev => 
-        prev.map(i => i.id === inquiryId ? { ...i, status: newStatus as any } : i)
-      )
-      alert('상태가 변경되었습니다.')
+      const response = await fetch(`/api/inquiries/${inquiryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: newStatus
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        await loadInquiries(hostData?.host_id)
+        alert('상태가 변경되었습니다.')
+      } else {
+        alert('상태 변경에 실패했습니다.')
+      }
     } catch (error) {
       console.error('상태 변경 실패:', error)
       alert('상태 변경에 실패했습니다.')
@@ -307,7 +282,7 @@ export default function HostInquiriesPage() {
               <SelectTrigger className="w-full md:w-[150px] border-gray-300 bg-white">
                 <SelectValue placeholder="상태" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 상태</SelectItem>
                 <SelectItem value="pending">답변대기</SelectItem>
                 <SelectItem value="answered">답변완료</SelectItem>
@@ -318,7 +293,7 @@ export default function HostInquiriesPage() {
               <SelectTrigger className="w-full md:w-[150px] border-gray-300 bg-white">
                 <SelectValue placeholder="우선순위" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 우선순위</SelectItem>
                 <SelectItem value="high">긴급</SelectItem>
                 <SelectItem value="medium">보통</SelectItem>

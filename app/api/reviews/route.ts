@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const accommodationId = searchParams.get('accommodation_id')
     const userId = searchParams.get('user_id')
+    const hostId = searchParams.get('hostId')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
     const rating = searchParams.get('rating')
@@ -27,7 +28,9 @@ export async function GET(request: NextRequest) {
         user_id,
         accommodation_id,
         reservation_id,
-        accommodations(name, accommodation_type, region),
+        host_reply,
+        reply_date,
+        accommodations(name, accommodation_type, region, host_id),
         reservations(guest_name)
       `)
       .order('created_at', { ascending: false })
@@ -39,6 +42,10 @@ export async function GET(request: NextRequest) {
     
     if (userId) {
       query = query.eq('user_id', userId)
+    }
+    
+    if (hostId) {
+      query = query.eq('accommodations.host_id', hostId)
     }
     
     if (rating) {

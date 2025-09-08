@@ -657,6 +657,7 @@ export default function AddAccommodationPage() {
                   type="number"
                   min="1"
                   value={form.base_capacity}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setForm({ ...form, base_capacity: parseInt(e.target.value) || 1 })}
                   required
                 />
@@ -668,6 +669,7 @@ export default function AddAccommodationPage() {
                   type="number"
                   min="1"
                   value={form.max_capacity}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setForm({ ...form, max_capacity: parseInt(e.target.value) || 1 })}
                   required
                 />
@@ -679,6 +681,7 @@ export default function AddAccommodationPage() {
                   type="number"
                   min="0"
                   value={form.bedrooms}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setForm({ ...form, bedrooms: parseInt(e.target.value) || 1 })}
                 />
               </div>
@@ -689,6 +692,7 @@ export default function AddAccommodationPage() {
                   type="number"
                   min="0"
                   value={form.bathrooms}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setForm({ ...form, bathrooms: parseInt(e.target.value) || 1 })}
                 />
               </div>
@@ -703,6 +707,7 @@ export default function AddAccommodationPage() {
                   type="number"
                   min="0"
                   value={form.base_price}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setForm({ ...form, base_price: parseInt(e.target.value) || 0 })}
                   required
                   placeholder="기준 인원 기준 1박 요금"
@@ -715,6 +720,7 @@ export default function AddAccommodationPage() {
                   type="number"
                   min="0"
                   value={form.extra_person_fee}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setForm({ ...form, extra_person_fee: parseInt(e.target.value) || 0 })}
                   placeholder="1인당 추가 요금"
                 />
@@ -955,12 +961,21 @@ export default function AddAccommodationPage() {
             </div>
 
             {/* 제출 버튼 */}
-            <div className="flex gap-2">
-              <Button type="submit" disabled={loading}>
-                {loading ? '등록 중...' : '숙소 등록'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => router.back()}>
+            <div className="flex gap-3 justify-end">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => router.back()}
+                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
+              >
                 취소
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={loading}
+                className="bg-green-600 hover:bg-green-700 text-white px-8"
+              >
+                {loading ? '등록 중...' : '✓ 숙소 등록'}
               </Button>
             </div>
           </form>

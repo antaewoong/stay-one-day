@@ -59,12 +59,7 @@ export default function HostUnitsPage() {
   const [typeFilter, setTypeFilter] = useState('all')
   const [hostData, setHostData] = useState<any>(null)
 
-  // 더미 숙소 목록
-  const accommodations = [
-    { id: '1', name: '구공스테이 풀빌라' },
-    { id: '2', name: '구공스테이 독채' },
-    { id: '3', name: '구공스테이 펜션' }
-  ]
+  const [accommodations, setAccommodations] = useState<{id: string, name: string}[]>([])
 
   useEffect(() => {
     const userData = sessionStorage.getItem('hostUser')
@@ -79,195 +74,97 @@ export default function HostUnitsPage() {
     try {
       setLoading(true)
       
-      // 호스트별 더미 유닛 데이터
-      const hostUnitsData = getHostUnits(hostId)
+      let url = `/api/accommodations?hostId=${hostId}&includeUnits=true`
       
-      let filteredUnits = hostUnitsData
+      const response = await fetch(url)
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        // Update accommodations list for filter
+        const accommodationsList = result.data.map((acc: any) => ({
+          id: acc.id,
+          name: acc.name
+        }))
+        setAccommodations(accommodationsList)
+        
+        // Flatten units from all accommodations
+        const allUnits: AccommodationUnit[] = []
+        
+        result.data.forEach((accommodation: any) => {
+          if (accommodation.units && accommodation.units.length > 0) {
+            accommodation.units.forEach((unit: any) => {
+              allUnits.push({
+                id: unit.id,
+                accommodation_id: accommodation.id,
+                accommodation_name: accommodation.name,
+                unit_name: unit.unit_name || unit.name,
+                unit_type: unit.unit_type || 'room',
+                unit_number: unit.unit_number || '1',
+                floor_number: unit.floor_number,
+                base_price: unit.base_price || 0,
+                weekend_price: unit.weekend_price || unit.base_price || 0,
+                peak_season_price: unit.peak_season_price || unit.base_price || 0,
+                base_capacity: unit.base_capacity || 2,
+                max_capacity: unit.max_capacity || unit.base_capacity || 4,
+                bedrooms: unit.bedrooms || 1,
+                bathrooms: unit.bathrooms || 1,
+                area_sqm: unit.area_sqm,
+                amenities: unit.amenities || [],
+                features: unit.features || [],
+                is_active: unit.is_active !== false,
+                maintenance_notes: unit.maintenance_notes,
+                last_cleaned_at: unit.last_cleaned_at,
+                created_at: unit.created_at,
+                image_count: unit.image_count || 0,
+                reservation_count: unit.reservation_count || 0
+              })
+            })
+          }
+        })
+        
+        let filteredUnits = allUnits
 
-      // 숙소별 필터 적용
-      if (accommodationFilter !== 'all') {
-        filteredUnits = filteredUnits.filter(u => u.accommodation_id === accommodationFilter)
-      }
-
-      // 상태 필터 적용
-      if (statusFilter !== 'all') {
-        if (statusFilter === 'active') {
-          filteredUnits = filteredUnits.filter(u => u.is_active)
-        } else if (statusFilter === 'inactive') {
-          filteredUnits = filteredUnits.filter(u => !u.is_active)
+        // 숙소별 필터 적용
+        if (accommodationFilter !== 'all') {
+          filteredUnits = filteredUnits.filter(u => u.accommodation_id === accommodationFilter)
         }
-      }
 
-      // 타입 필터 적용
-      if (typeFilter !== 'all') {
-        filteredUnits = filteredUnits.filter(u => u.unit_type === typeFilter)
-      }
+        // 상태 필터 적용
+        if (statusFilter !== 'all') {
+          if (statusFilter === 'active') {
+            filteredUnits = filteredUnits.filter(u => u.is_active)
+          } else if (statusFilter === 'inactive') {
+            filteredUnits = filteredUnits.filter(u => !u.is_active)
+          }
+        }
 
-      // 검색 필터 적용
-      if (searchQuery) {
-        filteredUnits = filteredUnits.filter(u => 
-          u.unit_name.includes(searchQuery) ||
-          u.unit_number.includes(searchQuery) ||
-          u.accommodation_name.includes(searchQuery)
-        )
-      }
+        // 타입 필터 적용
+        if (typeFilter !== 'all') {
+          filteredUnits = filteredUnits.filter(u => u.unit_type === typeFilter)
+        }
 
-      setUnits(filteredUnits)
+        // 검색 필터 적용
+        if (searchQuery) {
+          filteredUnits = filteredUnits.filter(u => 
+            u.unit_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            u.unit_number.includes(searchQuery) ||
+            u.accommodation_name.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        }
+
+        setUnits(filteredUnits)
+      } else {
+        console.log('유닛이 없거나 API 호출 실패')
+        setUnits([])
+      }
     } catch (error) {
       console.error('유닛 목록 로드 실패:', error)
+      setUnits([])
     } finally {
       setLoading(false)
     }
   }
 
-  const getHostUnits = (hostId: string): AccommodationUnit[] => {
-    const unitDataMap: Record<string, AccommodationUnit[]> = {
-      'host-1': [
-        {
-          id: '1',
-          accommodation_id: '1',
-          accommodation_name: '구공스테이 풀빌라',
-          unit_name: '풀빌라 A동',
-          unit_type: 'villa',
-          unit_number: 'A',
-          base_price: 500000,
-          weekend_price: 600000,
-          peak_season_price: 700000,
-          base_capacity: 4,
-          max_capacity: 8,
-          bedrooms: 2,
-          bathrooms: 2,
-          area_sqm: 85.5,
-          amenities: ['전용 수영장', '바베큐 시설', '주차장', '와이파이'],
-          features: ['프라이빗 풀', '정원', '바베큐 데크'],
-          is_active: true,
-          last_cleaned_at: '2024-02-01T10:00:00Z',
-          created_at: '2024-01-15T00:00:00Z',
-          image_count: 8,
-          reservation_count: 12
-        },
-        {
-          id: '2',
-          accommodation_id: '1',
-          accommodation_name: '구공스테이 풀빌라',
-          unit_name: '풀빌라 B동',
-          unit_type: 'villa',
-          unit_number: 'B',
-          base_price: 500000,
-          weekend_price: 600000,
-          peak_season_price: 700000,
-          base_capacity: 4,
-          max_capacity: 8,
-          bedrooms: 2,
-          bathrooms: 2,
-          area_sqm: 85.5,
-          amenities: ['전용 수영장', '바베큐 시설', '주차장', '와이파이'],
-          features: ['프라이빗 풀', '정원', '바베큐 데크'],
-          is_active: true,
-          last_cleaned_at: '2024-01-28T14:00:00Z',
-          created_at: '2024-01-15T00:00:00Z',
-          image_count: 6,
-          reservation_count: 8
-        },
-        {
-          id: '3',
-          accommodation_id: '2',
-          accommodation_name: '구공스테이 독채',
-          unit_name: '독채 1호',
-          unit_type: 'private_house',
-          unit_number: '1',
-          base_price: 280000,
-          weekend_price: 320000,
-          peak_season_price: 380000,
-          base_capacity: 2,
-          max_capacity: 6,
-          bedrooms: 1,
-          bathrooms: 1,
-          area_sqm: 62.0,
-          amenities: ['에어컨', 'TV', '냉장고', '와이파이', '주차장'],
-          features: ['프라이빗 정원', '테라스'],
-          is_active: true,
-          created_at: '2024-01-20T00:00:00Z',
-          image_count: 5,
-          reservation_count: 15
-        },
-        {
-          id: '4',
-          accommodation_id: '3',
-          accommodation_name: '구공스테이 펜션',
-          unit_name: '101호 (오션뷰)',
-          unit_type: 'room',
-          unit_number: '101',
-          floor_number: 1,
-          base_price: 150000,
-          weekend_price: 180000,
-          peak_season_price: 220000,
-          base_capacity: 2,
-          max_capacity: 4,
-          bedrooms: 1,
-          bathrooms: 1,
-          area_sqm: 45.0,
-          amenities: ['에어컨', 'TV', '냉장고', '와이파이'],
-          features: ['바다전망', '발코니'],
-          is_active: true,
-          created_at: '2024-01-25T00:00:00Z',
-          image_count: 4,
-          reservation_count: 22
-        },
-        {
-          id: '5',
-          accommodation_id: '3',
-          accommodation_name: '구공스테이 펜션',
-          unit_name: '102호 (마운틴뷰)',
-          unit_type: 'room',
-          unit_number: '102',
-          floor_number: 1,
-          base_price: 130000,
-          weekend_price: 160000,
-          peak_season_price: 200000,
-          base_capacity: 2,
-          max_capacity: 4,
-          bedrooms: 1,
-          bathrooms: 1,
-          area_sqm: 42.0,
-          amenities: ['에어컨', 'TV', '냉장고', '와이파이'],
-          features: ['산전망', '발코니'],
-          is_active: false,
-          maintenance_notes: '에어컨 수리 중',
-          created_at: '2024-01-25T00:00:00Z',
-          image_count: 3,
-          reservation_count: 18
-        }
-      ],
-      'host-2': [
-        {
-          id: '6',
-          accommodation_id: '4',
-          accommodation_name: '스테이도고 펜션',
-          unit_name: '201호 (프리미엄)',
-          unit_type: 'room',
-          unit_number: '201',
-          floor_number: 2,
-          base_price: 200000,
-          weekend_price: 240000,
-          peak_season_price: 280000,
-          base_capacity: 2,
-          max_capacity: 6,
-          bedrooms: 2,
-          bathrooms: 1,
-          area_sqm: 60.0,
-          amenities: ['에어컨', 'TV', '냉장고', '와이파이', '커피머신'],
-          features: ['넓은 거실', '킹사이즈 침대'],
-          is_active: true,
-          created_at: '2024-02-01T00:00:00Z',
-          image_count: 7,
-          reservation_count: 5
-        }
-      ]
-    }
-
-    return unitDataMap[hostId] || []
-  }
 
   useEffect(() => {
     if (hostData) {
@@ -283,9 +180,21 @@ export default function HostUnitsPage() {
     if (!confirm(`'${unitName}' 유닛을 삭제하시겠습니까?`)) return
 
     try {
-      // 실제 환경에서는 Supabase에서 삭제
-      setUnits(prev => prev.filter(u => u.id !== unitId))
-      alert('유닛이 삭제되었습니다.')
+      const response = await fetch(`/api/accommodations/units/${unitId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        await loadUnits(hostData?.host_id)
+        alert('유닛이 삭제되었습니다.')
+      } else {
+        alert('유닛 삭제에 실패했습니다.')
+      }
     } catch (error) {
       console.error('유닛 삭제 실패:', error)
       alert('유닛 삭제에 실패했습니다.')
@@ -294,9 +203,27 @@ export default function HostUnitsPage() {
 
   const toggleUnitStatus = async (unitId: string) => {
     try {
-      setUnits(prev => prev.map(u => 
-        u.id === unitId ? { ...u, is_active: !u.is_active } : u
-      ))
+      const unit = units.find(u => u.id === unitId)
+      if (!unit) return
+
+      const response = await fetch(`/api/accommodations/units/${unitId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          is_active: !unit.is_active
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        await loadUnits(hostData?.host_id)
+        alert('상태가 변경되었습니다.')
+      } else {
+        alert('상태 변경에 실패했습니다.')
+      }
     } catch (error) {
       console.error('상태 변경 실패:', error)
       alert('상태 변경에 실패했습니다.')
@@ -432,7 +359,7 @@ export default function HostUnitsPage() {
               <SelectTrigger className="border-gray-300 bg-white">
                 <SelectValue placeholder="숙소 선택" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 숙소</SelectItem>
                 {accommodations.map(acc => (
                   <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
@@ -444,7 +371,7 @@ export default function HostUnitsPage() {
               <SelectTrigger className="border-gray-300 bg-white">
                 <SelectValue placeholder="유형 선택" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 유형</SelectItem>
                 <SelectItem value="villa">빌라</SelectItem>
                 <SelectItem value="private_house">독채</SelectItem>
@@ -457,7 +384,7 @@ export default function HostUnitsPage() {
               <SelectTrigger className="border-gray-300 bg-white">
                 <SelectValue placeholder="상태 선택" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 상태</SelectItem>
                 <SelectItem value="active">활성</SelectItem>
                 <SelectItem value="inactive">비활성</SelectItem>

@@ -54,56 +54,55 @@ export default function HostPricingPage() {
   const [selectedDay, setSelectedDay] = useState<PricingCalendarDay | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
-  // Mock data fallback
-  const mockRoomStatuses: RoomStatus[] = Array.from({length: 31}, (_, i) => {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)
-    const status = Math.random() > 0.7 ? 'booked_platform' : Math.random() > 0.8 ? 'manual_closed' : 'available'
-    return {
-      id: `mock-${i}`,
-      accommodation_id: 'mock-acc-1',
-      room_id: 'mock-room-1',
-      date: date.toISOString().split('T')[0],
-      status: status as RoomStatus['status'],
-      price: status === 'available' ? 550000 + Math.floor(Math.random() * 100000) : 0,
-      base_price: 550000,
-      notes: status === 'manual_closed' ? '다른 플랫폼 예약' : status === 'booked_platform' ? '플랫폼 예약 완료' : undefined,
-      guest_name: status !== 'available' ? '김○○' : undefined,
-      guest_phone: status !== 'available' ? '010-****-****' : undefined,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  })
-
-  const mockAccommodations = [
-    { id: 'mock-acc-1', name: '구공스테이 청주점', accommodation_type: '독채' },
-    { id: 'mock-acc-2', name: '구공스테이 서울점', accommodation_type: '펜션' }
-  ]
-
-  const mockRooms = [
-    { id: 'mock-room-1', name: '101호 (디럭스)', accommodation_id: 'mock-acc-1' },
-    { id: 'mock-room-2', name: '102호 (스탠다드)', accommodation_id: 'mock-acc-1' },
-    { id: 'mock-room-3', name: '201호 (스위트)', accommodation_id: 'mock-acc-1' }
-  ]
+  const [hostData, setHostData] = useState<any>(null)
 
   useEffect(() => {
-    loadData()
-  }, [currentDate, selectedAccommodation])
+    // 호스트 정보 초기화
+    const userData = sessionStorage.getItem('hostUser')
+    if (userData) {
+      setHostData(JSON.parse(userData))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (hostData) {
+      loadData()
+    }
+  }, [hostData, currentDate, selectedAccommodation])
 
   const loadData = async () => {
     try {
       setLoading(true)
 
-      // Load accommodations
+      if (!hostData?.host_id) {
+        console.error('호스트 정보가 없습니다')
+        return
+      }
+
+      // 호스트 UUID 가져오기
+      const { data: hostIdData } = await supabase
+        .from('hosts')
+        .select('id')
+        .eq('host_id', hostData.host_id)
+        .single()
+
+      if (!hostIdData) {
+        console.error('호스트 정보를 찾을 수 없습니다')
+        return
+      }
+
+      // Load accommodations for this host
       const { data: accData, error: accError } = await supabase
         .from('accommodations')
         .select('id, name, accommodation_type')
+        .eq('host_id', hostIdData.id)
         .eq('status', 'active')
 
       if (accError) {
-        console.warn('Using mock accommodations data')
-        setAccommodations(mockAccommodations)
+        console.error('숙소 데이터 로드 실패:', accError)
+        setAccommodations([])
       } else {
-        setAccommodations(accData || mockAccommodations)
+        setAccommodations(accData || [])
       }
 
       // Load rooms for selected accommodation
@@ -114,20 +113,19 @@ export default function HostPricingPage() {
           .eq('accommodation_id', selectedAccommodation)
 
         if (roomError) {
-          console.warn('Using mock rooms data')
-          const filteredRooms = mockRooms.filter(r => r.accommodation_id === selectedAccommodation)
-          setRooms(filteredRooms)
+          console.error('객실 데이터 로드 실패:', roomError)
+          setRooms([])
         } else {
           setRooms(roomData || [])
         }
 
-        if (!selectedRoom && (roomData?.[0] || mockRooms[0])) {
-          setSelectedRoom(roomData?.[0]?.id || mockRooms[0].id)
+        if (!selectedRoom && roomData?.[0]) {
+          setSelectedRoom(roomData[0].id)
         }
       }
 
-      if (!selectedAccommodation && (accData?.[0] || mockAccommodations[0])) {
-        setSelectedAccommodation(accData?.[0]?.id || mockAccommodations[0].id)
+      if (!selectedAccommodation && accData?.[0]) {
+        setSelectedAccommodation(accData[0].id)
         return
       }
 
@@ -150,23 +148,17 @@ export default function HostPricingPage() {
       const { data: statusData, error: statusError } = await query
 
       if (statusError) {
-        console.warn('Using mock room status data')
-        setRoomStatuses(mockRoomStatuses)
+        console.error('객실 상태 데이터 로드 실패:', statusError)
+        setRoomStatuses([])
       } else {
         setRoomStatuses(statusData || [])
       }
 
     } catch (error) {
       console.error('데이터 로드 실패:', error)
-      setAccommodations(mockAccommodations)
-      setRooms(mockRooms)
-      setRoomStatuses(mockRoomStatuses)
-      if (!selectedAccommodation) {
-        setSelectedAccommodation(mockAccommodations[0].id)
-      }
-      if (!selectedRoom) {
-        setSelectedRoom(mockRooms[0].id)
-      }
+      setAccommodations([])
+      setRooms([])
+      setRoomStatuses([])
     } finally {
       setLoading(false)
     }
@@ -340,7 +332,7 @@ export default function HostPricingPage() {
             <SelectTrigger className="w-[250px]">
               <SelectValue placeholder="숙소 선택" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border border-gray-200 shadow-lg">
               {accommodations.map((acc) => (
                 <SelectItem key={acc.id} value={acc.id}>
                   {acc.name} ({acc.accommodation_type})
@@ -354,7 +346,7 @@ export default function HostPricingPage() {
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="객실 선택" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 {rooms.map((room) => (
                   <SelectItem key={room.id} value={room.id}>
                     {room.name}
@@ -484,7 +476,7 @@ export default function HostPricingPage() {
 
       {/* Status Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-white">
           <DialogHeader>
             <DialogTitle>객실 상태 변경</DialogTitle>
           </DialogHeader>
@@ -540,7 +532,7 @@ function RoomStatusForm({ day, onSubmit, onCancel }: RoomStatusFormProps) {
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white border border-gray-200 shadow-lg">
             <SelectItem value="available">예약 가능</SelectItem>
             <SelectItem value="booked_platform">플랫폼 예약</SelectItem>
             <SelectItem value="manual_closed">수동 마감</SelectItem>

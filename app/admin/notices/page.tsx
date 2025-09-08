@@ -14,7 +14,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Search, Plus, Eye, Edit, Trash2, Loader2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 
 interface Notice {
   id: string
@@ -29,7 +28,6 @@ interface Notice {
 }
 
 export default function NoticesPage() {
-  const supabase = createClient()
   const [notices, setNotices] = useState<Notice[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -43,35 +41,36 @@ export default function NoticesPage() {
     try {
       setLoading(true)
       
-      let query = supabase
-        .from('notices')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,author.ilike.%${searchQuery}%`)
+      // 실제 API 호출
+      const response = await fetch('/api/notices?limit=50')
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        setNotices(result.data.map((notice: any) => ({
+          id: notice.id,
+          title: notice.title,
+          content: notice.content,
+          author: notice.author_name,
+          views: notice.view_count || 0,
+          status: notice.is_published ? 'published' : 'draft',
+          is_important: notice.is_important,
+          created_at: notice.created_at,
+          updated_at: notice.updated_at
+        })))
+      } else {
+        console.log('공지사항이 없거나 API 호출 실패')
+        setNotices([])
       }
 
-      const { data, error } = await query
-
-      if (error) {
-        console.error('공지사항 로드 실패:', error)
-        // 에러시 목업 데이터 사용
-        setNotices(mockNotices)
-        return
-      }
-
-      setNotices(data || [])
     } catch (error) {
       console.error('공지사항 로드 실패:', error)
-      // 에러시 목업 데이터 사용
-      setNotices(mockNotices)
+      setNotices([])
     } finally {
       setLoading(false)
     }
   }
 
-  // 검색시 재로드
+  // 검색 시 재로드
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       loadNotices()
@@ -79,107 +78,32 @@ export default function NoticesPage() {
     return () => clearTimeout(timeoutId)
   }, [searchQuery])
 
-  // 목업 데이터 (테이블이 없는 경우 대비)
-  const mockNotices: Notice[] = [
-    {
-      id: '43',
-      title: 'Stay One Day 플랫폼 오픈 안내',
-      content: 'Stay One Day 서비스가 정식으로 오픈되었습니다.',
-      views: 45,
-      author: 'Stay One Day 관리자',
-      created_at: '2025-01-15T09:00:00+09:00',
-      updated_at: '2025-01-15T09:00:00+09:00',
-      status: 'published',
-      is_important: true
-    },
-    {
-      id: '42',
-      title: '[공지] 2월 프로모션 이벤트',
-      content: '2월 한 달간 모든 숙소 10% 할인 이벤트를 진행합니다.',
-      views: 67,
-      author: 'Stay One Day 관리자',
-      created_at: '2025-02-01T14:00:00+09:00',
-      updated_at: '2025-02-01T14:00:00+09:00',
-      status: 'published',
-      is_important: true
-    },
-    {
-      id: '41',
-      title: '신규 숙소 등록 프로세스 변경 안내',
-      content: '호스트 숙소 등록 절차가 간소화되었습니다.',
-      views: 28,
-      author: 'Stay One Day 관리자',
-      created_at: '2025-02-01T10:00:00+09:00',
-      updated_at: '2025-02-01T10:00:00+09:00',
-      status: 'published',
-      is_important: false
-    },
-    {
-      id: '40',
-      title: '[공지] 서비스 점검 안내',
-      content: '2월 28일 02:00~06:00 서비스 점검이 진행됩니다.',
-      views: 89,
-      author: 'Stay One Day 관리자',
-      created_at: '2025-02-25T16:00:00+09:00',
-      updated_at: '2025-02-25T16:00:00+09:00',
-      status: 'published',
-      is_important: true
-    },
-    {
-      id: '39',
-      title: '정산 주기 변경 안내',
-      content: '호스트 정산 주기가 월 1회에서 주 1회로 변경됩니다.',
-      views: 34,
-      author: 'Stay One Day 관리자',
-      created_at: '2025-02-15T11:00:00+09:00',
-      updated_at: '2025-02-15T11:00:00+09:00',
-      status: 'published',
-      is_important: false
-    }
-  ]
-
   const filteredNotices = notices.filter(notice =>
     notice.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     notice.author.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`'${title}' 공지사항을 정말 삭제하시겠습니까?`)) return
-
-    try {
-      const { error } = await supabase
-        .from('notices')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-
-      alert('공지사항이 삭제되었습니다.')
-      loadNotices()
-    } catch (error) {
-      console.error('삭제 실패:', error)
-      alert('삭제에 실패했습니다.')
-    }
-  }
-
-  const incrementViews = async (noticeId: string) => {
-    try {
-      const { error } = await supabase.rpc('increment_notice_views', {
-        notice_id: noticeId
-      })
-      if (!error) {
-        loadNotices() // 뷰 카운트 업데이트 후 새로고침
+  const handleDeleteSelected = async () => {
+    if (selectedNotices.length === 0) return
+    
+    if (confirm(`선택한 ${selectedNotices.length}개의 공지사항을 삭제하시겠습니까?`)) {
+      try {
+        // 실제 삭제 API 호출
+        for (const noticeId of selectedNotices) {
+          await fetch(`/api/notices/${noticeId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          })
+        }
+        
+        await loadNotices()
+        setSelectedNotices([])
+      } catch (error) {
+        console.error('공지사항 삭제 실패:', error)
+        alert('공지사항 삭제에 실패했습니다.')
       }
-    } catch (error) {
-      console.error('조회수 업데이트 실패:', error)
-    }
-  }
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedNotices(filteredNotices.map(notice => notice.id))
-    } else {
-      setSelectedNotices([])
     }
   }
 
@@ -193,149 +117,149 @@ export default function NoticesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">점주 공지사항</h1>
-          <p className="text-gray-600">Stay One Day 운영 관련 공지사항을 관리합니다.</p>
-        </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          공지 작성
-        </Button>
-      </div>
-
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>공지사항 목록</CardTitle>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder="제목, 작성자 검색..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 w-64"
-                />
-              </div>
+          <CardTitle className="flex items-center justify-between">
+            <span>공지사항 관리</span>
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => window.location.href = '/admin/notices/create'}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              새 공지사항 작성
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between mb-6">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="공지사항 제목 또는 작성자 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <div className="flex items-center gap-2">
               {selectedNotices.length > 0 && (
-                <Button variant="outline" size="sm">
-                  <Trash2 className="w-4 h-4 mr-2" />
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteSelected}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
                   선택 삭제 ({selectedNotices.length})
                 </Button>
               )}
+              <Badge variant="outline">
+                총 {filteredNotices.length}개
+              </Badge>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-              <p>로딩 중...</p>
-            </div>
-          ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <input
-                    type="checkbox"
-                    checked={selectedNotices.length === filteredNotices.length && filteredNotices.length > 0}
-                    onChange={(e) => handleSelectAll(e.target.checked)}
-                    className="rounded"
-                  />
-                </TableHead>
-                <TableHead className="w-16">#</TableHead>
-                <TableHead>제목</TableHead>
-                <TableHead className="w-20">조회수</TableHead>
-                <TableHead className="w-32">작성자</TableHead>
-                <TableHead className="w-32">작성일</TableHead>
-                <TableHead className="w-20">상태</TableHead>
-                <TableHead className="w-32">관리</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredNotices.map((notice) => (
-                <TableRow key={notice.id} className="hover:bg-gray-50">
-                  <TableCell>
-                    <input
-                      type="checkbox"
-                      checked={selectedNotices.includes(notice.id)}
-                      onChange={() => handleSelectNotice(notice.id)}
-                      className="rounded"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{notice.id}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {notice.is_important && (
-                        <Badge variant="destructive" className="text-xs">
-                          공지
-                        </Badge>
-                      )}
-                      <span className={notice.is_important ? 'text-red-600 font-medium' : ''}>
-                        {notice.title}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">{notice.views}</TableCell>
-                  <TableCell>{notice.author}</TableCell>
-                  <TableCell>{new Date(notice.created_at).toLocaleDateString('ko-KR')}</TableCell>
-                  <TableCell>
-                    <Badge variant={notice.status === 'published' ? 'default' : 'secondary'}>
-                      {notice.status === 'published' ? '게시됨' : '임시저장'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => incrementViews(notice.id)}
-                        title="조회수 증가"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" title="편집">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-red-600 hover:text-red-700"
-                        onClick={() => handleDelete(notice.id, notice.title)}
-                        title="삭제"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          )}
 
-          {!loading && filteredNotices.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              <span>공지사항을 불러오는 중...</span>
+            </div>
+          ) : filteredNotices.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
               {searchQuery ? '검색 결과가 없습니다.' : '등록된 공지사항이 없습니다.'}
             </div>
-          )}
-
-          {/* Pagination */}
-          <div className="flex items-center justify-center gap-2 mt-6">
-            <Button variant="outline" size="sm" disabled>
-              이전
-            </Button>
-            <div className="flex gap-1">
-              <Button variant="default" size="sm" className="w-8">1</Button>
-              <Button variant="outline" size="sm" className="w-8">2</Button>
-              <Button variant="outline" size="sm" className="w-8">3</Button>
+          ) : (
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-50">
+                    <TableHead className="w-12">
+                      <input 
+                        type="checkbox"
+                        checked={selectedNotices.length === filteredNotices.length && filteredNotices.length > 0}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedNotices(filteredNotices.map(notice => notice.id))
+                          } else {
+                            setSelectedNotices([])
+                          }
+                        }}
+                        className="rounded"
+                      />
+                    </TableHead>
+                    <TableHead>제목</TableHead>
+                    <TableHead className="w-32">작성자</TableHead>
+                    <TableHead className="w-20">조회수</TableHead>
+                    <TableHead className="w-24">상태</TableHead>
+                    <TableHead className="w-32">작성일</TableHead>
+                    <TableHead className="w-24">작업</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredNotices.map((notice) => (
+                    <TableRow key={notice.id} className="hover:bg-gray-50">
+                      <TableCell>
+                        <input 
+                          type="checkbox"
+                          checked={selectedNotices.includes(notice.id)}
+                          onChange={() => handleSelectNotice(notice.id)}
+                          className="rounded"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {notice.is_important && (
+                            <Badge variant="destructive" className="text-xs">중요</Badge>
+                          )}
+                          <span className="font-medium">{notice.title}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-gray-600">{notice.author}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Eye className="h-3 w-3 text-gray-400" />
+                          <span className="text-sm">{notice.views}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={notice.status === 'published' ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {notice.status === 'published' ? '공개' : '임시저장'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-gray-600 text-sm">
+                        {new Date(notice.created_at).toLocaleDateString('ko-KR', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit'
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.location.href = `/admin/notices/${notice.id}`}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.location.href = `/admin/notices/${notice.id}/edit`}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-            <Button variant="outline" size="sm">
-              다음
-            </Button>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -226,6 +226,7 @@ export async function PUT(
       type,
       accommodation_types,
       base_price,
+      weekend_price,
       base_guests,
       additional_guest_fee,
       max_guests,
@@ -235,7 +236,10 @@ export async function PUT(
       options,
       images,
       is_active,
-      approval_status
+      approval_status,
+      guidelines,
+      house_rules,
+      host_id
     } = body
 
     // 숙소 존재 확인
@@ -249,41 +253,73 @@ export async function PUT(
       return NextResponse.json({ error: '숙소를 찾을 수 없습니다.' }, { status: 404 })
     }
 
+    // 호스트 권한 확인
+    if (host_id && existingAccommodation.host_id !== host_id) {
+      return NextResponse.json({ error: '본인의 숙소만 수정할 수 있습니다.' }, { status: 403 })
+    }
+
     const updateData: any = { updated_at: new Date().toISOString() }
     
-    if (name !== undefined) updateData.name = name
-    if (description !== undefined) updateData.description = description
-    if (location !== undefined) {
-      updateData.address = location
-      updateData.region = location.split(' ')[0] // 첫 번째 단어를 지역으로 사용
-    }
-    if (type !== undefined) updateData.accommodation_type = type
+    // 호스트가 수정 가능한 필드들만 허용
     if (base_price !== undefined) updateData.base_price = parseInt(base_price)
-    if (base_guests !== undefined) updateData.base_capacity = parseInt(base_guests)
-    if (additional_guest_fee !== undefined) updateData.additional_guest_fee = parseInt(additional_guest_fee)
-    if (max_guests !== undefined) updateData.max_capacity = parseInt(max_guests)
-    if (check_in_time !== undefined) updateData.checkin_time = check_in_time + (check_in_time.includes(':') && !check_in_time.includes(':', check_in_time.indexOf(':') + 1) ? ':00' : '')
-    if (check_out_time !== undefined) updateData.checkout_time = check_out_time + (check_out_time.includes(':') && !check_out_time.includes(':', check_out_time.indexOf(':') + 1) ? ':00' : '')
-    // amenities는 별도 테이블에서 관리하므로 accommodations 테이블에서 제거
-    if (options !== undefined) updateData.extra_options = options
-    if (images !== undefined) updateData.images = images
-    if (is_active !== undefined) updateData.is_active = is_active
-    if (approval_status !== undefined) updateData.status = approval_status
+    if (weekend_price !== undefined) updateData.weekend_price = parseInt(weekend_price)
+    if (check_in_time !== undefined) updateData.checkin_time = check_in_time
+    if (check_out_time !== undefined) updateData.checkout_time = check_out_time
+    if (guidelines !== undefined) updateData.guidelines = guidelines
+    if (house_rules !== undefined) updateData.house_rules = house_rules
+    
+    // 관리자만 수정 가능한 필드들 (host_id가 없는 경우)
+    if (!host_id) {
+      if (name !== undefined) updateData.name = name
+      if (description !== undefined) updateData.description = description
+      if (location !== undefined) {
+        updateData.address = location
+        updateData.region = location.split(' ')[0]
+      }
+      if (type !== undefined) updateData.accommodation_type = type
+      if (base_guests !== undefined) updateData.base_capacity = parseInt(base_guests)
+      if (additional_guest_fee !== undefined) updateData.additional_guest_fee = parseInt(additional_guest_fee)
+      if (max_guests !== undefined) updateData.max_capacity = parseInt(max_guests)
+      if (options !== undefined) updateData.extra_options = options
+      if (images !== undefined) updateData.images = images
+      if (is_active !== undefined) updateData.is_active = is_active
+      if (approval_status !== undefined) updateData.status = approval_status
+    }
 
-    const { data, error } = await supabase
+    // 호스트 권한이 있는 경우에만 본인 숙소 업데이트
+    let query = supabase
       .from('accommodations')
       .update(updateData)
       .eq('id', accommodationId)
-      .select()
-      .single()
+
+    // 호스트 권한 확인이 있는 경우 추가 조건
+    if (host_id) {
+      query = query.eq('host_id', host_id)
+    }
+
+    const { data, error } = await query.select().single()
 
     if (error) {
       console.error('숙소 수정 오류:', error)
+      console.error('업데이트 데이터:', updateData)
+      console.error('숙소 ID:', accommodationId)
+      console.error('호스트 ID:', host_id)
       return NextResponse.json(
-        { error: '숙소 수정 중 오류가 발생했습니다.' },
+        { error: '숙소 수정 중 오류가 발생했습니다: ' + error.message },
         { status: 500 }
       )
     }
+
+    if (!data) {
+      console.error('업데이트된 데이터가 없습니다')
+      console.error('쿼리 조건:', { accommodationId, host_id })
+      return NextResponse.json(
+        { error: '숙소를 찾을 수 없거나 수정 권한이 없습니다.' },
+        { status: 404 }
+      )
+    }
+
+    console.log('숙소 업데이트 성공:', { accommodationId, updateData })
 
     // 숙소 유형 업데이트 (accommodation_types 테이블)
     if (accommodation_types !== undefined) {
@@ -310,30 +346,15 @@ export async function PUT(
       }
     }
 
-    // 편의시설 업데이트 (accommodation_amenities 테이블)
+    // 편의시설 업데이트 (amenities 필드 직접 업데이트)
     if (amenities !== undefined) {
-      // 기존 편의시설 삭제
-      await supabase
-        .from('accommodation_amenities')
-        .delete()
-        .eq('accommodation_id', accommodationId)
+      const { error: amenityError } = await supabase
+        .from('accommodations')
+        .update({ amenities })
+        .eq('id', accommodationId)
 
-      // 새로운 편의시설 추가
-      if (amenities && amenities.length > 0) {
-        const amenityData = amenities.map((amenity: any) => ({
-          accommodation_id: accommodationId,
-          amenity_type: amenity.type || amenity.toLowerCase().replace(/\s+/g, '_'),
-          amenity_name: amenity.name || amenity,
-          is_available: amenity.available !== undefined ? amenity.available : true
-        }))
-
-        const { error: amenityError } = await supabase
-          .from('accommodation_amenities')
-          .insert(amenityData)
-
-        if (amenityError) {
-          console.error('편의시설 업데이트 실패:', amenityError)
-        }
+      if (amenityError) {
+        console.error('편의시설 업데이트 실패:', amenityError)
       }
     }
 

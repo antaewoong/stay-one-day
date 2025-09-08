@@ -21,6 +21,7 @@ import {
   Download,
   Star
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface AccommodationPhoto {
   id: string
@@ -43,47 +44,152 @@ export default function HostPhotosPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [hostData, setHostData] = useState<any>(null)
 
-  // 더미 데이터
-  const accommodations = [
-    { id: '1', name: '구공스테이 풀빌라' },
-    { id: '2', name: '구공스테이 독채' },
-    { id: '3', name: '구공스테이 펜션' }
-  ]
+  const [accommodations, setAccommodations] = useState<any[]>([])
 
   useEffect(() => {
     const userData = sessionStorage.getItem('hostUser')
     if (userData) {
       const parsedData = JSON.parse(userData)
       setHostData(parsedData)
-      loadPhotos(parsedData.host_id)
     }
   }, [])
 
-  const loadPhotos = async (hostId: string) => {
+  useEffect(() => {
+    if (hostData) {
+      loadHostData()
+    }
+  }, [hostData])
+
+  useEffect(() => {
+    if (hostData) {
+      loadPhotos()
+    }
+  }, [accommodationFilter, searchQuery, hostData])
+
+  const loadHostData = async () => {
+    try {
+      if (!hostData?.host_id) {
+        console.error('호스트 정보가 없습니다')
+        return
+      }
+
+      // 호스트 UUID 가져오기
+      const { data: hostIdData, error: hostError } = await createClient()
+        .from('hosts')
+        .select('id')
+        .eq('host_id', hostData.host_id)
+        .single()
+
+      if (hostError || !hostIdData) {
+        console.error('호스트 정보를 찾을 수 없습니다:', hostError)
+        setAccommodations([])
+        return
+      }
+
+      // 호스트의 숙소들 가져오기
+      const { data: accData, error: accError } = await createClient()
+        .from('accommodations')
+        .select('id, name, accommodation_type')
+        .eq('host_id', hostIdData.id)
+        .eq('status', 'active')
+
+      if (accError) {
+        console.error('숙소 데이터 로드 실패:', accError)
+        setAccommodations([])
+      } else {
+        setAccommodations(accData || [])
+      }
+
+    } catch (error) {
+      console.error('호스트 데이터 로드 실패:', error)
+      setAccommodations([])
+    }
+  }
+
+  const loadPhotos = async () => {
     try {
       setLoading(true)
       
-      // 호스트별 더미 사진 데이터
-      const hostPhotosData = getHostPhotos(hostId)
-      
-      let filteredPhotos = hostPhotosData
+      if (!hostData?.host_id) {
+        console.error('호스트 정보가 없습니다')
+        return
+      }
+
+      // 호스트 UUID 가져오기
+      const { data: hostIdData, error: hostError } = await createClient()
+        .from('hosts')
+        .select('id')
+        .eq('host_id', hostData.host_id)
+        .single()
+
+      if (hostError || !hostIdData) {
+        console.error('호스트 정보를 찾을 수 없습니다:', hostError)
+        setPhotos([])
+        return
+      }
+
+      // 호스트의 숙소 ID들 가져오기
+      const { data: accData } = await createClient()
+        .from('accommodations')
+        .select('id')
+        .eq('host_id', hostIdData.id)
+        .eq('status', 'active')
+
+      if (!accData || accData.length === 0) {
+        setPhotos([])
+        return
+      }
+
+      const accommodationIds = accData.map(acc => acc.id)
+
+      // 숙소 이미지들 가져오기
+      let query = createClient()
+        .from('accommodation_images')
+        .select(`
+          *,
+          accommodations(name)
+        `)
+        .in('accommodation_id', accommodationIds)
+        .order('image_order')
 
       // 숙소별 필터 적용
       if (accommodationFilter !== 'all') {
-        filteredPhotos = filteredPhotos.filter(p => p.accommodation_id === accommodationFilter)
+        query = query.eq('accommodation_id', accommodationFilter)
       }
+
+      const { data: photosData, error: photosError } = await query
+
+      if (photosError) {
+        console.error('사진 데이터 로드 실패:', photosError)
+        setPhotos([])
+        return
+      }
+
+      // 데이터 변환
+      let transformedPhotos: AccommodationPhoto[] = (photosData || []).map(photo => ({
+        id: photo.id,
+        accommodation_id: photo.accommodation_id,
+        accommodation_name: photo.accommodations?.name || 'Unknown',
+        image_url: photo.image_url,
+        image_order: photo.image_order || 1,
+        file_name: photo.image_url?.split('/').pop() || 'unknown.jpg',
+        file_size: 0, // 실제로는 파일 크기 정보가 필요
+        uploaded_at: photo.created_at || new Date().toISOString(),
+        is_main: photo.image_order === 1
+      }))
 
       // 검색 필터 적용
       if (searchQuery) {
-        filteredPhotos = filteredPhotos.filter(p => 
-          p.accommodation_name.includes(searchQuery) ||
-          p.file_name.includes(searchQuery)
+        transformedPhotos = transformedPhotos.filter(p => 
+          p.accommodation_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.file_name.toLowerCase().includes(searchQuery.toLowerCase())
         )
       }
 
-      setPhotos(filteredPhotos)
+      setPhotos(transformedPhotos)
     } catch (error) {
       console.error('사진 목록 로드 실패:', error)
+      setPhotos([])
     } finally {
       setLoading(false)
     }
@@ -312,7 +418,7 @@ export default function HostPhotosPage() {
               <SelectTrigger className="w-full md:w-[200px] border-gray-300 bg-white">
                 <SelectValue placeholder="숙소 선택" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 숙소</SelectItem>
                 {accommodations.map(acc => (
                   <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>

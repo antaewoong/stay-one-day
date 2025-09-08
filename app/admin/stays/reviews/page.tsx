@@ -308,7 +308,7 @@ export default function ReviewsPage() {
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="상태" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   <SelectItem value="all">전체</SelectItem>
                   <SelectItem value="published">게시됨</SelectItem>
                   <SelectItem value="pending">검토중</SelectItem>
@@ -320,7 +320,7 @@ export default function ReviewsPage() {
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="평점" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   <SelectItem value="all">전체</SelectItem>
                   <SelectItem value="5">⭐⭐⭐⭐⭐</SelectItem>
                   <SelectItem value="4">⭐⭐⭐⭐</SelectItem>
@@ -391,7 +391,7 @@ export default function ReviewsPage() {
                         <SelectTrigger className="w-8 h-8 p-1">
                           <Eye className="w-3 h-3" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white border border-gray-200 shadow-lg">
                           <SelectItem value="published">게시</SelectItem>
                           <SelectItem value="hidden">숨김</SelectItem>
                           <SelectItem value="reported">신고</SelectItem>
@@ -420,7 +420,7 @@ export default function ReviewsPage() {
 
       {/* Reply Dialog */}
       <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-white">
           <DialogHeader>
             <DialogTitle>리뷰 답변</DialogTitle>
             <DialogDescription>

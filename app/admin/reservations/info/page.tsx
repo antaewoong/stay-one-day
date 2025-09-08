@@ -396,7 +396,7 @@ export default function ReservationInfoPage() {
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="예약상태" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   {statusOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -408,7 +408,7 @@ export default function ReservationInfoPage() {
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="결제방법" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   {paymentOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -524,7 +524,7 @@ export default function ReservationInfoPage() {
 
       {/* Detail Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle>예약 상세 정보</DialogTitle>
           </DialogHeader>

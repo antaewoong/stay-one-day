@@ -82,6 +82,14 @@ import {
   formatDate,
   formatTime
 } from '@/lib/utils/reservation'
+import { 
+  fetchHolidays, 
+  getHolidayInfo, 
+  formatDateToYYYYMMDD, 
+  isWeekend,
+  getHolidayColorClass 
+} from '@/lib/utils/holiday'
+import { Holiday } from '@/lib/types/holiday'
 
 interface Review {
   id: string
@@ -150,12 +158,16 @@ export default function AccommodationDetailPage() {
   
   // 가격 계산
   const [priceCalculation, setPriceCalculation] = useState<ReservationCalculation | null>(null)
+  
+  // 공휴일 정보
+  const [holidays, setHolidays] = useState<Holiday[]>([])
 
   useEffect(() => {
     if (params.id) {
       loadAccommodationData()
       loadReviewsData()
       checkAuthState()
+      loadHolidayData()
     }
   }, [params.id])
 
@@ -288,6 +300,26 @@ export default function AccommodationDetailPage() {
   const checkAuthState = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     setUser(user)
+  }
+
+  // 공휴일 데이터 로드
+  const loadHolidayData = async () => {
+    try {
+      const currentYear = new Date().getFullYear()
+      const nextYear = new Date().getFullYear() + 1
+      
+      // 현재 연도와 다음 연도 공휴일 데이터 가져오기
+      const [currentYearHolidays, nextYearHolidays] = await Promise.all([
+        fetchHolidays(currentYear),
+        fetchHolidays(nextYear)
+      ])
+      
+      const allHolidays = [...currentYearHolidays, ...nextYearHolidays]
+      console.log('로드된 공휴일 데이터:', allHolidays)
+      setHolidays(allHolidays)
+    } catch (error) {
+      console.error('공휴일 데이터 로드 실패:', error)
+    }
   }
 
   // 리뷰 데이터 로드
@@ -1349,9 +1381,9 @@ export default function AccommodationDetailPage() {
                         <h2 className="text-lg font-medium">일정 및 인원</h2>
                         <button 
                           onClick={() => setShowDateGuestPicker(false)}
-                          className="text-gray-400 hover:text-gray-600"
+                          className="text-gray-400 hover:text-gray-600 p-1"
                         >
-                          ✕
+                          <X className="w-5 h-5" />
                         </button>
                       </div>
 
@@ -1403,47 +1435,142 @@ export default function AccommodationDetailPage() {
                               ))}
                             </div>
                             
-                            {/* 달력 그리드 */}
-                            <div className="grid grid-cols-7 gap-1">
-                              {Array.from({ length: 35 }, (_, i) => {
-                                const today = new Date()
-                                const firstDay = new Date(today.getFullYear(), today.getMonth(), 1)
-                                const startDate = new Date(firstDay.getTime() - (firstDay.getDay() * 24 * 60 * 60 * 1000))
-                                const currentDate = new Date(startDate.getTime() + (i * 24 * 60 * 60 * 1000))
-                                const isCurrentMonth = currentDate.getMonth() === today.getMonth()
-                                const isToday = currentDate.toDateString() === today.toDateString()
-                                const isSelected = reservationDate && currentDate.toDateString() === reservationDate.toDateString()
-                                const isPast = currentDate < new Date(today.getFullYear(), today.getMonth(), today.getDate())
-                                
-                                return (
-                                  <button
-                                    key={i}
-                                    onClick={() => {
-                                      if (!isPast && isCurrentMonth) {
-                                        setReservationDate(currentDate)
-                                      }
-                                    }}
-                                    disabled={isPast || !isCurrentMonth}
-                                    className={`
-                                      h-12 text-sm rounded-lg transition-colors
-                                      ${isSelected 
-                                        ? 'bg-gray-800 text-white font-bold' 
-                                        : isToday 
-                                          ? 'bg-gray-100 text-gray-800 font-medium'
-                                          : isCurrentMonth && !isPast
-                                            ? 'hover:bg-gray-100 text-gray-800'
-                                            : 'text-gray-300 cursor-not-allowed'
-                                      }
-                                    `}
-                                  >
-                                    {currentDate.getDate()}
-                                  </button>
-                                )
-                              })}
+                            {/* 2개월 달력 그리드 */}
+                            <div className="space-y-4">
+                              {/* 현재 월 */}
+                              <div className="grid grid-cols-7 gap-1">
+                                {Array.from({ length: 42 }, (_, i) => {
+                                  const today = new Date()
+                                  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1)
+                                  const startDate = new Date(firstDay.getTime() - (firstDay.getDay() * 24 * 60 * 60 * 1000))
+                                  const currentDate = new Date(startDate.getTime() + (i * 24 * 60 * 60 * 1000))
+                                  const isCurrentMonth = currentDate.getMonth() === today.getMonth()
+                                  const isToday = currentDate.toDateString() === today.toDateString()
+                                  const isSelected = reservationDate && currentDate.toDateString() === reservationDate.toDateString()
+                                  const isPast = currentDate < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+                                  
+                                  // 공휴일 정보 확인
+                                  const holidayInfo = getHolidayInfo(currentDate, holidays)
+                                  const isHoliday = !!holidayInfo
+                                  const isWeekendDay = isWeekend(currentDate)
+                                  
+                                  return (
+                                    <button
+                                      key={i}
+                                      onClick={() => {
+                                        if (!isPast && isCurrentMonth) {
+                                          setReservationDate(currentDate)
+                                        }
+                                      }}
+                                      disabled={isPast || !isCurrentMonth}
+                                      className={`
+                                        h-12 text-sm rounded-lg transition-colors relative group
+                                        ${isSelected 
+                                          ? 'bg-gray-800 text-white font-bold' 
+                                          : isToday 
+                                            ? 'bg-gray-100 text-gray-800 font-medium'
+                                            : isHoliday && isCurrentMonth && !isPast
+                                              ? 'bg-red-50 text-red-700 hover:bg-red-100 font-medium'
+                                              : isWeekendDay && isCurrentMonth && !isPast && currentDate.getDay() === 6
+                                                ? 'text-blue-700 hover:bg-blue-50 font-medium'
+                                                : isWeekendDay && isCurrentMonth && !isPast && currentDate.getDay() === 0
+                                                  ? 'text-red-700 hover:bg-red-50 font-medium'
+                                                : isCurrentMonth && !isPast
+                                                  ? 'hover:bg-gray-100 text-gray-800'
+                                                  : 'text-gray-300 cursor-not-allowed'
+                                        }
+                                      `}
+                                      title={holidayInfo ? holidayInfo.name : undefined}
+                                    >
+                                      <div className="flex flex-col items-center">
+                                        <span>{currentDate.getDate()}</span>
+                                        {isHoliday && isCurrentMonth && (
+                                          <div className="w-1 h-1 bg-red-500 rounded-full absolute bottom-1"></div>
+                                        )}
+                                      </div>
+                                    </button>
+                                  )
+                                })}
+                              </div>
+
+                              {/* 다음 월 제목 */}
+                              <div className="text-center text-lg font-medium text-gray-800 mt-8 mb-4">
+                                {new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' })}
+                              </div>
+
+                              {/* 다음 월 */}
+                              <div className="grid grid-cols-7 gap-1">
+                                {Array.from({ length: 42 }, (_, i) => {
+                                  const today = new Date()
+                                  const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1)
+                                  const firstDay = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 1)
+                                  const startDate = new Date(firstDay.getTime() - (firstDay.getDay() * 24 * 60 * 60 * 1000))
+                                  const currentDate = new Date(startDate.getTime() + (i * 24 * 60 * 60 * 1000))
+                                  const isNextMonth = currentDate.getMonth() === nextMonth.getMonth()
+                                  const isToday = currentDate.toDateString() === today.toDateString()
+                                  const isSelected = reservationDate && currentDate.toDateString() === reservationDate.toDateString()
+                                  const isPast = currentDate < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+                                  
+                                  // 공휴일 정보 확인
+                                  const holidayInfo = getHolidayInfo(currentDate, holidays)
+                                  const isHoliday = !!holidayInfo
+                                  const isWeekendDay = isWeekend(currentDate)
+                                  
+                                  return (
+                                    <button
+                                      key={`next-${i}`}
+                                      onClick={() => {
+                                        if (!isPast && isNextMonth) {
+                                          setReservationDate(currentDate)
+                                        }
+                                      }}
+                                      disabled={isPast || !isNextMonth}
+                                      className={`
+                                        h-12 text-sm rounded-lg transition-colors relative group
+                                        ${isSelected 
+                                          ? 'bg-gray-800 text-white font-bold' 
+                                          : isToday 
+                                            ? 'bg-gray-100 text-gray-800 font-medium'
+                                            : isHoliday && isNextMonth && !isPast
+                                              ? 'bg-red-50 text-red-700 hover:bg-red-100 font-medium'
+                                              : isWeekendDay && isNextMonth && !isPast && currentDate.getDay() === 6
+                                                ? 'text-blue-700 hover:bg-blue-50 font-medium'
+                                                : isWeekendDay && isNextMonth && !isPast && currentDate.getDay() === 0
+                                                  ? 'text-red-700 hover:bg-red-50 font-medium'
+                                                : isNextMonth && !isPast
+                                                  ? 'hover:bg-gray-100 text-gray-800'
+                                                  : 'text-gray-300 cursor-not-allowed'
+                                        }
+                                      `}
+                                      title={holidayInfo ? holidayInfo.name : undefined}
+                                    >
+                                      <div className="flex flex-col items-center">
+                                        <span>{currentDate.getDate()}</span>
+                                        {isHoliday && isNextMonth && (
+                                          <div className="w-1 h-1 bg-red-500 rounded-full absolute bottom-1"></div>
+                                        )}
+                                      </div>
+                                    </button>
+                                  )
+                                })}
+                              </div>
                             </div>
                             
-                            <div className="mt-6 text-center">
-                              <span className="text-xs text-gray-500">• 마감임박일</span>
+                            <div className="mt-6 text-center space-y-2">
+                              <div className="flex items-center justify-center gap-4 text-xs">
+                                <div className="flex items-center gap-1">
+                                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                  <span className="text-red-600">공휴일</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                  <span className="text-blue-600">주말</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
+                                  <span className="text-gray-600">선택됨</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         ) : (
@@ -1548,10 +1675,13 @@ export default function AccommodationDetailPage() {
                         </div>
                         <div className="flex gap-3">
                           <button 
-                            onClick={() => setShowDateGuestPicker(false)}
-                            className="flex-1 py-3 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            onClick={() => {
+                              setReservationDate(null)
+                              setGuestCount({ adults: 2, teens: 0, infants: 0 })
+                            }}
+                            className="px-4 py-3 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
                           >
-                            취소
+                            초기화
                           </button>
                           <button 
                             onClick={() => {

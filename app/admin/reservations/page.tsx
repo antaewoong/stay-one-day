@@ -258,7 +258,7 @@ export default function AdminReservationsPage() {
               <SelectTrigger className="w-full md:w-[140px]">
                 <SelectValue placeholder="날짜" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 기간</SelectItem>
                 <SelectItem value="today">오늘</SelectItem>
                 <SelectItem value="tomorrow">내일</SelectItem>
@@ -269,7 +269,7 @@ export default function AdminReservationsPage() {
               <SelectTrigger className="w-full md:w-[120px]">
                 <SelectValue placeholder="예약상태" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 상태</SelectItem>
                 <SelectItem value="confirmed">확정</SelectItem>
                 <SelectItem value="cancelled">취소</SelectItem>
@@ -281,7 +281,7 @@ export default function AdminReservationsPage() {
               <SelectTrigger className="w-full md:w-[120px]">
                 <SelectValue placeholder="결제상태" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 결제</SelectItem>
                 <SelectItem value="paid">결제완료</SelectItem>
                 <SelectItem value="pending">결제대기</SelectItem>
@@ -386,7 +386,7 @@ export default function AdminReservationsPage() {
                           <SelectTrigger className="w-[100px]">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-white border border-gray-200 shadow-lg">
                             <SelectItem value="confirmed">확정</SelectItem>
                             <SelectItem value="cancelled">취소</SelectItem>
                             <SelectItem value="completed">완료</SelectItem>

@@ -1,32 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
-  ChevronDown, 
-  ChevronRight, 
-  Bell,
-  MessageCircle,
   Building2,
   Calendar,
-  Calculator,
+  ClipboardList,
   BarChart3,
-  Settings,
+  X,
   Home,
   Users,
-  DollarSign,
-  Camera,
-  Star,
-  Menu,
-  X
+  TrendingUp
 } from 'lucide-react'
 
 interface MenuItem {
   title: string
-  href?: string
+  href: string
   icon: React.ReactNode
-  children?: MenuItem[]
 }
 
 const menuItems: MenuItem[] = [
@@ -36,46 +27,29 @@ const menuItems: MenuItem[] = [
     icon: <BarChart3 className="w-4 h-4" />
   },
   {
-    title: '내 숙소 관리',
-    icon: <Building2 className="w-4 h-4" />,
-    children: [
-      { title: '숙소 목록', href: '/host/accommodations', icon: <></> },
-      { title: '새 숙소 등록', href: '/host/accommodations/add', icon: <></> },
-      { title: '사진 관리', href: '/host/accommodations/photos', icon: <></> }
-    ]
+    title: '숙소 관리',
+    href: '/host/accommodations',
+    icon: <Building2 className="w-4 h-4" />
   },
   {
     title: '예약 관리',
-    icon: <Calendar className="w-4 h-4" />,
-    children: [
-      { title: '예약 현황', href: '/host/reservations', icon: <></> },
-      { title: '예약 달력', href: '/host/reservations/calendar', icon: <></> },
-      { title: '체크인/아웃', href: '/host/reservations/checkin', icon: <></> }
-    ]
+    href: '/host/reservations',
+    icon: <ClipboardList className="w-4 h-4" />
   },
   {
-    title: '리뷰 관리',
-    href: '/host/reviews',
-    icon: <Star className="w-4 h-4" />
+    title: '달력',
+    href: '/host/calendar',
+    icon: <Calendar className="w-4 h-4" />
   },
   {
-    title: '게스트 문의',
-    href: '/host/inquiries',
-    icon: <MessageCircle className="w-4 h-4" />
+    title: 'CRM',
+    href: '/host/crm',
+    icon: <Users className="w-4 h-4" />
   },
   {
-    title: '정산 관리',
-    icon: <Calculator className="w-4 h-4" />,
-    children: [
-      { title: '정산 내역', href: '/host/settlement/history', icon: <></> },
-      { title: '수익 분석', href: '/host/settlement/analytics', icon: <></> },
-      { title: '세금 신고', href: '/host/settlement/tax', icon: <></> }
-    ]
-  },
-  {
-    title: '호스트 설정',
-    href: '/host/settings',
-    icon: <Settings className="w-4 h-4" />
+    title: '마케팅 분석',
+    href: '/host/marketing',
+    icon: <TrendingUp className="w-4 h-4" />
   }
 ]
 
@@ -85,61 +59,35 @@ interface HostSidebarProps {
 }
 
 export default function HostSidebar({ isOpen = true, onToggle }: HostSidebarProps) {
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['내 숙소 관리'])
+  const [hostData, setHostData] = useState<any>(null)
   const pathname = usePathname()
 
-  const toggleMenu = (title: string) => {
-    setExpandedMenus(prev => 
-      prev.includes(title) 
-        ? prev.filter(item => item !== title)
-        : [...prev, title]
-    )
-  }
-
-  const renderMenuItem = (item: MenuItem, depth = 0) => {
-    const hasChildren = item.children && item.children.length > 0
-    const isExpanded = expandedMenus.includes(item.title)
-    const isActive = item.href && pathname === item.href
-
-    if (hasChildren) {
-      return (
-        <div key={item.title} className="mb-1">
-          <button
-            onClick={() => toggleMenu(item.title)}
-            className="w-full flex items-center justify-between px-4 py-3 text-white/90 hover:bg-white/10 hover:text-white transition-colors rounded-md text-sm"
-          >
-            <div className="flex items-center gap-3">
-              {item.icon}
-              <span>{item.title}</span>
-            </div>
-            {isExpanded ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
-            )}
-          </button>
-          {isExpanded && (
-            <div className="ml-4 mt-1 space-y-1">
-              {item.children?.map(child => renderMenuItem(child, depth + 1))}
-            </div>
-          )}
-        </div>
-      )
+  useEffect(() => {
+    const userData = sessionStorage.getItem('hostUser')
+    if (userData) {
+      setHostData(JSON.parse(userData))
     }
+  }, [])
+
+  const renderMenuItem = (item: MenuItem) => {
+    const isActive = pathname === item.href || (item.href !== '/host' && pathname.startsWith(item.href))
 
     return (
       <Link
         key={item.title}
-        href={item.href || '#'}
+        href={item.href}
         className={`flex items-center gap-3 px-4 py-3 text-sm transition-colors rounded-md mb-1 ${
           isActive 
             ? 'bg-green-600 text-white font-medium' 
-            : depth > 0 
-              ? 'text-white/80 hover:bg-white/10 hover:text-white pl-8'
-              : 'text-white/90 hover:bg-white/10 hover:text-white'
+            : 'text-white/90 hover:bg-white/10 hover:text-white'
         }`}
+        onClick={() => {
+          if (onToggle && window.innerWidth < 1024) {
+            onToggle()
+          }
+        }}
       >
-        {depth === 0 && item.icon}
+        {item.icon}
         <span>{item.title}</span>
       </Link>
     )
@@ -157,7 +105,7 @@ export default function HostSidebar({ isOpen = true, onToggle }: HostSidebarProp
       
       {/* Sidebar */}
       <div className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-green-800 text-white flex flex-col transform transition-transform duration-300 ease-in-out
+        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-800 text-white flex flex-col transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Mobile close button */}
@@ -167,39 +115,40 @@ export default function HostSidebar({ isOpen = true, onToggle }: HostSidebarProp
         >
           <X className="w-5 h-5" />
         </button>
-      {/* Logo */}
-      <div className="p-4 border-b border-green-700">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">H</span>
-          </div>
-          <div className="font-bold text-lg">Stay One Day Host</div>
-        </div>
-      </div>
-
-      {/* User Info */}
-      <div className="p-4 border-b border-green-700">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">호</span>
-          </div>
-          <div>
-            <div className="text-sm font-medium">호스트님</div>
-            <div className="text-xs text-white/60">최근로그인: {new Date().toLocaleDateString()}</div>
+        
+        {/* Logo */}
+        <div className="p-4 border-b border-slate-700">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+              <Home className="w-4 h-4 text-white" />
+            </div>
+            <div className="font-bold text-lg">Stay One Day</div>
           </div>
         </div>
-      </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4 overflow-y-auto">
-        {menuItems.map(item => renderMenuItem(item))}
-      </nav>
-
-      {/* Copyright */}
-      <div className="p-4 border-t border-green-700">
-        <div className="text-xs text-white/60">
-          Copyright © STAY ONE DAY. All Rights Reserved.
+        {/* Host Info */}
+        <div className="p-4 border-b border-slate-700">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-medium">호</span>
+            </div>
+            <div>
+              <div className="text-sm font-medium">{hostData?.business_name || '호스트'}</div>
+              <div className="text-xs text-white/60">{hostData?.name || '사용자'}</div>
+            </div>
+          </div>
         </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-4 overflow-y-auto">
+          {menuItems.map(item => renderMenuItem(item))}
+        </nav>
+
+        {/* Copyright */}
+        <div className="p-4 border-t border-slate-700">
+          <div className="text-xs text-white/60">
+            Copyright © STAY ONE DAY. All Rights Reserved.
+          </div>
         </div>
       </div>
     </>

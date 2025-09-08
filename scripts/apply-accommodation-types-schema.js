@@ -2,7 +2,7 @@ const { createClient } = require('@supabase/supabase-js')
 const fs = require('fs')
 
 const supabaseUrl = 'https://fcmauibvdqbocwhloqov.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjbWF1aWJ2ZHFib2N3aGxvcW92Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNTQzNDM3NCwiZXhwIjoyMDQxMDEwMzc0fQ.7wYKiDMrjSeCM8KZ2ZVdGKUh75JxAbU7ZBRD0b3_sZA'
+const supabaseKey = '[REMOVED_SUPABASE_SERVICE_KEY]'
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 

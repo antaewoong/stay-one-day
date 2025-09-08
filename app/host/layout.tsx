@@ -1,107 +1,84 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Inter } from 'next/font/google'
-import { AuthProvider, useAuth } from '@/lib/auth-context'
-
-const inter = Inter({ subsets: ['latin'] })
-
-function HostLayoutContent({ children }: { children: React.ReactNode }) {
-  const { isHost, loading, hostId } = useAuth()
-  const router = useRouter()
-  const pathname = usePathname()
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    // Skip auth check for login page
-    if (pathname === '/host/login') {
-      setIsLoading(false)
-      return
-    }
-
-    // Check authentication after loading completes
-    if (!loading) {
-      if (!isHost) {
-        router.replace('/host/login')
-        return
-      }
-      setIsLoading(false)
-    }
-  }, [isHost, loading, pathname, router])
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">인증을 확인하는 중...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Show login page
-  if (pathname === '/host/login') {
-    return <div className={inter.className}>{children}</div>
-  }
-
-  // Show protected content
-  if (isHost && hostId) {
-    return (
-      <div className={inter.className}>
-        {/* Host Navigation */}
-        <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex items-center">
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Stay One Day 호스트
-                </h1>
-                <span className="ml-3 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
-                  {hostId}
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">
-                  안전하게 로그인됨
-                </span>
-                <button
-                  onClick={() => {
-                    sessionStorage.clear()
-                    router.push('/host/login')
-                  }}
-                  className="text-sm text-red-600 hover:text-red-700"
-                >
-                  로그아웃
-                </button>
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        {/* Main Content */}
-        <main className="min-h-screen bg-gray-50">
-          {children}
-        </main>
-      </div>
-    )
-  }
-
-  // Fallback
-  return null
-}
+import HostSidebar from '@/components/host/HostSidebar'
+import HostHeader from '@/components/host/HostHeader'
+import { Menu } from 'lucide-react'
 
 export default function HostLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
+  const router = useRouter()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  
+  // Hook은 항상 같은 순서로 호출되어야 함
+  useEffect(() => {
+    // 로그인 페이지에서는 인증 체크를 하지 않음
+    if (pathname === '/host/login') {
+      return
+    }
+
+    const checkAuth = () => {
+      const hostUser = sessionStorage.getItem('hostUser')
+      if (!hostUser) {
+        setIsAuthenticated(false)
+        router.push('/host/login')
+      } else {
+        setIsAuthenticated(true)
+      }
+    }
+
+    checkAuth()
+  }, [router, pathname])
+
+  // 로그인 페이지에서는 레이아웃 없이 순수한 페이지만 렌더링
+  if (pathname === '/host/login') {
+    return <>{children}</>
+  }
+
+  // 인증 상태 확인 중
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      </div>
+    )
+  }
+
+  // 인증되지 않은 경우
+  if (!isAuthenticated) {
+    return null
+  }
+
   return (
-    <AuthProvider>
-      <HostLayoutContent>{children}</HostLayoutContent>
-    </AuthProvider>
+    <div className="host-layout flex h-screen bg-gray-50">
+      <HostSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <div className="flex-1 flex flex-col min-h-0 lg:ml-0">
+        {/* Mobile header with hamburger menu */}
+        <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200 flex-shrink-0">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 text-gray-600 hover:bg-gray-100 rounded-md"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+          <h1 className="text-lg font-semibold text-green-600">Stay One Day</h1>
+          <div className="w-10" /> {/* Spacer for alignment */}
+        </div>
+        
+        <div className="flex-shrink-0">
+          <HostHeader />
+        </div>
+        
+        <main className="flex-1 overflow-y-auto p-6 min-h-0">
+          {children}
+        </main>
+      </div>
+    </div>
   )
 }

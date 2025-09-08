@@ -66,3 +66,17 @@ DEVELOPMENT_WORKFLOW.md
 
 # MCP config (contains sensitive keys)
 .mcp.json
+
+# Scripts with hardcoded secrets (security risk)
+scripts/
+
+# Spotlight 인덱싱 최적화 (CPU 사용량 감소)
+.git/
+dist/
+*.sqlite
+*.db
+.turbo/
+.nuxt/
+.output/
+.nitro/
+coverage/

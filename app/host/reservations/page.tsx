@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { createClient } from '@/lib/supabase/client'
 import { Search, Calendar, Users, MapPin, Phone, Mail, CheckCircle, XCircle, Clock, CreditCard, AlertCircle } from 'lucide-react'
 
 interface Reservation {
@@ -44,18 +45,93 @@ export default function HostReservationsPage() {
   const loadReservations = async (hostId: string) => {
     try {
       setLoading(true)
+      const supabase = createClient()
       
-      // 호스트별 더미 예약 데이터
-      const hostReservationsData = getHostReservations(hostId)
+      // 먼저 호스트 정보를 가져와서 hosts 테이블의 id를 찾습니다
+      const { data: hostData, error: hostError } = await supabase
+        .from('hosts')
+        .select('id')
+        .eq('host_id', hostId)
+        .single()
+
+      if (hostError || !hostData) {
+        console.error('호스트 정보를 찾을 수 없습니다:', hostError)
+        setReservations([])
+        return
+      }
+
+      // 호스트의 숙소 목록을 가져옵니다
+      const { data: accommodations, error: accommodationsError } = await supabase
+        .from('accommodations')
+        .select('id, name')
+        .eq('host_id', hostData.id)
+
+      if (accommodationsError || !accommodations) {
+        console.error('숙소 정보를 찾을 수 없습니다:', accommodationsError)
+        setReservations([])
+        return
+      }
+
+      const accommodationIds = accommodations.map(acc => acc.id)
       
-      let filteredReservations = hostReservationsData
+      if (accommodationIds.length === 0) {
+        setReservations([])
+        return
+      }
+
+      // 예약 데이터를 가져옵니다
+      let query = supabase
+        .from('reservations')
+        .select(`
+          id,
+          guest_name,
+          guest_phone,
+          guest_email,
+          checkin_date,
+          checkout_date,
+          guest_count,
+          total_amount,
+          status,
+          payment_status,
+          created_at,
+          special_requests,
+          accommodations!inner(name)
+        `)
+        .in('accommodation_id', accommodationIds)
+        .order('created_at', { ascending: false })
 
       // 상태 필터 적용
       if (statusFilter !== 'all') {
-        filteredReservations = filteredReservations.filter(r => r.status === statusFilter)
+        query = query.eq('status', statusFilter)
       }
 
+      const { data: reservationsData, error: reservationsError } = await query
+
+      if (reservationsError) {
+        console.error('예약 데이터 로드 실패:', reservationsError)
+        setReservations([])
+        return
+      }
+
+      // 데이터를 컴포넌트가 기대하는 형식으로 변환
+      const formattedReservations = (reservationsData || []).map(reservation => ({
+        id: reservation.id,
+        guest_name: reservation.guest_name,
+        guest_phone: reservation.guest_phone || '정보없음',
+        guest_email: reservation.guest_email || '정보없음',
+        accommodation_name: reservation.accommodations?.name || '숙소명 없음',
+        check_in: reservation.checkin_date,
+        check_out: reservation.checkout_date,
+        guests: reservation.guest_count,
+        total_amount: reservation.total_amount,
+        status: reservation.status,
+        payment_status: reservation.payment_status || 'pending',
+        created_at: reservation.created_at,
+        special_requests: reservation.special_requests
+      }))
+
       // 검색 필터 적용
+      let filteredReservations = formattedReservations
       if (searchQuery) {
         filteredReservations = filteredReservations.filter(r => 
           r.guest_name.includes(searchQuery) || 
@@ -67,110 +143,12 @@ export default function HostReservationsPage() {
       setReservations(filteredReservations)
     } catch (error) {
       console.error('예약 목록 로드 실패:', error)
+      setReservations([])
     } finally {
       setLoading(false)
     }
   }
 
-  const getHostReservations = (hostId: string): Reservation[] => {
-    const reservationDataMap: Record<string, Reservation[]> = {
-      'host-1': [
-        {
-          id: '1',
-          guest_name: '김민수',
-          guest_phone: '010-1234-5678',
-          guest_email: 'kim@example.com',
-          accommodation_name: '구공스테이 풀빌라',
-          check_in: '2024-02-15',
-          check_out: '2024-02-17',
-          guests: 4,
-          total_amount: 360000,
-          status: 'confirmed',
-          payment_status: 'paid',
-          created_at: '2024-02-10T10:00:00Z',
-          special_requests: '늦은 체크인 요청'
-        },
-        {
-          id: '2',
-          guest_name: '박지영',
-          guest_phone: '010-2345-6789',
-          guest_email: 'park@example.com',
-          accommodation_name: '구공스테이 독채',
-          check_in: '2024-02-20',
-          check_out: '2024-02-22',
-          guests: 2,
-          total_amount: 280000,
-          status: 'pending',
-          payment_status: 'pending',
-          created_at: '2024-02-18T14:30:00Z'
-        },
-        {
-          id: '3',
-          guest_name: '최서연',
-          guest_phone: '010-3456-7890',
-          guest_email: 'choi@example.com',
-          accommodation_name: '구공스테이 풀빌라',
-          check_in: '2024-01-25',
-          check_out: '2024-01-27',
-          guests: 6,
-          total_amount: 420000,
-          status: 'completed',
-          payment_status: 'paid',
-          created_at: '2024-01-20T09:15:00Z',
-          special_requests: '바베큐 준비 요청'
-        }
-      ],
-      'host-2': [
-        {
-          id: '4',
-          guest_name: '이준호',
-          guest_phone: '010-4567-8901',
-          guest_email: 'lee@example.com',
-          accommodation_name: '스테이도고 펜션',
-          check_in: '2024-02-18',
-          check_out: '2024-02-19',
-          guests: 2,
-          total_amount: 150000,
-          status: 'completed',
-          payment_status: 'paid',
-          created_at: '2024-02-15T16:20:00Z'
-        },
-        {
-          id: '5',
-          guest_name: '정미영',
-          guest_phone: '010-5678-9012',
-          guest_email: 'jung@example.com',
-          accommodation_name: '스테이도고 펜션',
-          check_in: '2024-02-25',
-          check_out: '2024-02-26',
-          guests: 3,
-          total_amount: 180000,
-          status: 'confirmed',
-          payment_status: 'paid',
-          created_at: '2024-02-22T11:45:00Z'
-        }
-      ],
-      'host-3': [
-        {
-          id: '6',
-          guest_name: '강동욱',
-          guest_phone: '010-6789-0123',
-          guest_email: 'kang@example.com',
-          accommodation_name: '마담아네뜨 글램핑',
-          check_in: '2024-02-28',
-          check_out: '2024-03-01',
-          guests: 2,
-          total_amount: 200000,
-          status: 'pending',
-          payment_status: 'pending',
-          created_at: '2024-02-25T13:30:00Z',
-          special_requests: '애견 동반'
-        }
-      ]
-    }
-
-    return reservationDataMap[hostId] || []
-  }
 
   useEffect(() => {
     if (hostData) {
@@ -184,7 +162,19 @@ export default function HostReservationsPage() {
 
   const handleStatusUpdate = async (reservationId: string, newStatus: string) => {
     try {
-      // 실제 환경에서는 Supabase 업데이트
+      const supabase = createClient()
+      
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: newStatus })
+        .eq('id', reservationId)
+
+      if (error) {
+        console.error('상태 변경 실패:', error)
+        alert('상태 변경에 실패했습니다.')
+        return
+      }
+
       setReservations(prev => 
         prev.map(r => r.id === reservationId ? { ...r, status: newStatus as any } : r)
       )
@@ -286,7 +276,7 @@ export default function HostReservationsPage() {
               <SelectTrigger className="w-full md:w-[150px] border-gray-300 bg-white">
                 <SelectValue placeholder="예약 상태" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 상태</SelectItem>
                 <SelectItem value="confirmed">확정</SelectItem>
                 <SelectItem value="pending">대기</SelectItem>

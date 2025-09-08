@@ -199,7 +199,7 @@ export default function AddAccommodationPage() {
                   <SelectTrigger className="border-gray-200">
                     <SelectValue placeholder="숙소 유형 선택" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
                     <SelectItem value="풀빌라">풀빌라</SelectItem>
                     <SelectItem value="독채">독채</SelectItem>
                     <SelectItem value="펜션">펜션</SelectItem>

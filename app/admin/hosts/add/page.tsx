@@ -19,6 +19,7 @@ interface HostForm {
   business_number: string
   address: string
   status: string
+  host_id: string
   password: string
   confirmPassword: string
 }
@@ -36,6 +37,7 @@ export default function AddHostPage() {
     business_number: '',
     address: '',
     status: 'pending',
+    host_id: '',
     password: '',
     confirmPassword: ''
   })
@@ -44,8 +46,13 @@ export default function AddHostPage() {
     e.preventDefault()
     
     // 간단한 검증
-    if (!form.name || !form.email || !form.phone || !form.password) {
+    if (!form.name || !form.email || !form.phone || !form.host_id || !form.password) {
       alert('필수 정보를 모두 입력해주세요.')
+      return
+    }
+
+    if (form.password !== form.confirmPassword) {
+      alert('비밀번호가 일치하지 않습니다.')
       return
     }
 
@@ -59,6 +66,7 @@ export default function AddHostPage() {
         representative_name: form.name,
         phone: form.phone,
         email: form.email,
+        host_id: form.host_id,
         password: form.password,
         address: form.address || '',
         status: form.status || 'pending',
@@ -87,8 +95,19 @@ export default function AddHostPage() {
     }
   }
 
+  // 한글 자동 변환/제거
+  const removeKoreanChars = (value: string) => {
+    return value.replace(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/g, '')
+  }
+
   const handleInputChange = (field: keyof HostForm, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }))
+    // 호스트 ID, 이메일, 패스워드는 한글 자동 제거
+    if (field === 'host_id' || field === 'email' || field === 'password' || field === 'confirmPassword') {
+      const cleanValue = removeKoreanChars(value)
+      setForm(prev => ({ ...prev, [field]: cleanValue }))
+    } else {
+      setForm(prev => ({ ...prev, [field]: value }))
+    }
   }
 
   const formatPhoneNumber = (value: string) => {
@@ -193,6 +212,19 @@ export default function AddHostPage() {
               </div>
 
               <div>
+                <Label htmlFor="host_id">호스트 ID *</Label>
+                <Input
+                  id="host_id"
+                  value={form.host_id}
+                  onChange={(e) => handleInputChange('host_id', e.target.value)}
+                  placeholder="gugong90stay"
+                  className="placeholder:text-gray-400"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">로그인 시 사용할 고유 ID (한글 자동 제거됨)</p>
+              </div>
+
+              <div>
                 <Label htmlFor="password">비밀번호 *</Label>
                 <Input
                   id="password"
@@ -203,7 +235,23 @@ export default function AddHostPage() {
                   className="placeholder:text-gray-400"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">호스트가 이메일로 로그인할 수 있습니다</p>
+                <p className="text-xs text-gray-500 mt-1">한글은 자동으로 제거됩니다</p>
+              </div>
+
+              <div>
+                <Label htmlFor="confirmPassword">비밀번호 확인 *</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={form.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  placeholder="비밀번호 재입력"
+                  className="placeholder:text-gray-400"
+                  required
+                />
+                {form.password && form.confirmPassword && form.password !== form.confirmPassword && (
+                  <p className="text-xs text-red-500 mt-1">비밀번호가 일치하지 않습니다</p>
+                )}
               </div>
 
               <div>
@@ -271,17 +319,22 @@ export default function AddHostPage() {
         </div>
 
         {/* Submit Buttons */}
-        <div className="flex justify-end space-x-4 mt-6">
+        <div className="flex justify-end gap-3 mt-6">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.back()}
             disabled={loading}
+            className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
           >
             취소
           </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? '등록 중...' : '호스트 등록'}
+          <Button 
+            type="submit" 
+            disabled={loading}
+            className="bg-green-600 hover:bg-green-700 text-white px-8"
+          >
+            {loading ? '등록 중...' : '✓ 호스트 등록'}
           </Button>
         </div>
       </form>

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import Header from '@/components/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -96,19 +95,25 @@ export default function HostDashboard() {
 
   const loadHostData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      // 세션에서 호스트 정보 가져오기 (다른 호스트 페이지와 일관성 유지)
+      const userData = sessionStorage.getItem('hostUser')
+      if (!userData) {
+        window.location.href = '/host/login'
+        return
+      }
 
+      const parsedData = JSON.parse(userData)
+      
       // 호스트 정보 조회
       const { data: hostInfo } = await supabase
         .from('hosts')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('host_id', parsedData.host_id)
         .single()
 
       if (!hostInfo) {
-        // 호스트 등록이 안된 경우 등록 페이지로 리다이렉트
-        window.location.href = '/host/register'
+        console.error('호스트 정보를 찾을 수 없습니다.')
+        window.location.href = '/host/login'
         return
       }
 
@@ -205,10 +210,7 @@ export default function HostDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <div className="container mx-auto px-4 py-8">
+    <div className="space-y-6">
         {/* 헤더 섹션 */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -478,7 +480,6 @@ export default function HostDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
     </div>
   )
 }

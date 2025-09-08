@@ -47,10 +47,24 @@ export default function HostAccommodationsPage() {
     try {
       setLoading(true)
       
+      // 먼저 호스트 정보를 가져와서 hosts 테이블의 id를 찾습니다
+      const { data: hostData, error: hostError } = await supabase
+        .from('hosts')
+        .select('id')
+        .eq('host_id', hostId)
+        .single()
+
+      if (hostError || !hostData) {
+        console.error('호스트 정보를 찾을 수 없습니다:', hostError)
+        setAccommodations([])
+        return
+      }
+
+      // 호스트의 숙소들을 가져옵니다
       let query = supabase
         .from('accommodations')
         .select('*')
-        .eq('host_id', hostId)
+        .eq('host_id', hostData.id)  // hosts 테이블의 UUID 사용
         .order('created_at', { ascending: false })
 
       // 필터 적용
@@ -69,6 +83,7 @@ export default function HostAccommodationsPage() {
       setAccommodations(data || [])
     } catch (error) {
       console.error('숙소 목록 로드 실패:', error)
+      setAccommodations([])
     } finally {
       setLoading(false)
     }
@@ -154,7 +169,7 @@ export default function HostAccommodationsPage() {
               <SelectTrigger className="w-full md:w-[150px] border-gray-200">
                 <SelectValue placeholder="승인 상태" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="all">전체 상태</SelectItem>
                 <SelectItem value="active">활성</SelectItem>
                 <SelectItem value="pending">승인대기</SelectItem>

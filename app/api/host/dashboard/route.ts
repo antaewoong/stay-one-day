@@ -1,0 +1,159 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const hostId = searchParams.get('hostId')
+
+    if (!hostId) {
+      return NextResponse.json({ error: 'Host ID required' }, { status: 400 })
+    }
+
+    // 호스트 정보 조회
+    const { data: host, error: hostError } = await supabase
+      .from('hosts')
+      .select('*')
+      .eq('host_id', hostId)
+      .single()
+
+    if (hostError || !host) {
+      return NextResponse.json({ error: 'Host not found' }, { status: 404 })
+    }
+
+    // 호스트의 숙소들 조회
+    const { data: accommodations } = await supabase
+      .from('accommodations')
+      .select('*')
+      .eq('host_id', host.id)
+
+    const accommodationIds = accommodations?.map(a => a.id) || []
+
+    // 예약 데이터 조회 (최근 3개월)
+    const threeMonthsAgo = new Date()
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+
+    const { data: reservations } = await supabase
+      .from('reservations')
+      .select(`
+        *,
+        accommodations!inner(name)
+      `)
+      .in('accommodation_id', accommodationIds)
+      .gte('created_at', threeMonthsAgo.toISOString())
+      .order('created_at', { ascending: false })
+
+    // 리뷰 데이터 조회
+    const { data: reviews } = await supabase
+      .from('reviews')
+      .select(`
+        *,
+        accommodations!inner(name)
+      `)
+      .in('accommodation_id', accommodationIds)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(10)
+
+    // 통계 계산
+    const now = new Date()
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const thisYear = new Date(now.getFullYear(), 0, 1)
+
+    const monthlyReservations = reservations?.filter(r => 
+      new Date(r.created_at) >= thisMonth
+    ) || []
+
+    const yearlyReservations = reservations?.filter(r => 
+      new Date(r.created_at) >= thisYear
+    ) || []
+
+    const totalEarnings = yearlyReservations.reduce((sum, r) => sum + r.total_amount, 0)
+    const monthlyEarnings = monthlyReservations.reduce((sum, r) => sum + r.total_amount, 0)
+    
+    const averageRating = reviews?.length > 0 
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+      : 0
+
+    const occupancyRate = accommodations?.length > 0 
+      ? Math.floor((monthlyReservations.length / accommodations.length) * 30) // 대략적 계산
+      : 0
+
+    // 오늘 체크인/체크아웃
+    const today = now.toISOString().split('T')[0]
+    const todayCheckins = reservations?.filter(r => r.checkin_date === today).length || 0
+    const todayCheckouts = reservations?.filter(r => r.checkout_date === today).length || 0
+    const pendingReservations = reservations?.filter(r => r.status === 'confirmed').length || 0
+
+    // 최근 예약 (상세 정보와 함께)
+    const recentBookings = reservations?.slice(0, 10).map(r => ({
+      id: r.id,
+      guestName: r.guest_name,
+      propertyName: r.accommodations?.name || '숙소명 없음',
+      checkIn: r.checkin_date,
+      checkOut: r.checkout_date,
+      amount: r.total_amount,
+      status: r.status
+    })) || []
+
+    // 최근 리뷰
+    const recentReviews = reviews?.slice(0, 5).map(r => ({
+      id: r.id,
+      guestName: r.user_id, // 실제로는 users 테이블과 조인 필요
+      propertyName: r.accommodations?.name || '숙소명 없음',
+      rating: r.rating,
+      comment: r.content,
+      date: r.created_at.split('T')[0]
+    })) || []
+
+    const dashboardData = {
+      host: {
+        id: host.id,
+        host_id: host.host_id,
+        name: host.representative_name,
+        business_name: host.business_name
+      },
+      stats: {
+        totalEarnings,
+        monthlyEarnings,
+        totalBookings: yearlyReservations.length,
+        monthlyBookings: monthlyReservations.length,
+        averageRating: Math.round(averageRating * 10) / 10,
+        occupancyRate: Math.min(occupancyRate, 100),
+        totalProperties: accommodations?.length || 0,
+        activeProperties: accommodations?.filter(a => a.status === 'active').length || 0
+      },
+      today: {
+        checkins: todayCheckins,
+        checkouts: todayCheckouts,
+        pendingBookings: pendingReservations
+      },
+      recentBookings,
+      recentReviews,
+      accommodations: accommodations?.map(a => ({
+        id: a.id,
+        name: a.name,
+        status: a.status === 'active' ? 'available' : 'blocked',
+        accommodation_type: a.accommodation_type || '숙소',
+        max_capacity: a.max_capacity || 0,
+        base_price: a.base_price || 0
+      })) || []
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: dashboardData
+    })
+
+  } catch (error) {
+    console.error('Dashboard API error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to load dashboard data' },
+      { status: 500 }
+    )
+  }
+}

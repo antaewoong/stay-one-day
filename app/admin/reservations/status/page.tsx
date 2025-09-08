@@ -385,7 +385,7 @@ export default function ReservationStatusPage() {
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="상태" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   {statusOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -500,7 +500,7 @@ export default function ReservationStatusPage() {
 
       {/* Status Change Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle>예약 상태 변경</DialogTitle>
           </DialogHeader>
@@ -578,7 +578,7 @@ export default function ReservationStatusPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="변경할 상태를 선택하세요" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white border border-gray-200 shadow-lg">
                         {statusChangeOptions.map(option => (
                           <SelectItem key={option.value} value={option.value}>
                             <div className="flex flex-col">

@@ -326,7 +326,7 @@ export default function AnalyticsPage() {
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border border-gray-200 shadow-lg">
               <SelectItem value="last_7_days">최근 7일</SelectItem>
               <SelectItem value="last_30_days">최근 30일</SelectItem>
               <SelectItem value="last_90_days">최근 90일</SelectItem>
