@@ -116,8 +116,8 @@ export default function HomePage() {
 
         // 2. 평점 데이터가 로드된 후 관리자 설정과 히어로 텍스트 로드
         const [accommodationResponse, heroTextsResponse] = await Promise.all([
-          fetch('/api/accommodations?limit=1000'),
-          fetch('/api/admin/hero-texts')
+          fetch('/api/accommodations?limit=1000').catch(() => ({ ok: false })),
+          fetch('/api/admin/hero-texts').catch(() => ({ ok: false }))
         ])
         
         const response = accommodationResponse

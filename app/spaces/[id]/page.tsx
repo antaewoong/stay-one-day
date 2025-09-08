@@ -1379,12 +1379,6 @@ export default function AccommodationDetailPage() {
                       {/* 헤더 */}
                       <div className="flex items-center justify-between p-4 border-b">
                         <h2 className="text-lg font-medium">일정 및 인원</h2>
-                        <button 
-                          onClick={() => setShowDateGuestPicker(false)}
-                          className="text-gray-400 hover:text-gray-600 p-1"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
                       </div>
 
                       {/* 탭 버튼 */}
