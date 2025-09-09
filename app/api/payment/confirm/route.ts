@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const TOSS_PAYMENTS_SECRET_KEY = process.env.TOSS_PAYMENTS_SECRET_KEY
-
-if (!TOSS_PAYMENTS_SECRET_KEY) {
-  throw new Error('TOSS_PAYMENTS_SECRET_KEY is not configured')
-}
-
 export async function POST(request: NextRequest) {
+  const TOSS_PAYMENTS_SECRET_KEY = process.env.TOSS_PAYMENTS_SECRET_KEY
+
+  if (!TOSS_PAYMENTS_SECRET_KEY) {
+    return NextResponse.json(
+      { error: 'TOSS_PAYMENTS_SECRET_KEY is not configured' },
+      { status: 500 }
+    )
+  }
   try {
     const { paymentKey, orderId, amount } = await request.json()
 

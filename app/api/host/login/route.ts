@@ -1,14 +1,22 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-// Service role client - RLS 우회 가능
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
 export async function POST(request: Request) {
   try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase environment variables:', { supabaseUrl: !!supabaseUrl, supabaseServiceKey: !!supabaseServiceKey })
+      return NextResponse.json(
+        { error: '서버 설정 오류가 발생했습니다.' },
+        { status: 500 }
+      )
+    }
+
+    // Service role client - RLS 우회 가능
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
     let hostId, password
     
     try {
