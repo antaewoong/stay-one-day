@@ -38,8 +38,6 @@ export async function POST(request: Request) {
       )
     }
 
-    console.log('Host login attempt:', { hostId, passwordLength: password.length })
-
     try {
       // 데이터베이스에서 호스트 계정 조회 (host_id 또는 email로)
       let { data: hostAccounts, error } = await supabase
