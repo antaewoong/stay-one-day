@@ -88,7 +88,12 @@ export default function HostHeader() {
   }
   
   const handleLogout = () => {
+    // 세션 스토리지 삭제
     sessionStorage.removeItem('hostUser')
+    
+    // 쿠키 삭제 (미들웨어 인증 쿠키)
+    document.cookie = 'host-auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    
     router.push('/host/login')
   }
   

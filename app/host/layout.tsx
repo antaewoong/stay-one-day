@@ -23,9 +23,21 @@ export default function HostLayout({
       return
     }
 
-    // 임시로 인증을 항상 true로 설정
-    console.log('Layout loaded for path:', pathname)
-    setIsAuthenticated(true)
+    const checkAuth = () => {
+      // 쿠키에서 host-auth 확인 (미들웨어와 동일한 방식)
+      const hostAuthCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('host-auth='))
+      
+      if (!hostAuthCookie || !hostAuthCookie.split('=')[1]?.startsWith('host-')) {
+        setIsAuthenticated(false)
+        router.push('/host/login')
+      } else {
+        setIsAuthenticated(true)
+      }
+    }
+
+    checkAuth()
   }, [router, pathname])
 
   // 로그인 페이지에서는 레이아웃 없이 순수한 페이지만 렌더링
