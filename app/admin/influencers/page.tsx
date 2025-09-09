@@ -162,6 +162,83 @@ export default function AdminInfluencersPage() {
     setFilteredInfluencers(filtered)
   }
 
+  // 인플루언서 등록 함수
+  const handleAddInfluencer = async () => {
+    try {
+      setAddLoading(true)
+
+      if (!newInfluencer.name.trim() || !newInfluencer.email.trim()) {
+        toast.error('이름과 이메일은 필수입니다')
+        return
+      }
+
+      const response = await fetch('/api/admin/influencers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newInfluencer)
+      })
+
+      if (!response.ok) {
+        throw new Error('인플루언서 등록 실패')
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        toast.success('인플루언서가 성공적으로 등록되었습니다')
+        setShowAddModal(false)
+        setNewInfluencer({
+          name: '',
+          email: '',
+          phone: '',
+          instagram_handle: '',
+          youtube_channel: '',
+          tiktok_handle: '',
+          follower_count: 0,
+          engagement_rate: 0,
+          content_category: [],
+          social_media_links: [],
+          collaboration_rate: 0,
+          preferred_collaboration_type: 'free',
+          bio: '',
+          location: ''
+        })
+        await loadInfluencers()
+      } else {
+        throw new Error(result.error || '등록 실패')
+      }
+    } catch (error) {
+      console.error('인플루언서 등록 오류:', error)
+      toast.error('등록에 실패했습니다')
+    } finally {
+      setAddLoading(false)
+    }
+  }
+
+  const addSocialMediaLink = () => {
+    setNewInfluencer(prev => ({
+      ...prev,
+      social_media_links: [...prev.social_media_links, { platform: '', url: '' }]
+    }))
+  }
+
+  const removeSocialMediaLink = (index: number) => {
+    setNewInfluencer(prev => ({
+      ...prev,
+      social_media_links: prev.social_media_links.filter((_, i) => i !== index)
+    }))
+  }
+
+  const handleSocialMediaLinkChange = (index: number, field: string, value: string) => {
+    setNewInfluencer(prev => ({
+      ...prev,
+      social_media_links: prev.social_media_links.map((link, i) => 
+        i === index ? { ...link, [field]: value } : link
+      )
+    }))
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -919,56 +996,6 @@ export default function AdminInfluencersPage() {
     </div>
   )
 
-  // 인플루언서 등록 함수
-  async function handleAddInfluencer() {
-    try {
-      setAddLoading(true)
-
-      if (!newInfluencer.name.trim() || !newInfluencer.email.trim()) {
-        toast.error('이름과 이메일은 필수입니다')
-        return
-      }
-
-      const response = await fetch('/api/admin/influencers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newInfluencer)
-      })
-
-      if (!response.ok) {
-        throw new Error('인플루언서 등록 실패')
-      }
-
-      const result = await response.json()
-      if (result.success) {
-        toast.success('인플루언서가 성공적으로 등록되었습니다')
-        setShowAddModal(false)
-        setNewInfluencer({
-          name: '',
-          email: '',
-          phone: '',
-          social_media_links: [{ platform: '', url: '' }],
-          follower_count: 0,
-          engagement_rate: 0,
-          content_category: [],
-          collaboration_rate: 0,
-          preferred_collaboration_type: 'free',
-          bio: '',
-          location: ''
-        })
-        loadInfluencers() // 목록 새로고침
-      } else {
-        throw new Error(result.message || '등록 실패')
-      }
-    } catch (error) {
-      console.error('인플루언서 등록 오류:', error)
-      toast.error(error instanceof Error ? error.message : '등록 중 오류가 발생했습니다')
-    } finally {
-      setAddLoading(false)
-    }
-  }
 
   function handleCategoryToggle(category: string) {
     setNewInfluencer(prev => ({
@@ -984,26 +1011,4 @@ export default function AdminInfluencersPage() {
     setShowAIModal(true)
   }
 
-  function handleSocialMediaLinkChange(index: number, field: 'platform' | 'url', value: string) {
-    setNewInfluencer(prev => ({
-      ...prev,
-      social_media_links: prev.social_media_links.map((link, i) => 
-        i === index ? { ...link, [field]: value } : link
-      )
-    }))
-  }
-
-  function addSocialMediaLink() {
-    setNewInfluencer(prev => ({
-      ...prev,
-      social_media_links: [...prev.social_media_links, { platform: '', url: '' }]
-    }))
-  }
-
-  function removeSocialMediaLink(index: number) {
-    setNewInfluencer(prev => ({
-      ...prev,
-      social_media_links: prev.social_media_links.filter((_, i) => i !== index)
-    }))
-  }
 }

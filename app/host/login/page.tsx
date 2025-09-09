@@ -26,33 +26,37 @@ export default function SecureHostLoginPage() {
     setError('')
     setLoading(true)
 
-    if (!loginForm.hostId || !loginForm.password) {
-      setError('호스트 ID와 비밀번호를 모두 입력해주세요.')
-      setLoading(false)
-      return
-    }
-
     try {
-      // 호스트 인증
-      const { data: host, error } = await supabase
-        .from('hosts')
-        .select('*')
-        .eq('host_id', loginForm.hostId)
-        .eq('password_hash', loginForm.password)
-        .single()
-
-      if (error || !host) {
-        setError('로그인에 실패했습니다. 호스트 ID와 비밀번호를 확인해주세요.')
-        setLoading(false)
+      if (!loginForm.hostId || !loginForm.password) {
+        setError('호스트 ID와 비밀번호를 모두 입력해주세요.')
         return
       }
 
-      // 세션 저장
-      sessionStorage.setItem('hostUser', JSON.stringify(host))
-      router.push('/host')
+      // API 호출을 통한 호스트 인증
+      const response = await fetch('/api/host/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          hostId: loginForm.hostId,
+          password: loginForm.password
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success && result.host) {
+        // 세션 저장
+        sessionStorage.setItem('hostUser', JSON.stringify(result.host))
+        router.push('/host')
+      } else {
+        setError(result.error || '로그인에 실패했습니다. 호스트 ID와 비밀번호를 확인해주세요.')
+      }
     } catch (error) {
-      setError('로그인에 실패했습니다. 호스트 ID와 비밀번호를 확인해주세요.')
       console.error('Host login error:', error)
+      setError('로그인 처리 중 오류가 발생했습니다.')
+    } finally {
       setLoading(false)
     }
   }
