@@ -29,31 +29,47 @@ import {
   Mail,
   Phone,
   MapPin,
-  Star
+  Star,
+  X
 } from 'lucide-react'
 import Link from 'next/link'
 import OptimizedImage from '@/components/optimized-image'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'react-hot-toast'
+
+interface SocialMediaLink {
+  platform: string
+  url: string
+}
 
 interface Influencer {
   id: string
   name: string
   email: string
   phone?: string
-  instagram_handle?: string
-  youtube_channel?: string
-  tiktok_handle?: string
-  blog_url?: string
+  social_media_links: SocialMediaLink[]
   follower_count: number
   engagement_rate: number
   average_views: number
   content_category: string[]
   collaboration_rate: number
-  preferred_collaboration_type: 'paid' | 'barter' | 'both'
+  preferred_collaboration_type: 'free' | 'paid'
   bio: string
   profile_image_url?: string
   location: string
   status: 'active' | 'inactive' | 'pending' | 'suspended'
   created_at: string
+  ai_evaluation?: any
+  ai_evaluation_date?: string
 }
 
 export default function AdminInfluencersPage() {
@@ -67,6 +83,25 @@ export default function AdminInfluencersPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const itemsPerPage = 20
+  
+  // 인플루언서 등록 모달 상태
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [addLoading, setAddLoading] = useState(false)
+  const [showAIModal, setShowAIModal] = useState(false)
+  const [selectedInfluencer, setSelectedInfluencer] = useState<Influencer | null>(null)
+  const [newInfluencer, setNewInfluencer] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    social_media_links: [{ platform: '', url: '' }],
+    follower_count: 0,
+    engagement_rate: 0,
+    content_category: [] as string[],
+    collaboration_rate: 0,
+    preferred_collaboration_type: 'free',
+    bio: '',
+    location: ''
+  })
 
   useEffect(() => {
     checkAdminAuth()
@@ -160,13 +195,30 @@ export default function AdminInfluencersPage() {
   const getCollaborationTypeText = (type: string) => {
     switch (type) {
       case 'paid':
-        return '유료협업'
-      case 'barter':
-        return '제휴협업'
-      case 'both':
-        return '전체'
+        return '유상협업'
+      case 'free':
+        return '무료협업'
       default:
-        return '전체'
+        return '무료협업'
+    }
+  }
+
+  const getAIGradeColor = (grade: string) => {
+    switch (grade) {
+      case 'SS':
+        return 'bg-purple-100 text-purple-800'
+      case 'S':
+        return 'bg-red-100 text-red-800'
+      case 'A':
+        return 'bg-orange-100 text-orange-800'
+      case 'B':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'C':
+        return 'bg-blue-100 text-blue-800'
+      case 'D':
+        return 'bg-gray-100 text-gray-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -194,7 +246,10 @@ export default function AdminInfluencersPage() {
               커뮤니티 게시판
             </Link>
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => setShowAddModal(true)}
+          >
             <Plus className="w-4 h-4 mr-2" />
             인플루언서 등록
           </Button>
@@ -291,11 +346,11 @@ export default function AdminInfluencersPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">전체 카테고리</SelectItem>
-                <SelectItem value="여행">여행</SelectItem>
-                <SelectItem value="캠핑">캠핑</SelectItem>
-                <SelectItem value="펜션">펜션</SelectItem>
-                <SelectItem value="힐링">힐링</SelectItem>
-                <SelectItem value="라이프스타일">라이프스타일</SelectItem>
+                <SelectItem value="가족여행">가족여행</SelectItem>
+                <SelectItem value="커플여행">커플여행</SelectItem>
+                <SelectItem value="동성친구">동성친구</SelectItem>
+                <SelectItem value="나홀로여행">나홀로여행</SelectItem>
+                <SelectItem value="대가족모임">대가족모임</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -362,24 +417,30 @@ export default function AdminInfluencersPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 mt-2">
-                          {influencer.instagram_handle && (
-                            <Badge variant="outline" className="text-xs">
-                              <Instagram className="w-3 h-3 mr-1" />
-                              {influencer.follower_count.toLocaleString()}
-                            </Badge>
-                          )}
-                          {influencer.youtube_channel && (
-                            <Badge variant="outline" className="text-xs">
-                              <Youtube className="w-3 h-3 mr-1" />
-                              {influencer.average_views.toLocaleString()}
-                            </Badge>
-                          )}
+                          {influencer.social_media_links?.map((link, index) => {
+                            if (!link.platform || !link.url) return null
+                            const Icon = link.platform === 'instagram' ? Instagram : 
+                                        link.platform === 'youtube' ? Youtube : MessageCircle
+                            return (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                <Icon className="w-3 h-3 mr-1" />
+                                {link.platform === 'instagram' ? influencer.follower_count.toLocaleString() : 
+                                 link.platform === 'youtube' ? influencer.average_views.toLocaleString() : 
+                                 link.platform}
+                              </Badge>
+                            )
+                          })}
                           <Badge variant="outline" className="text-xs">
                             {getCollaborationTypeText(influencer.preferred_collaboration_type)}
                           </Badge>
                           <Badge className={`text-xs ${getStatusColor(influencer.status)}`}>
                             {getStatusText(influencer.status)}
                           </Badge>
+                          {influencer.ai_evaluation?.grade && (
+                            <Badge className={`text-xs ${getAIGradeColor(influencer.ai_evaluation.grade)}`}>
+                              AI: {influencer.ai_evaluation.grade}급
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -389,9 +450,19 @@ export default function AdminInfluencersPage() {
                           {influencer.collaboration_rate.toLocaleString()}원
                         </p>
                         <p className="text-gray-500">협업비용</p>
+                        {influencer.ai_evaluation && (
+                          <p className="text-xs text-blue-600 mt-1">
+                            AI 점수: {influencer.ai_evaluation.overall_score}/100
+                          </p>
+                        )}
                       </div>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="w-4 h-4" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => influencer.ai_evaluation && showAIEvaluation(influencer)}
+                        disabled={!influencer.ai_evaluation}
+                      >
+                        {influencer.ai_evaluation ? <Eye className="w-4 h-4" /> : <MoreVertical className="w-4 h-4" />}
                       </Button>
                     </div>
                   </div>
@@ -434,6 +505,505 @@ export default function AdminInfluencersPage() {
           </Button>
         </div>
       )}
+
+      {/* 인플루언서 등록 모달 */}
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent className="max-w-2xl bg-white border shadow-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-gray-900">인플루언서 등록</DialogTitle>
+            <DialogDescription className="text-gray-600">
+              새로운 인플루언서를 등록합니다.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4 max-h-96 overflow-y-auto">
+            {/* 기본 정보 */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name" className="text-sm font-medium">이름 *</Label>
+                <Input
+                  id="name"
+                  value={newInfluencer.name}
+                  onChange={(e) => setNewInfluencer(prev => ({...prev, name: e.target.value}))}
+                  placeholder="이름을 입력하세요"
+                  className="bg-white border"
+                />
+              </div>
+              <div>
+                <Label htmlFor="email" className="text-sm font-medium">이메일 *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newInfluencer.email}
+                  onChange={(e) => setNewInfluencer(prev => ({...prev, email: e.target.value}))}
+                  placeholder="이메일을 입력하세요"
+                  className="bg-white border"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone" className="text-sm font-medium">전화번호</Label>
+                <Input
+                  id="phone"
+                  value={newInfluencer.phone}
+                  onChange={(e) => setNewInfluencer(prev => ({...prev, phone: e.target.value}))}
+                  placeholder="010-0000-0000"
+                  className="bg-white border"
+                />
+              </div>
+              <div>
+                <Label htmlFor="location" className="text-sm font-medium">지역</Label>
+                <Input
+                  id="location"
+                  value={newInfluencer.location}
+                  onChange={(e) => setNewInfluencer(prev => ({...prev, location: e.target.value}))}
+                  placeholder="활동 지역"
+                  className="bg-white border"
+                />
+              </div>
+            </div>
+
+            {/* 소셜 미디어 링크 */}
+            <div>
+              <Label className="text-sm font-medium mb-3 block">소셜 미디어 & 채널</Label>
+              <div className="space-y-3">
+                {newInfluencer.social_media_links.map((link, index) => (
+                  <div key={index} className="flex gap-2">
+                    <select
+                      value={link.platform}
+                      onChange={(e) => handleSocialMediaLinkChange(index, 'platform', e.target.value)}
+                      className="px-3 py-2 border border-gray-200 rounded-md bg-white min-w-[140px]"
+                    >
+                      <option value="">플랫폼 선택</option>
+                      <option value="instagram">인스타그램</option>
+                      <option value="youtube">유튜브</option>
+                      <option value="tiktok">틱톡</option>
+                      <option value="blog">블로그</option>
+                      <option value="facebook">페이스북</option>
+                      <option value="twitter">트위터</option>
+                      <option value="linkedin">링크드인</option>
+                      <option value="twitch">트위치</option>
+                      <option value="other">기타</option>
+                    </select>
+                    <Input
+                      value={link.url}
+                      onChange={(e) => handleSocialMediaLinkChange(index, 'url', e.target.value)}
+                      placeholder="채널 URL 또는 핸들 (@username)"
+                      className="bg-white border flex-1"
+                    />
+                    {newInfluencer.social_media_links.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeSocialMediaLink(index)}
+                        className="px-3 bg-white border-red-200 hover:bg-red-50 text-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addSocialMediaLink}
+                  className="mt-2 bg-white border-blue-200 hover:bg-blue-50 text-blue-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  채널 추가
+                </Button>
+              </div>
+            </div>
+
+            {/* 통계 */}
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="followers" className="text-sm font-medium">팔로워 수</Label>
+                <Input
+                  id="followers"
+                  type="number"
+                  value={newInfluencer.follower_count}
+                  onChange={(e) => setNewInfluencer(prev => ({...prev, follower_count: parseInt(e.target.value) || 0}))}
+                  placeholder="0"
+                  className="bg-white border"
+                />
+              </div>
+              <div>
+                <Label htmlFor="engagement" className="text-sm font-medium">참여율 (%)</Label>
+                <Input
+                  id="engagement"
+                  type="number"
+                  step="0.1"
+                  value={newInfluencer.engagement_rate}
+                  onChange={(e) => setNewInfluencer(prev => ({...prev, engagement_rate: parseFloat(e.target.value) || 0}))}
+                  placeholder="0.0"
+                  className="bg-white border"
+                />
+              </div>
+              <div>
+                <Label htmlFor="rate" className="text-sm font-medium">협업 단가</Label>
+                <Input
+                  id="rate"
+                  type="number"
+                  value={newInfluencer.collaboration_rate}
+                  onChange={(e) => setNewInfluencer(prev => ({...prev, collaboration_rate: parseInt(e.target.value) || 0}))}
+                  placeholder="0"
+                  className="bg-white border"
+                />
+              </div>
+            </div>
+
+            {/* 협업 유형 */}
+            <div>
+              <Label className="text-sm font-medium">선호 협업 유형</Label>
+              <Select 
+                value={newInfluencer.preferred_collaboration_type} 
+                onValueChange={(value) => setNewInfluencer(prev => ({...prev, preferred_collaboration_type: value}))}
+              >
+                <SelectTrigger className="bg-white border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-white border shadow-lg">
+                  <SelectItem value="free">무료 협업</SelectItem>
+                  <SelectItem value="paid">유상 협업</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 콘텐츠 카테고리 */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">콘텐츠 카테고리</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  '가족여행', '커플여행', '동성친구', '나홀로여행', '대가족모임'
+                ].map((category) => (
+                  <Button
+                    key={category}
+                    type="button"
+                    variant={newInfluencer.content_category.includes(category) ? "default" : "outline"}
+                    size="sm"
+                    className={`text-xs ${newInfluencer.content_category.includes(category) ? 'bg-blue-600 text-white' : 'bg-white border'}`}
+                    onClick={() => handleCategoryToggle(category)}
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* 소개 */}
+            <div>
+              <Label htmlFor="bio" className="text-sm font-medium">소개</Label>
+              <Textarea
+                id="bio"
+                value={newInfluencer.bio}
+                onChange={(e) => setNewInfluencer(prev => ({...prev, bio: e.target.value}))}
+                placeholder="인플루언서 소개를 입력하세요"
+                className="bg-white border resize-none h-20"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowAddModal(false)}
+              className="bg-white border"
+            >
+              취소
+            </Button>
+            <Button 
+              onClick={handleAddInfluencer}
+              disabled={addLoading || !newInfluencer.name.trim() || !newInfluencer.email.trim()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {addLoading ? '등록 중...' : '등록하기'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI 평가 결과 모달 */}
+      <Dialog open={showAIModal} onOpenChange={setShowAIModal}>
+        <DialogContent className="max-w-4xl bg-white border shadow-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <Star className="w-6 h-6 text-purple-600" />
+              AI 인플루언서 평가 결과 - {selectedInfluencer?.name}
+            </DialogTitle>
+            <DialogDescription className="text-gray-600">
+              AI가 분석한 인플루언서의 상세 평가 결과입니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedInfluencer?.ai_evaluation && (
+            <div className="space-y-6 py-4">
+              {/* 종합 점수 및 등급 */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card className="text-center">
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {selectedInfluencer.ai_evaluation.overall_score}/100
+                    </div>
+                    <div className="text-sm text-gray-600">종합 점수</div>
+                  </CardContent>
+                </Card>
+                <Card className="text-center">
+                  <CardContent className="p-4">
+                    <div className={`text-2xl font-bold px-3 py-1 rounded-full inline-block ${getAIGradeColor(selectedInfluencer.ai_evaluation.grade)}`}>
+                      {selectedInfluencer.ai_evaluation.grade}급
+                    </div>
+                    <div className="text-sm text-gray-600 mt-2">AI 등급</div>
+                  </CardContent>
+                </Card>
+                <Card className="text-center">
+                  <CardContent className="p-4">
+                    <div className="text-lg font-semibold text-blue-600">
+                      {selectedInfluencer.ai_evaluation.final_recommendation}
+                    </div>
+                    <div className="text-sm text-gray-600">최종 추천</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* 상세 점수 */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">세부 평가 점수</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    {selectedInfluencer.ai_evaluation.detailed_scores && Object.entries(selectedInfluencer.ai_evaluation.detailed_scores).map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span className="font-medium">
+                          {key === 'blog_quality' && '블로그 품질'}
+                          {key === 'sns_engagement' && 'SNS 참여도'}
+                          {key === 'accommodation_marketing' && '숙박 마케팅 적합성'}
+                          {key === 'target_audience' && '타겟 오디언스'}
+                          {key === 'roi_prediction' && 'ROI 예측'}
+                        </span>
+                        <span className="font-bold text-blue-600">{value}/25</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 마케팅 인사이트 */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">마케팅 인사이트</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-2">주요 타겟층</h4>
+                      <p className="text-gray-600">{selectedInfluencer.ai_evaluation.marketing_insights?.primary_audience}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-2">최적 포스팅 시간</h4>
+                      <p className="text-gray-600">{selectedInfluencer.ai_evaluation.marketing_insights?.peak_engagement_time}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-2">전문 분야</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedInfluencer.ai_evaluation.marketing_insights?.content_specialty?.map((specialty: string, index: number) => (
+                          <Badge key={index} variant="secondary">{specialty}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-2">계절별 트렌드</h4>
+                      <p className="text-gray-600">{selectedInfluencer.ai_evaluation.marketing_insights?.seasonal_trends}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 협업 분석 */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">협업 분석</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-2">추천 협업 유형</h4>
+                      <p className="text-blue-600 font-medium">{selectedInfluencer.ai_evaluation.collaboration_analysis?.recommended_collaboration_type}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-2">예상 전환율</h4>
+                      <p className="text-green-600 font-medium">{selectedInfluencer.ai_evaluation.collaboration_analysis?.expected_conversion_rate}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <h4 className="font-semibold text-gray-900 mb-2">적합한 숙박 유형</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedInfluencer.ai_evaluation.collaboration_analysis?.optimal_accommodation_types?.map((type: string, index: number) => (
+                          <Badge key={index} className="bg-blue-100 text-blue-800">{type}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 강점과 약점 */}
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg text-green-600">강점</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {selectedInfluencer.ai_evaluation.strengths?.map((strength: string, index: number) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-gray-700">{strength}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg text-orange-600">개선점</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {selectedInfluencer.ai_evaluation.weaknesses?.map((weakness: string, index: number) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-gray-700">{weakness}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* 추천사항 */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg text-blue-600">추천사항</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {selectedInfluencer.ai_evaluation.recommendations?.map((recommendation: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <span className="text-gray-700">{recommendation}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* 평가 일시 */}
+              <div className="text-center text-sm text-gray-500">
+                평가 일시: {selectedInfluencer.ai_evaluation_date ? new Date(selectedInfluencer.ai_evaluation_date).toLocaleString('ko-KR') : '정보 없음'}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button onClick={() => setShowAIModal(false)} className="bg-gray-600 hover:bg-gray-700">
+              닫기
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
+
+  // 인플루언서 등록 함수
+  async function handleAddInfluencer() {
+    try {
+      setAddLoading(true)
+
+      if (!newInfluencer.name.trim() || !newInfluencer.email.trim()) {
+        toast.error('이름과 이메일은 필수입니다')
+        return
+      }
+
+      const response = await fetch('/api/admin/influencers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newInfluencer)
+      })
+
+      if (!response.ok) {
+        throw new Error('인플루언서 등록 실패')
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        toast.success('인플루언서가 성공적으로 등록되었습니다')
+        setShowAddModal(false)
+        setNewInfluencer({
+          name: '',
+          email: '',
+          phone: '',
+          social_media_links: [{ platform: '', url: '' }],
+          follower_count: 0,
+          engagement_rate: 0,
+          content_category: [],
+          collaboration_rate: 0,
+          preferred_collaboration_type: 'free',
+          bio: '',
+          location: ''
+        })
+        loadInfluencers() // 목록 새로고침
+      } else {
+        throw new Error(result.message || '등록 실패')
+      }
+    } catch (error) {
+      console.error('인플루언서 등록 오류:', error)
+      toast.error(error instanceof Error ? error.message : '등록 중 오류가 발생했습니다')
+    } finally {
+      setAddLoading(false)
+    }
+  }
+
+  function handleCategoryToggle(category: string) {
+    setNewInfluencer(prev => ({
+      ...prev,
+      content_category: prev.content_category.includes(category)
+        ? prev.content_category.filter(c => c !== category)
+        : [...prev.content_category, category]
+    }))
+  }
+
+  function showAIEvaluation(influencer: Influencer) {
+    setSelectedInfluencer(influencer)
+    setShowAIModal(true)
+  }
+
+  function handleSocialMediaLinkChange(index: number, field: 'platform' | 'url', value: string) {
+    setNewInfluencer(prev => ({
+      ...prev,
+      social_media_links: prev.social_media_links.map((link, i) => 
+        i === index ? { ...link, [field]: value } : link
+      )
+    }))
+  }
+
+  function addSocialMediaLink() {
+    setNewInfluencer(prev => ({
+      ...prev,
+      social_media_links: [...prev.social_media_links, { platform: '', url: '' }]
+    }))
+  }
+
+  function removeSocialMediaLink(index: number) {
+    setNewInfluencer(prev => ({
+      ...prev,
+      social_media_links: prev.social_media_links.filter((_, i) => i !== index)
+    }))
+  }
 }

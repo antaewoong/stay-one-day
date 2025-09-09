@@ -388,6 +388,12 @@ export default function HostPage() {
                   리뷰 관리
                 </Link>
               </Button>
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 hover:bg-purple-50">
+                <Link href="/host/influencer-reviews">
+                  <Users className="w-4 h-4 mr-2" />
+                  인플루언서 리뷰 관리
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 

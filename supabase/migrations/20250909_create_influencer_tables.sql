@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS influencer_collaboration_requests (
   influencer_id UUID REFERENCES influencers(id) ON DELETE CASCADE,
   accommodation_id UUID REFERENCES accommodations(id) ON DELETE CASCADE,
   host_id UUID REFERENCES hosts(id) ON DELETE CASCADE,
-  request_type VARCHAR(20) CHECK (request_type IN ('paid', 'barter', 'partnership')) NOT NULL,
+  request_type VARCHAR(20) CHECK (request_type IN ('free', 'paid')) NOT NULL,
   proposed_rate INTEGER,
   message TEXT,
   check_in_date DATE,

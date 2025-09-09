@@ -3,7 +3,7 @@ import { validateAdminAuth, supabaseService } from '@/lib/auth/admin-service'
 
 export async function GET() {
   try {
-    // Service Role로 RLS 우회하여 호스트 목록과 숙소 카운트 조회
+    // Service Role로 RLS 우회하여 호스트 목록 조회
     const { data: hostData, error: hostsError } = await supabaseService
       .from('hosts')
       .select(`
@@ -17,8 +17,7 @@ export async function GET() {
         status,
         host_id,
         password_hash,
-        created_at,
-        accommodations!host_id(count)
+        created_at
       `)
       .order('created_at', { ascending: false })
 
@@ -30,8 +29,23 @@ export async function GET() {
       )
     }
 
+    // 각 호스트의 숙소 수를 별도로 조회
+    const hostsWithAccommodationCount = await Promise.all(
+      (hostData || []).map(async (host) => {
+        const { count } = await supabaseService
+          .from('accommodations')
+          .select('id', { count: 'exact' })
+          .eq('host_id', host.id)
+
+        return {
+          ...host,
+          accommodation_count: count || 0
+        }
+      })
+    )
+
     // 호스트 데이터 형식 변환
-    const hosts = (hostData || []).map((host) => ({
+    const hosts = hostsWithAccommodationCount.map((host) => ({
       id: host.id,
       name: host.representative_name || '이름 없음',
       email: host.email || '이메일 없음',
@@ -43,7 +57,7 @@ export async function GET() {
       host_id: host.host_id || null,
       password: host.password_hash || null,
       created_at: host.created_at,
-      accommodation_count: host.accommodations?.[0]?.count || 0
+      accommodation_count: host.accommodation_count
     }))
 
     return NextResponse.json({ 

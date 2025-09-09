@@ -69,8 +69,8 @@ const menuItems: MenuItem[] = [
     icon: <Users className="w-4 h-4" />,
     children: [
       { title: '인플루언서 목록', href: '/admin/influencers', icon: <></> },
-      { title: '협업신청 링크', href: '/admin/influencers/tokens', icon: <></> },
-      { title: '커뮤니티 게시판', href: '/admin/influencers/board', icon: <></> }
+      { title: '협업 공지 관리', href: '/admin/influencers/notices', icon: <></> },
+      { title: '협업 신청 현황', href: '/admin/influencers/requests', icon: <></> }
     ]
   },
   {

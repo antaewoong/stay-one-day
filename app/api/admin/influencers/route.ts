@@ -94,10 +94,7 @@ export async function POST(request: NextRequest) {
       name,
       email,
       phone,
-      instagram_handle,
-      youtube_channel,
-      tiktok_handle,
-      blog_url,
+      social_media_links,
       follower_count,
       engagement_rate,
       content_category,
@@ -121,20 +118,14 @@ export async function POST(request: NextRequest) {
         name: name.trim(),
         email: email.trim(),
         phone: phone || null,
-        instagram_handle: instagram_handle || null,
-        youtube_channel: youtube_channel || null,
-        tiktok_handle: tiktok_handle || null,
-        blog_url: blog_url || null,
+        social_media_links: social_media_links || [],
         follower_count: follower_count || 0,
         engagement_rate: engagement_rate || 0,
         content_category: content_category || [],
         collaboration_rate: collaboration_rate || 0,
-        preferred_collaboration_type: preferred_collaboration_type || 'both',
+        preferred_collaboration_type: preferred_collaboration_type || 'free',
         bio: bio || null,
         location: location || null,
-        username: name.toLowerCase().replace(/[^a-z0-9]/g, ''),
-        password_hash: '$2b$10$dummy.hash.for.testing.purposes.only',
-        is_verified: true,
         status: 'active'
       })
       .select()
@@ -146,6 +137,34 @@ export async function POST(request: NextRequest) {
         { error: '인플루언서 추가에 실패했습니다' },
         { status: 500 }
       )
+    }
+
+    // AI 평가 실행 (비동기, 실패해도 인플루언서 생성은 성공으로 처리)
+    try {
+      const aiEvaluationResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/ai/influencer-evaluation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          influencerData: influencer
+        })
+      })
+
+      if (aiEvaluationResponse.ok) {
+        const aiResult = await aiEvaluationResponse.json()
+        
+        // AI 평가 결과를 인플루언서 레코드에 업데이트
+        await supabase
+          .from('influencers')
+          .update({
+            ai_evaluation: aiResult.analysis,
+            ai_evaluation_date: new Date().toISOString()
+          })
+          .eq('id', influencer.id)
+      }
+    } catch (aiError) {
+      console.error('AI 평가 오류 (인플루언서 생성은 성공):', aiError)
     }
 
     return NextResponse.json({
