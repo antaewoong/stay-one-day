@@ -56,8 +56,7 @@ export default function InfluencerApplyPage() {
   const [submitting, setSubmitting] = useState(false)
   const [currentPeriod, setCurrentPeriod] = useState<CollaborationPeriod | null>(null)
   const [accommodations, setAccommodations] = useState<Accommodation[]>([])
-  const [checkInDate, setCheckInDate] = useState<Date>()
-  const [checkOutDate, setCheckOutDate] = useState<Date>()
+  const [useDate, setUseDate] = useState<Date>()
   
   const [formData, setFormData] = useState({
     accommodation_id: '',
@@ -117,8 +116,8 @@ export default function InfluencerApplyPage() {
       return
     }
 
-    if (!checkInDate || !checkOutDate) {
-      toast.error('체크인/체크아웃 날짜를 선택해주세요.')
+    if (!useDate) {
+      toast.error('이용 날짜를 선택해주세요.')
       return
     }
     
@@ -131,7 +130,7 @@ export default function InfluencerApplyPage() {
     const collabStart = new Date(currentPeriod.collaboration_start_date)
     const collabEnd = new Date(currentPeriod.collaboration_end_date)
     
-    if (checkInDate < collabStart || checkOutDate > collabEnd) {
+    if (useDate < collabStart || useDate > collabEnd) {
       toast.error(`협업 기간(${format(collabStart, 'MM/dd')} ~ ${format(collabEnd, 'MM/dd')}) 내에서 날짜를 선택해주세요.`)
       return
     }
@@ -149,8 +148,7 @@ export default function InfluencerApplyPage() {
           accommodation_id: formData.accommodation_id,
           request_type: formData.request_type,
           message: formData.message,
-          check_in_date: format(checkInDate, 'yyyy-MM-dd'),
-          check_out_date: format(checkOutDate, 'yyyy-MM-dd'),
+          use_date: format(useDate, 'yyyy-MM-dd'),
           guest_count: formData.guest_count
         })
       })
@@ -292,7 +290,7 @@ export default function InfluencerApplyPage() {
                             </div>
                           </div>
                           <div className="text-xs text-gray-500">
-                            ₩{accommodation.price_per_night?.toLocaleString()}/박
+                            ₩{accommodation.price_per_night?.toLocaleString()}/당일이용
                           </div>
                         </div>
                       </SelectItem>
@@ -301,55 +299,32 @@ export default function InfluencerApplyPage() {
                 </Select>
               </div>
 
-              {/* 체크인/체크아웃 */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>체크인 날짜 *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {checkInDate ? format(checkInDate, 'PPP', { locale: ko }) : '날짜 선택'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={checkInDate}
-                        onSelect={setCheckInDate}
-                        disabled={(date) => 
-                          date < new Date(currentPeriod.collaboration_start_date) || 
-                          date > new Date(currentPeriod.collaboration_end_date)
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <div>
-                  <Label>체크아웃 날짜 *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {checkOutDate ? format(checkOutDate, 'PPP', { locale: ko }) : '날짜 선택'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={checkOutDate}
-                        onSelect={setCheckOutDate}
-                        disabled={(date) => 
-                          date < new Date(currentPeriod.collaboration_start_date) || 
-                          date > new Date(currentPeriod.collaboration_end_date) ||
-                          (checkInDate && date <= checkInDate)
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+              {/* 이용 날짜 */}
+              <div>
+                <Label>이용 날짜 *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {useDate ? format(useDate, 'PPP', { locale: ko }) : '날짜를 선택해주세요'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={useDate}
+                      onSelect={setUseDate}
+                      disabled={(date) => 
+                        date < new Date(currentPeriod.collaboration_start_date) || 
+                        date > new Date(currentPeriod.collaboration_end_date) ||
+                        date < new Date()
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <div className="text-xs text-gray-500 mt-1">
+                  당일 이용 서비스입니다. 원하는 이용 날짜를 선택해주세요.
                 </div>
               </div>
 
@@ -471,22 +446,24 @@ export default function InfluencerApplyPage() {
               </div>
 
               {/* 예상 비용 안내 */}
-              {formData.accommodation_id && (
+              {formData.accommodation_id && useDate && (
                 <div className="bg-gray-50 border rounded-lg p-4">
                   <h3 className="font-semibold text-gray-900 mb-3">💰 예상 비용</h3>
                   {(() => {
                     const selectedAccommodation = accommodations.find(acc => acc.id === formData.accommodation_id)
-                    if (!selectedAccommodation || !checkInDate || !checkOutDate) return null
+                    if (!selectedAccommodation) return null
                     
-                    const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
-                    const totalPrice = selectedAccommodation.price_per_night * nights
-                    const discountedPrice = Math.round(totalPrice * 0.3)
+                    const dayUsePrice = selectedAccommodation.price_per_night // 당일 이용 가격 (1일 가격과 동일)
+                    const discountedPrice = Math.round(dayUsePrice * 0.3)
                     
                     return (
                       <div className="space-y-2">
                         <div className="flex justify-between items-center text-sm">
-                          <span>{selectedAccommodation.name} × {nights}박</span>
-                          <span className="text-gray-600">₩{totalPrice.toLocaleString()}</span>
+                          <span>{selectedAccommodation.name} (당일 이용)</span>
+                          <span className="text-gray-600">₩{dayUsePrice.toLocaleString()}</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {format(useDate, 'PPP', { locale: ko })} 이용 예정
                         </div>
                         
                         {formData.request_type === 'free' ? (
@@ -498,14 +475,14 @@ export default function InfluencerApplyPage() {
                           <>
                             <div className="flex justify-between items-center text-sm text-red-600">
                               <span>할인 금액 (70% 할인)</span>
-                              <span>-₩{(totalPrice - discountedPrice).toLocaleString()}</span>
+                              <span>-₩{(dayUsePrice - discountedPrice).toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between items-center font-semibold text-purple-600 border-t pt-2">
                               <span>최종 금액 (30% 지급)</span>
                               <span className="text-xl">₩{discountedPrice.toLocaleString()}</span>
                             </div>
                             <div className="text-xs text-gray-500 text-center">
-                              일반 예약 대비 70% 절약!
+                              일반 당일 이용 대비 70% 절약!
                             </div>
                           </>
                         )}
