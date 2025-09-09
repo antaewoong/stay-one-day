@@ -147,11 +147,11 @@ export default function HostCollaborationRequestsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline" className="text-yellow-600">대기중</Badge>
+        return <Badge variant="outline" className="text-orange-600 border-orange-300 bg-orange-50">승인대기</Badge>
       case 'accepted':
-        return <Badge variant="default" className="bg-green-600">승인됨</Badge>
+        return <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">승인완료</Badge>
       case 'rejected':
-        return <Badge variant="destructive">거부됨</Badge>
+        return <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50">승인거절</Badge>
       default:
         return <Badge variant="secondary">{status}</Badge>
     }
@@ -196,8 +196,8 @@ export default function HostCollaborationRequestsPage() {
                   onClick={() => setStatusFilter(status)}
                 >
                   {status === 'all' ? '전체' : 
-                   status === 'pending' ? '대기중' :
-                   status === 'accepted' ? '승인됨' : '거부됨'}
+                   status === 'pending' ? '승인대기' :
+                   status === 'accepted' ? '승인완료' : '승인거절'}
                 </Button>
               ))}
             </div>
@@ -206,7 +206,10 @@ export default function HostCollaborationRequestsPage() {
         <CardContent>
           {requests.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              {statusFilter === 'all' ? '협업 요청이 없습니다.' : `${statusFilter} 상태의 협업 요청이 없습니다.`}
+              {statusFilter === 'all' ? '협업 요청이 없습니다.' : 
+               statusFilter === 'pending' ? '승인대기 중인 협업 요청이 없습니다.' :
+               statusFilter === 'accepted' ? '승인완료된 협업 요청이 없습니다.' : 
+               '승인거절된 협업 요청이 없습니다.'}
             </div>
           ) : (
             <div className="border rounded-lg overflow-hidden">
