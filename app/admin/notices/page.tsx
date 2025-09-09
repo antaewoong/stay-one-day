@@ -122,7 +122,7 @@ export default function NoticesPage() {
           <CardTitle className="flex items-center justify-between">
             <span>공지사항 관리</span>
             <Button 
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => window.location.href = '/admin/notices/create'}
             >
               <Plus className="mr-2 h-4 w-4" />

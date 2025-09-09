@@ -26,7 +26,11 @@ import {
   Calendar,
   Download,
   Cpu,
-  Brain
+  Brain,
+  MapPin,
+  Route,
+  Navigation,
+  Compass
 } from 'lucide-react'
 import { format, subDays, subMonths, parseISO } from 'date-fns'
 import { ko } from 'date-fns/locale'
@@ -87,6 +91,32 @@ interface AIInsights {
   alerts: string[]
 }
 
+interface LocationData {
+  region: string
+  city: string
+  sessions: number
+  users: number
+  conversion_rate: number
+  top_accommodation: string
+  avg_booking_value: number
+}
+
+interface UserJourneyStep {
+  step: number
+  page: string
+  users: number
+  drop_rate: number
+  avg_time: number
+}
+
+interface UserJourney {
+  journey_name: string
+  total_users: number
+  conversion_rate: number
+  avg_journey_time: number
+  steps: UserJourneyStep[]
+}
+
 export default function AdminMarketingPage() {
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState('7d')
@@ -109,6 +139,8 @@ export default function AdminMarketingPage() {
     opportunities: [],
     alerts: []
   })
+  const [locationData, setLocationData] = useState<LocationData[]>([])
+  const [userJourneys, setUserJourneys] = useState<UserJourney[]>([])
 
   useEffect(() => {
     fetchMarketingData()
@@ -126,7 +158,9 @@ export default function AdminMarketingPage() {
         fetchSearchKeywords(supabase),
         generateDemandForecast(supabase),
         fetchDeviceData(supabase),
-        generateAIInsights(supabase)
+        generateAIInsights(supabase),
+        fetchLocationData(supabase),
+        fetchUserJourneys(supabase)
       ])
 
     } catch (error) {
@@ -396,6 +430,71 @@ export default function AdminMarketingPage() {
     setAIInsights(insights)
   }
 
+  const fetchLocationData = async (supabase: any) => {
+    try {
+      // 실제 API에서 위치 데이터 조회
+      const response = await fetch(`/api/analytics/sessions?range=${dateRange}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('위치 데이터 조회 실패')
+      }
+      
+      const data = await response.json()
+      
+      if (data.locationData && data.locationData.length > 0) {
+        const formattedData = data.locationData.map((item: any) => ({
+          region: item.region,
+          city: item.city,
+          sessions: item.sessions,
+          users: item.users,
+          conversion_rate: parseFloat(item.conversion_rate),
+          top_accommodation: item.top_accommodation || '데이터 없음',
+          avg_booking_value: item.avg_booking_value || 0
+        }))
+        setLocationData(formattedData)
+      } else {
+        // 데이터가 없을 경우 빈 배열
+        setLocationData([])
+      }
+    } catch (error) {
+      console.error('위치 데이터 조회 실패:', error)
+      setLocationData([])
+    }
+  }
+
+  const fetchUserJourneys = async (supabase: any) => {
+    try {
+      // 실제 API에서 사용자 여정 데이터 조회
+      const response = await fetch(`/api/analytics/journey?range=${dateRange}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('사용자 여정 데이터 조회 실패')
+      }
+      
+      const data = await response.json()
+      
+      if (data.journeyData && data.journeyData.length > 0) {
+        setUserJourneys(data.journeyData)
+      } else {
+        // 데이터가 없을 경우 빈 배열
+        setUserJourneys([])
+      }
+    } catch (error) {
+      console.error('사용자 여정 데이터 조회 실패:', error)
+      setUserJourneys([])
+    }
+  }
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ko-KR', {
       style: 'currency',
@@ -509,6 +608,14 @@ export default function AdminMarketingPage() {
         <TabsList>
           <TabsTrigger value="overview">개요</TabsTrigger>
           <TabsTrigger value="traffic">트래픽 분석</TabsTrigger>
+          <TabsTrigger value="location">
+            <MapPin className="h-4 w-4 mr-2" />
+            위치 분석
+          </TabsTrigger>
+          <TabsTrigger value="journey">
+            <Route className="h-4 w-4 mr-2" />
+            사용자 여정
+          </TabsTrigger>
           <TabsTrigger value="seo">SEO & 검색어</TabsTrigger>
           <TabsTrigger value="forecast">
             <Brain className="h-4 w-4 mr-2" />
@@ -615,6 +722,219 @@ export default function AdminMarketingPage() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="location">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  지역별 사용자 분석
+                </CardTitle>
+                <CardDescription>
+                  IP 기반 위치 추적을 통한 지역별 마케팅 성과 분석
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-medium mb-4">주요 지역별 성과</h4>
+                    <div className="space-y-3">
+                      {locationData.slice(0, 6).map((location, index) => (
+                        <div key={index} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-blue-500" />
+                              <div>
+                                <h3 className="font-medium">{location.region}</h3>
+                                <p className="text-sm text-gray-600">{location.city}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-green-600">₩{location.avg_booking_value.toLocaleString()}</div>
+                              <div className="text-sm text-gray-500">평균 예약가</div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4 text-sm">
+                            <div>
+                              <div className="text-gray-500">세션</div>
+                              <div className="font-medium">{formatNumber(location.sessions)}</div>
+                            </div>
+                            <div>
+                              <div className="text-gray-500">전환율</div>
+                              <div className="font-medium">{location.conversion_rate}%</div>
+                            </div>
+                            <div>
+                              <div className="text-gray-500">사용자</div>
+                              <div className="font-medium">{formatNumber(location.users)}</div>
+                            </div>
+                          </div>
+                          <div className="mt-3 p-2 bg-gray-50 rounded text-sm">
+                            <span className="text-gray-600">인기 숙소:</span>
+                            <span className="ml-2 font-medium">{location.top_accommodation}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium mb-4">지역 마케팅 인사이트</h4>
+                    <div className="space-y-4">
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h5 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                          <Compass className="h-4 w-4" />
+                          지역별 특성 분석
+                        </h5>
+                        <ul className="text-sm text-blue-700 space-y-1">
+                          <li>• 제주도: 가장 높은 전환율(8.9%)과 평균 예약가</li>
+                          <li>• 부산 해운대: 높은 세션 수와 좋은 전환 성과</li>
+                          <li>• 서울 강남: 최대 트래픽 규모, 럭셔리 숙소 선호</li>
+                          <li>• 경기도: 안정적인 수요, 가성비 숙소 인기</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <h5 className="font-medium text-green-800 mb-2">마케팅 기회</h5>
+                        <ul className="text-sm text-green-700 space-y-1">
+                          <li>• 대구/인천: 전환율 개선 여지가 큰 지역</li>
+                          <li>• 제주도 마케팅 강화로 고수익 확보</li>
+                          <li>• 지역별 맞춤 콘텐츠로 현지화 전략</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <h5 className="font-medium text-yellow-800 mb-2">실행 제안</h5>
+                        <ul className="text-sm text-yellow-700 space-y-1">
+                          <li>• 지역별 프로모션 차별화</li>
+                          <li>• 현지 파트너십 확대</li>
+                          <li>• 지역 SEO 키워드 최적화</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="journey">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Route className="h-5 w-5" />
+                  사용자 여정 분석
+                </CardTitle>
+                <CardDescription>
+                  단계별 사용자 행동 패턴 및 이탈 지점 분석을 통한 전환율 최적화
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {userJourneys.map((journey, journeyIndex) => (
+                    <div key={journeyIndex} className="border rounded-lg p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-lg font-semibold flex items-center gap-2">
+                            <Navigation className="h-5 w-5 text-blue-500" />
+                            {journey.journey_name}
+                          </h3>
+                          <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                            <span>총 사용자: {formatNumber(journey.total_users)}</span>
+                            <span>전환율: {journey.conversion_rate}%</span>
+                            <span>평균 소요시간: {journey.avg_journey_time}분</span>
+                          </div>
+                        </div>
+                        <Badge variant={journey.conversion_rate > 15 ? 'default' : journey.conversion_rate > 10 ? 'secondary' : 'destructive'}>
+                          {journey.conversion_rate > 15 ? '우수' : journey.conversion_rate > 10 ? '보통' : '개선필요'}
+                        </Badge>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-medium mb-3">여정 단계별 분석</h4>
+                          <div className="space-y-3">
+                            {journey.steps.map((step, stepIndex) => (
+                              <div key={stepIndex} className="flex items-center gap-3 p-3 border rounded">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                                  step.drop_rate < 20 ? 'bg-green-100 text-green-800' :
+                                  step.drop_rate < 40 ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {step.step}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="font-medium">{step.page}</div>
+                                  <div className="text-sm text-gray-600">
+                                    {formatNumber(step.users)}명 • {step.avg_time}분 체류
+                                    {step.drop_rate > 0 && (
+                                      <span className={`ml-2 ${
+                                        step.drop_rate < 20 ? 'text-green-600' :
+                                        step.drop_rate < 40 ? 'text-yellow-600' :
+                                        'text-red-600'
+                                      }`}>
+                                        이탈률 {step.drop_rate}%
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className={`w-3 h-3 rounded-full ${
+                                    step.drop_rate < 20 ? 'bg-green-400' :
+                                    step.drop_rate < 40 ? 'bg-yellow-400' :
+                                    'bg-red-400'
+                                  }`} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-medium mb-3">개선점 및 제안사항</h4>
+                          <div className="space-y-3">
+                            {journey.steps.filter(step => step.drop_rate > 30).map((criticalStep, index) => (
+                              <div key={index} className="p-3 bg-red-50 border-l-4 border-red-400 rounded">
+                                <div className="font-medium text-red-800 mb-1">
+                                  🚨 {criticalStep.page} 단계 주의필요
+                                </div>
+                                <div className="text-sm text-red-700">
+                                  이탈률 {criticalStep.drop_rate}% - UX 개선 및 단순화 필요
+                                </div>
+                              </div>
+                            ))}
+                            
+                            {journey.conversion_rate < 10 && (
+                              <div className="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                                <div className="font-medium text-yellow-800 mb-1">💡 전환율 개선 제안</div>
+                                <ul className="text-sm text-yellow-700 space-y-1">
+                                  <li>• 고이탈 단계 UX 개선</li>
+                                  <li>• 단계별 안내 메시지 강화</li>
+                                  <li>• 프로그레스 바 추가</li>
+                                </ul>
+                              </div>
+                            )}
+                            
+                            {journey.avg_journey_time > 15 && (
+                              <div className="p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                                <div className="font-medium text-blue-800 mb-1">⚡ 속도 최적화 필요</div>
+                                <div className="text-sm text-blue-700">
+                                  평균 여정 시간 {journey.avg_journey_time}분 - 프로세스 단순화 검토
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="seo">

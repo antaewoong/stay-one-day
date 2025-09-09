@@ -70,7 +70,7 @@ const menuItems: MenuItem[] = [
     children: [
       { title: '인플루언서 목록', href: '/admin/influencers', icon: <></> },
       { title: '협업 공지 관리', href: '/admin/influencers/notices', icon: <></> },
-      { title: '협업 신청 현황', href: '/admin/influencers/requests', icon: <></> }
+      { title: '협업 신청 현황', href: '/admin/influencers/collaboration-requests', icon: <></> }
     ]
   },
   {
@@ -106,8 +106,8 @@ const menuItems: MenuItem[] = [
     title: '정산 관리',
     icon: <Calculator className="w-4 h-4" />,
     children: [
-      { title: '정산 리포트', href: '/admin/settlement/reports', icon: <></> },
-      { title: '결제 정보 통계', href: '/admin/settlement/statistics', icon: <></> }
+      { title: '정산 리포트', href: '/admin/settlement', icon: <></> },
+      { title: '결제 정보 통계', href: '/admin/payments', icon: <></> }
     ]
   },
   {

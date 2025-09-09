@@ -257,7 +257,7 @@ export default function InfluencerBoardPage() {
             <p className="text-gray-500">인플루언서들의 게시글 및 소통 현황</p>
           </div>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
           <Plus className="w-4 h-4 mr-2" />
           공지 작성
         </Button>

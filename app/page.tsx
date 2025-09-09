@@ -82,9 +82,12 @@ export default function HomePage() {
   const [currentEmotionalText, setCurrentEmotionalText] = useState(0)
 
 
-  // 평점 데이터와 관리자 설정 순차 로드
+  // 평점 데이터와 관리자 설정 순차 로드 (최적화: 한 번만 실행)
   useEffect(() => {
+    let isActive = true // cleanup을 위한 플래그
+    
     const loadAllData = async () => {
+      if (!isActive) return
       try {
         // 1. 평점 데이터 먼저 로드
         const { data: reviewsData, error: reviewError } = await supabase
@@ -115,7 +118,9 @@ export default function HomePage() {
           })
         }
         
-        setAccommodationRatings(ratingsMap)
+        if (isActive) {
+          setAccommodationRatings(ratingsMap)
+        }
 
         // 2. 평점 데이터가 로드된 후 관리자 설정과 히어로 텍스트 로드
         const [accommodationResponse, heroTextsResponse] = await Promise.all([
@@ -124,22 +129,18 @@ export default function HomePage() {
         ])
         
         const response = accommodationResponse
-        if (response.ok) {
+        if (response.ok && isActive) {
           const result = await response.json()
           const accommodations = result.data || []
           setAllAccommodations(accommodations)
 
-          // API를 통해 관리자 설정 로드 (캐시 비활성화)
+          // API를 통해 관리자 설정 로드 (단순화)
           const [sectionsResponse, slidesResponse] = await Promise.all([
-            fetch('/api/admin/sections', { 
-              cache: 'no-store',
-              headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-              }
-            }).then(res => res.json()),
+            fetch('/api/admin/sections').then(res => res.json()),
             supabase.from('hero_slides').select('*').eq('active', true).order('slide_order', { ascending: true })
           ])
+          
+          if (!isActive) return
 
           // 섹션 설정 처리
           if (sectionsResponse.data && sectionsResponse.data.length > 0) {
@@ -196,7 +197,7 @@ export default function HomePage() {
                   }))
               }
 
-              if (selectedAccommodations.length > 0) {
+              if (selectedAccommodations.length > 0 && isActive) {
                 switch (section.section_id) {
                   case 'recommended':
                     setFeaturedStays(selectedAccommodations);
@@ -219,7 +220,7 @@ export default function HomePage() {
                 }
               }
             })
-          } else {
+          } else if (isActive) {
             // 기본값: Stay Cheongju만 추천에 표시
             const defaultStay = accommodations.find((acc: any) => acc.name.includes('청주'))
             if (defaultStay) {
@@ -241,7 +242,7 @@ export default function HomePage() {
           }
 
           // 히어로 슬라이드 로드
-          if (slidesResponse.data && slidesResponse.data.length > 0) {
+          if (slidesResponse.data && slidesResponse.data.length > 0 && isActive) {
             const heroData = slidesResponse.data.map((slide: any) => ({
               id: slide.id,
               title: slide.title,
@@ -253,7 +254,7 @@ export default function HomePage() {
               stats: slide.stats
             }))
             setHeroSlides(heroData)
-          } else {
+          } else if (isActive) {
             // 기본 히어로 슬라이드 (Stay Cheongju 기반)
             const defaultStay = accommodations.find((acc: any) => acc.name.includes('청주'))
             if (defaultStay) {
@@ -276,7 +277,7 @@ export default function HomePage() {
           }
 
           // 히어로 텍스트 로드
-          if (heroTextsResponse.ok) {
+          if (heroTextsResponse.ok && isActive) {
             const heroTextsResult = await heroTextsResponse.json()
             if (heroTextsResult.data && heroTextsResult.data.length > 0) {
               const textData = heroTextsResult.data.map((text: any) => ({
@@ -291,12 +292,18 @@ export default function HomePage() {
       } catch (error) {
         console.error('데이터 로드 실패:', error)
       } finally {
-        setLoading(false)
+        if (isActive) {
+          setLoading(false)
+        }
       }
     }
 
     loadAllData()
-  }, [])
+    
+    return () => {
+      isActive = false // cleanup
+    }
+  }, []) // 빈 의존성 배열로 한 번만 실행
 
   // Framer Motion 스크롤 애니메이션 훅들
   const { scrollY } = useScroll()

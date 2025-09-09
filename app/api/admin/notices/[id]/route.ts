@@ -18,7 +18,7 @@ export async function GET(
       .from('notices')
       .select('*')
       .eq('id', id)
-      .eq('is_published', true)
+.eq('status', 'published')
       .single()
 
     if (error || !notice) {
@@ -31,13 +31,14 @@ export async function GET(
     // 조회수 증가
     await supabase
       .from('notices')
-      .update({ views: notice.views + 1 })
+      .update({ view_count: (notice.view_count || 0) + 1 })
       .eq('id', id)
 
-    return NextResponse.json({ 
-      notice: {
+    return NextResponse.json({
+      success: true,
+      data: {
         ...notice,
-        views: notice.views + 1
+        view_count: (notice.view_count || 0) + 1
       }
     })
   } catch (error) {
@@ -49,6 +50,24 @@ export async function GET(
   }
 }
 
+// 관리자 인증 확인 함수
+function checkAdminAuth(request: NextRequest) {
+  const adminSession = request.headers.get('x-admin-session')
+  
+  if (adminSession) {
+    try {
+      const adminData = JSON.parse(adminSession)
+      if (adminData.role === 'admin' || adminData.role === 'super_admin') {
+        return { isValid: true, adminId: adminData.id, adminName: adminData.name }
+      }
+    } catch (error) {
+      console.error('Admin session parsing error:', error)
+    }
+  }
+  
+  return { isValid: false }
+}
+
 // PUT: 공지사항 수정
 export async function PUT(
   request: NextRequest,
@@ -57,9 +76,12 @@ export async function PUT(
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // 인증 확인
+    // 관리자 인증 확인
+    const adminAuth = checkAdminAuth(request)
+    
+    // Supabase 세션 또는 관리자 세션 확인
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    if (!session && !adminAuth.isValid) {
       return NextResponse.json(
         { error: '인증이 필요합니다' },
         { status: 401 }
@@ -83,9 +105,9 @@ export async function PUT(
       .update({
         title: title.trim(),
         content: content?.trim() || '',
-        is_important: is_important || false,
+        is_pinned: is_important || false,
         target_audience: target_audience || 'all',
-        is_published: is_published !== undefined ? is_published : true
+        status: 'published'
       })
       .eq('id', id)
       .select()
@@ -99,7 +121,7 @@ export async function PUT(
       )
     }
 
-    return NextResponse.json({ notice })
+    return NextResponse.json({ success: true, data: notice })
   } catch (error) {
     console.error('공지사항 수정 API 에러:', error)
     return NextResponse.json(
@@ -117,9 +139,12 @@ export async function DELETE(
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // 인증 확인
+    // 관리자 인증 확인
+    const adminAuth = checkAdminAuth(request)
+    
+    // Supabase 세션 또는 관리자 세션 확인
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    if (!session && !adminAuth.isValid) {
       return NextResponse.json(
         { error: '인증이 필요합니다' },
         { status: 401 }
@@ -142,7 +167,7 @@ export async function DELETE(
       )
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, message: '공지사항이 삭제되었습니다' })
   } catch (error) {
     console.error('공지사항 삭제 API 에러:', error)
     return NextResponse.json(

@@ -20,13 +20,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 인플루언서 조회
+    // 인플루언서 조회 (email 또는 이름으로 조회)
     const { data: influencer, error } = await supabase
       .from('influencers')
       .select('*')
-      .eq('username', username.trim())
+      .or(`email.eq.${username.trim()},name.eq.${username.trim()}`)
       .eq('status', 'active')
-      .eq('is_verified', true)
       .single()
 
     if (error || !influencer) {

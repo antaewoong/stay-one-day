@@ -15,13 +15,12 @@ export async function POST(request: NextRequest) {
       request_type, 
       proposed_rate, 
       message, 
-      check_in_date, 
-      check_out_date, 
+      use_date, 
       guest_count 
     } = body
 
     // 입력값 검증
-    if (!influencer_id || !accommodation_id || !check_in_date || !check_out_date || !guest_count) {
+    if (!influencer_id || !accommodation_id || !use_date || !guest_count) {
       return NextResponse.json(
         { success: false, message: '필수 항목을 모두 입력해주세요.' },
         { status: 400 }
@@ -101,12 +100,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 날짜 검증 (협업 기간 내)
-    const checkIn = new Date(check_in_date)
-    const checkOut = new Date(check_out_date)
+    const useDate = new Date(use_date)
     const collabStart = new Date(currentPeriod.collaboration_start_date)
     const collabEnd = new Date(currentPeriod.collaboration_end_date)
 
-    if (checkIn < collabStart || checkOut > collabEnd) {
+    if (useDate < collabStart || useDate > collabEnd) {
       return NextResponse.json(
         { success: false, message: '협업 기간 내에서 날짜를 선택해주세요.' },
         { status: 400 }
@@ -123,8 +121,8 @@ export async function POST(request: NextRequest) {
         request_type,
         proposed_rate: proposed_rate || null,
         message: message || '',
-        check_in_date,
-        check_out_date,
+        check_in_date: use_date,
+        check_out_date: use_date,
         guest_count,
         status: 'pending',
         final_status: 'pending'

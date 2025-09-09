@@ -564,7 +564,11 @@ export default function ReservationCalendarPage() {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className={`text-sm font-medium ${
-                      day.isToday ? 'text-blue-600' : day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
+                      day.isToday ? 'text-blue-600' : 
+                      !day.isCurrentMonth ? 'text-gray-400' :
+                      day.date.getDay() === 0 ? 'text-red-600' : // 일요일
+                      day.date.getDay() === 6 ? 'text-blue-600' : // 토요일
+                      'text-gray-900'
                     }`}>
                       {day.date.getDate()}
                     </span>

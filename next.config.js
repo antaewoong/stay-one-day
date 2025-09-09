@@ -17,18 +17,19 @@ const nextConfig = {
         hostname: 'stay-oneday.vercel.app',
       },
       {
+        protocol: 'https',
+        hostname: 'fcmauibvdqbocwhloqov.supabase.co',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
       }
     ],
-    // Supabase 이미지 최적화 비활성화
+    // Supabase 이미지 처리를 위해 unoptimized 사용
     unoptimized: true,
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // 이미지 로더 커스터마이징
-    loader: 'custom',
-    loaderFile: './lib/image-loader.js',
   },
   typescript: {
     ignoreBuildErrors: true,

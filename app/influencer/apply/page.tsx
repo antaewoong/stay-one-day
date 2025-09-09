@@ -278,7 +278,7 @@ export default function InfluencerApplyPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="숙소를 선택해주세요" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white">
                     {accommodations.map(accommodation => (
                       <SelectItem key={accommodation.id} value={accommodation.id}>
                         <div className="flex items-center justify-between w-full">
@@ -309,7 +309,7 @@ export default function InfluencerApplyPage() {
                       {useDate ? format(useDate, 'PPP', { locale: ko }) : '날짜를 선택해주세요'}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0 bg-white">
                     <Calendar
                       mode="single"
                       selected={useDate}
@@ -335,7 +335,7 @@ export default function InfluencerApplyPage() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white">
                     {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
                       <SelectItem key={num} value={num.toString()}>
                         <div className="flex items-center gap-1">

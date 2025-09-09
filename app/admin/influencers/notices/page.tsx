@@ -192,7 +192,7 @@ export default function InfluencerNoticesPage() {
           </div>
         </div>
         <Button 
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
           onClick={() => setShowCreateModal(true)}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -270,7 +270,7 @@ export default function InfluencerNoticesPage() {
               <p className="text-gray-500 mb-4">작성된 공지사항이 없습니다</p>
               <Button 
                 onClick={() => setShowCreateModal(true)}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 첫 공지사항 작성하기
               </Button>

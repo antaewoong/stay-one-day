@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -48,29 +48,35 @@ import {
 } from 'lucide-react'
 
 interface Reservation {
-  id: number
-  reservationNumber: string
-  stayId: number
-  stayName: string
-  customerName: string
-  customerPhone: string
-  customerEmail: string
-  checkInDate: string
-  checkOutDate: string
-  usageTime: string
-  baseGuests: number
-  extraGuests: number
-  totalGuests: number
-  basePrice: number
-  extraFee: number
-  optionFee: number
-  totalPrice: number
-  paymentMethod: 'card' | 'transfer' | 'kakaopay'
-  paymentStatus: 'pending' | 'completed' | 'failed' | 'refunded'
-  reservationStatus: 'confirmed' | 'in_use' | 'completed' | 'cancelled' | 'no_show'
-  specialRequests: string
-  createdAt: string
-  updatedAt: string
+  id: string
+  reservation_number: string
+  checkin_date: string
+  checkout_date: string
+  guest_count: number
+  guest_name: string
+  guest_phone: string
+  guest_email: string
+  base_amount: number
+  additional_amount: number
+  discount_amount: number
+  total_amount: number
+  payment_method: string | null
+  payment_status: 'pending' | 'paid' | 'cancelled' | 'refunded' | 'partial_refund'
+  status: 'confirmed' | 'cancelled' | 'completed' | 'no_show'
+  special_requests: string | null
+  created_at: string
+  updated_at: string
+  accommodation: {
+    id: string
+    name: string
+    accommodation_type: string
+    address: string
+    host: {
+      id: string
+      business_name: string
+      representative_name: string
+    }
+  }
 }
 
 export default function ReservationInfoPage() {
@@ -80,140 +86,50 @@ export default function ReservationInfoPage() {
   const [dateFilter, setDateFilter] = useState<string>('today')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null)
+  const [reservations, setReservations] = useState<Reservation[]>([])
+  const [loading, setLoading] = useState(true)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0
+  })
 
-  // Mock data
-  const reservations: Reservation[] = [
-    {
-      id: 1,
-      reservationNumber: 'SO25090200001',
-      stayId: 1,
-      stayName: '구공스테이 청주 본디',
-      customerName: '김민수',
-      customerPhone: '010-1234-5678',
-      customerEmail: 'kim@example.com',
-      checkInDate: '2025-09-02',
-      checkOutDate: '2025-09-02',
-      usageTime: '15:00-23:00',
-      baseGuests: 4,
-      extraGuests: 2,
-      totalGuests: 6,
-      basePrice: 150000,
-      extraFee: 60000,
-      optionFee: 30000,
-      totalPrice: 240000,
-      paymentMethod: 'card',
-      paymentStatus: 'completed',
-      reservationStatus: 'confirmed',
-      specialRequests: '바베큐 그릴 이용 희망',
-      createdAt: '2025-09-01 14:30',
-      updatedAt: '2025-09-01 14:30'
-    },
-    {
-      id: 2,
-      reservationNumber: 'SO25090200002',
-      stayId: 2,
-      stayName: '구공스테이 소소한옥',
-      customerName: '이지영',
-      customerPhone: '010-9876-5432',
-      customerEmail: 'lee@example.com',
-      checkInDate: '2025-09-02',
-      checkOutDate: '2025-09-02',
-      usageTime: '15:00-23:00',
-      baseGuests: 4,
-      extraGuests: 0,
-      totalGuests: 4,
-      basePrice: 120000,
-      extraFee: 0,
-      optionFee: 20000,
-      totalPrice: 140000,
-      paymentMethod: 'kakaopay',
-      paymentStatus: 'completed',
-      reservationStatus: 'in_use',
-      specialRequests: '한옥 체험과 전통차 준비 부탁드립니다',
-      createdAt: '2025-09-01 16:45',
-      updatedAt: '2025-09-02 15:00'
-    },
-    {
-      id: 3,
-      reservationNumber: 'SO25090200003',
-      stayId: 3,
-      stayName: '구공스테이 옥천 키즈',
-      customerName: '박가족',
-      customerPhone: '010-5555-1234',
-      customerEmail: 'park@example.com',
-      checkInDate: '2025-09-03',
-      checkOutDate: '2025-09-03',
-      usageTime: '12:00-23:00',
-      baseGuests: 4,
-      extraGuests: 2,
-      totalGuests: 6,
-      basePrice: 160000,
-      extraFee: 60000,
-      optionFee: 50000,
-      totalPrice: 270000,
-      paymentMethod: 'card',
-      paymentStatus: 'completed',
-      reservationStatus: 'confirmed',
-      specialRequests: '아이 2명 동반, 얼리 체크인 신청',
-      createdAt: '2025-09-01 10:20',
-      updatedAt: '2025-09-01 10:20'
-    },
-    {
-      id: 4,
-      reservationNumber: 'SO25090200004',
-      stayId: 1,
-      stayName: '구공스테이 청주 본디',
-      customerName: '최현우',
-      customerPhone: '010-7777-9999',
-      customerEmail: 'choi@example.com',
-      checkInDate: '2025-09-01',
-      checkOutDate: '2025-09-01',
-      usageTime: '15:00-23:00',
-      baseGuests: 4,
-      extraGuests: 4,
-      totalGuests: 8,
-      basePrice: 150000,
-      extraFee: 120000,
-      optionFee: 30000,
-      totalPrice: 300000,
-      paymentMethod: 'transfer',
-      paymentStatus: 'completed',
-      reservationStatus: 'completed',
-      specialRequests: '대가족 모임, 바베큐 준비 필요',
-      createdAt: '2025-08-30 09:15',
-      updatedAt: '2025-09-01 23:30'
-    },
-    {
-      id: 5,
-      reservationNumber: 'SO25090200005',
-      stayId: 5,
-      stayName: '구공스테이 남해 디풀&애견',
-      customerName: '강동현',
-      customerPhone: '010-2222-8888',
-      customerEmail: 'kang@example.com',
-      checkInDate: '2025-09-05',
-      checkOutDate: '2025-09-05',
-      usageTime: '15:00-23:00',
-      baseGuests: 4,
-      extraGuests: 0,
-      totalGuests: 4,
-      basePrice: 160000,
-      extraFee: 0,
-      optionFee: 25000,
-      totalPrice: 185000,
-      paymentMethod: 'card',
-      paymentStatus: 'pending',
-      reservationStatus: 'confirmed',
-      specialRequests: '반려견 2마리 동반 (소형견)',
-      createdAt: '2025-09-02 08:45',
-      updatedAt: '2025-09-02 08:45'
+  // 데이터 로딩
+  useEffect(() => {
+    fetchReservations()
+  }, [pagination.page, statusFilter, paymentFilter, searchQuery])
+
+  const fetchReservations = async () => {
+    try {
+      setLoading(true)
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(paymentFilter !== 'all' && { payment_status: paymentFilter }),
+        ...(searchQuery && { search: searchQuery })
+      })
+
+      const response = await fetch(`/api/admin/reservations?${params}`)
+      const result = await response.json()
+
+      if (response.ok) {
+        setReservations(result.data || [])
+        setPagination(result.pagination)
+      } else {
+        console.error('예약 조회 실패:', result.error)
+      }
+    } catch (error) {
+      console.error('예약 조회 오류:', error)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
 
   const statusOptions = [
     { value: 'all', label: '전체' },
     { value: 'confirmed', label: '예약확정' },
-    { value: 'in_use', label: '이용중' },
     { value: 'completed', label: '이용완료' },
     { value: 'cancelled', label: '예약취소' },
     { value: 'no_show', label: '노쇼' }
@@ -221,9 +137,10 @@ export default function ReservationInfoPage() {
 
   const paymentOptions = [
     { value: 'all', label: '전체' },
-    { value: 'card', label: '카드결제' },
-    { value: 'kakaopay', label: '카카오페이' },
-    { value: 'transfer', label: '계좌이체' }
+    { value: 'pending', label: '결제대기' },
+    { value: 'paid', label: '결제완료' },
+    { value: 'cancelled', label: '결제취소' },
+    { value: 'refunded', label: '환불완료' }
   ]
 
   const dateOptions = [
@@ -233,20 +150,11 @@ export default function ReservationInfoPage() {
     { value: 'all', label: '전체' }
   ]
 
-  const filteredReservations = reservations.filter(reservation => {
-    const matchesSearch = reservation.reservationNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         reservation.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         reservation.stayName.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || reservation.reservationStatus === statusFilter
-    const matchesPayment = paymentFilter === 'all' || reservation.paymentMethod === paymentFilter
-    
-    return matchesSearch && matchesStatus && matchesPayment
-  })
+  const filteredReservations = reservations
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       confirmed: { color: 'bg-blue-100 text-blue-800', icon: <CheckCircle className="w-3 h-3 mr-1" />, label: '예약확정' },
-      in_use: { color: 'bg-green-100 text-green-800', icon: <Clock className="w-3 h-3 mr-1" />, label: '이용중' },
       completed: { color: 'bg-gray-100 text-gray-800', icon: <CheckCircle className="w-3 h-3 mr-1" />, label: '이용완료' },
       cancelled: { color: 'bg-red-100 text-red-800', icon: <XCircle className="w-3 h-3 mr-1" />, label: '예약취소' },
       no_show: { color: 'bg-yellow-100 text-yellow-800', icon: <AlertCircle className="w-3 h-3 mr-1" />, label: '노쇼' }
@@ -266,9 +174,10 @@ export default function ReservationInfoPage() {
   const getPaymentStatusBadge = (status: string) => {
     const statusConfig = {
       pending: { color: 'bg-yellow-100 text-yellow-800', label: '결제대기' },
-      completed: { color: 'bg-green-100 text-green-800', label: '결제완료' },
-      failed: { color: 'bg-red-100 text-red-800', label: '결제실패' },
-      refunded: { color: 'bg-gray-100 text-gray-800', label: '환불완료' }
+      paid: { color: 'bg-green-100 text-green-800', label: '결제완료' },
+      cancelled: { color: 'bg-red-100 text-red-800', label: '결제취소' },
+      refunded: { color: 'bg-gray-100 text-gray-800', label: '환불완료' },
+      partial_refund: { color: 'bg-orange-100 text-orange-800', label: '부분환불' }
     }
     
     const config = statusConfig[status as keyof typeof statusConfig]
@@ -277,11 +186,13 @@ export default function ReservationInfoPage() {
     return <Badge className={config.color}>{config.label}</Badge>
   }
 
-  const getPaymentMethodLabel = (method: string) => {
+  const getPaymentMethodLabel = (method: string | null) => {
+    if (!method) return '미설정'
     const labels = {
       card: '카드결제',
-      kakaopay: '카카오페이',
-      transfer: '계좌이체'
+      kakao_pay: '카카오페이',
+      bank_transfer: '계좌이체',
+      toss_pay: '토스페이'
     }
     
     return labels[method as keyof typeof labels] || method
@@ -329,7 +240,7 @@ export default function ReservationInfoPage() {
               <div>
                 <p className="text-sm text-gray-600">예약확정</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {reservations.filter(r => r.reservationStatus === 'confirmed').length}
+                  {reservations.filter(r => r.status === 'confirmed').length}
                 </p>
               </div>
               <CheckCircle className="w-8 h-8 text-blue-500" />
@@ -342,7 +253,7 @@ export default function ReservationInfoPage() {
               <div>
                 <p className="text-sm text-gray-600">이용중</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {reservations.filter(r => r.reservationStatus === 'in_use').length}
+                  {reservations.filter(r => r.status === 'confirmed').length}
                 </p>
               </div>
               <Clock className="w-8 h-8 text-green-500" />
@@ -355,7 +266,7 @@ export default function ReservationInfoPage() {
               <div>
                 <p className="text-sm text-gray-600">이용완료</p>
                 <p className="text-2xl font-bold">
-                  {reservations.filter(r => r.reservationStatus === 'completed').length}
+                  {reservations.filter(r => r.status === 'completed').length}
                 </p>
               </div>
               <CheckCircle className="w-8 h-8 text-gray-500" />
@@ -368,7 +279,7 @@ export default function ReservationInfoPage() {
               <div>
                 <p className="text-sm text-gray-600">총 매출</p>
                 <p className="text-2xl font-bold text-green-600">
-                  ₩{reservations.filter(r => r.paymentStatus === 'completed').reduce((sum, r) => sum + r.totalPrice, 0).toLocaleString()}
+                  ₩{reservations.filter(r => r.payment_status === 'paid').reduce((sum, r) => sum + r.total_amount, 0).toLocaleString()}
                 </p>
               </div>
               <CreditCard className="w-8 h-8 text-purple-500" />
@@ -439,35 +350,35 @@ export default function ReservationInfoPage() {
                   <TableRow key={reservation.id} className="hover:bg-gray-50">
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium">{reservation.reservationNumber}</span>
-                        <span className="text-xs text-gray-500">{reservation.createdAt}</span>
+                        <span className="font-medium">{reservation.reservation_number}</span>
+                        <span className="text-xs text-gray-500">{new Date(reservation.created_at).toLocaleDateString()}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium">{reservation.stayName}</span>
+                        <span className="font-medium">{reservation.accommodation.name}</span>
                         <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
                           <MapPin className="w-3 h-3" />
-                          <span>#{reservation.stayId}</span>
+                          <span>{reservation.accommodation.accommodation_type}</span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium">{reservation.customerName}</span>
-                        <span className="text-sm text-gray-600">{reservation.customerPhone}</span>
-                        <span className="text-xs text-gray-500">{reservation.customerEmail}</span>
+                        <span className="font-medium">{reservation.guest_name}</span>
+                        <span className="text-sm text-gray-600">{reservation.guest_phone}</span>
+                        <span className="text-xs text-gray-500">{reservation.guest_email}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col text-sm">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-gray-400" />
-                          {reservation.checkInDate}
+                          {reservation.checkin_date} - {reservation.checkout_date}
                         </div>
                         <div className="flex items-center gap-1 mt-1">
                           <Clock className="w-3 h-3 text-gray-400" />
-                          {reservation.usageTime}
+                          체크인/아웃
                         </div>
                       </div>
                     </TableCell>
@@ -475,22 +386,19 @@ export default function ReservationInfoPage() {
                       <div className="flex flex-col text-sm">
                         <div className="flex items-center gap-1">
                           <Users className="w-3 h-3 text-gray-400" />
-                          <span>기본 {reservation.baseGuests}명</span>
-                          {reservation.extraGuests > 0 && (
-                            <span className="text-blue-600">+{reservation.extraGuests}</span>
-                          )}
+                          <span>총 {reservation.guest_count}명</span>
                         </div>
-                        <span className="font-medium mt-1">₩{reservation.totalPrice.toLocaleString()}</span>
+                        <span className="font-medium mt-1">₩{reservation.total_amount.toLocaleString()}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
-                        <span className="text-sm">{getPaymentMethodLabel(reservation.paymentMethod)}</span>
-                        {getPaymentStatusBadge(reservation.paymentStatus)}
+                        <span className="text-sm">{getPaymentMethodLabel(reservation.payment_method)}</span>
+                        {getPaymentStatusBadge(reservation.payment_status)}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {getStatusBadge(reservation.reservationStatus)}
+                      {getStatusBadge(reservation.status)}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">

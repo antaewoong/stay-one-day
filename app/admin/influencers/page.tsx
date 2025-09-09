@@ -95,9 +95,7 @@ export default function AdminInfluencersPage() {
     phone: '',
     social_media_links: [{ platform: '', url: '' }],
     follower_count: 0,
-    engagement_rate: 0,
     content_category: [] as string[],
-    collaboration_rate: 0,
     preferred_collaboration_type: 'free',
     bio: '',
     location: ''
@@ -192,14 +190,9 @@ export default function AdminInfluencersPage() {
           name: '',
           email: '',
           phone: '',
-          instagram_handle: '',
-          youtube_channel: '',
-          tiktok_handle: '',
+          social_media_links: [{ platform: '', url: '' }],
           follower_count: 0,
-          engagement_rate: 0,
           content_category: [],
-          social_media_links: [],
-          collaboration_rate: 0,
           preferred_collaboration_type: 'free',
           bio: '',
           location: ''
@@ -324,7 +317,7 @@ export default function AdminInfluencersPage() {
             </Link>
           </Button>
           <Button 
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
             onClick={() => setShowAddModal(true)}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -524,9 +517,9 @@ export default function AdminInfluencersPage() {
                     <div className="flex items-center gap-2">
                       <div className="text-right text-sm">
                         <p className="font-medium text-gray-900">
-                          {influencer.collaboration_rate.toLocaleString()}원
+                          {influencer.follower_count.toLocaleString()}명
                         </p>
-                        <p className="text-gray-500">협업비용</p>
+                        <p className="text-gray-500">팔로워</p>
                         {influencer.ai_evaluation && (
                           <p className="text-xs text-blue-600 mt-1">
                             AI 점수: {influencer.ai_evaluation.overall_score}/100
@@ -697,37 +690,14 @@ export default function AdminInfluencersPage() {
             </div>
 
             {/* 통계 */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
-                <Label htmlFor="followers" className="text-sm font-medium">팔로워 수</Label>
+                <Label htmlFor="followers" className="text-sm font-medium">팔로워 수(대표채널)</Label>
                 <Input
                   id="followers"
                   type="number"
                   value={newInfluencer.follower_count}
                   onChange={(e) => setNewInfluencer(prev => ({...prev, follower_count: parseInt(e.target.value) || 0}))}
-                  placeholder="0"
-                  className="bg-white border"
-                />
-              </div>
-              <div>
-                <Label htmlFor="engagement" className="text-sm font-medium">참여율 (%)</Label>
-                <Input
-                  id="engagement"
-                  type="number"
-                  step="0.1"
-                  value={newInfluencer.engagement_rate}
-                  onChange={(e) => setNewInfluencer(prev => ({...prev, engagement_rate: parseFloat(e.target.value) || 0}))}
-                  placeholder="0.0"
-                  className="bg-white border"
-                />
-              </div>
-              <div>
-                <Label htmlFor="rate" className="text-sm font-medium">협업 단가</Label>
-                <Input
-                  id="rate"
-                  type="number"
-                  value={newInfluencer.collaboration_rate}
-                  onChange={(e) => setNewInfluencer(prev => ({...prev, collaboration_rate: parseInt(e.target.value) || 0}))}
                   placeholder="0"
                   className="bg-white border"
                 />
@@ -796,7 +766,7 @@ export default function AdminInfluencersPage() {
             <Button 
               onClick={handleAddInfluencer}
               disabled={addLoading || !newInfluencer.name.trim() || !newInfluencer.email.trim()}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {addLoading ? '등록 중...' : '등록하기'}
             </Button>

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -11,14 +10,64 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Save } from 'lucide-react'
 
-export default function CreateNoticePage() {
+interface Notice {
+  id: string
+  title: string
+  content: string
+  notice_type: string
+  target_audience: string
+  is_pinned: boolean
+  status: string
+  created_at: string
+}
+
+export default function EditNoticePage() {
+  const params = useParams()
+  const router = useRouter()
+  const [notice, setNotice] = useState<Notice | null>(null)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [isImportant, setIsImportant] = useState(false)
   const [targetAudience, setTargetAudience] = useState('all')
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
-  const supabase = createClientComponentClient()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (params.id) {
+      loadNotice()
+    }
+  }, [params.id])
+
+  const loadNotice = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch(`/api/admin/notices/${params.id}`)
+      
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success) {
+          const noticeData = result.data
+          setNotice(noticeData)
+          setTitle(noticeData.title || '')
+          setContent(noticeData.content || '')
+          setIsImportant(noticeData.is_pinned || false)
+          setTargetAudience(noticeData.target_audience || 'all')
+        } else {
+          alert('공지사항을 찾을 수 없습니다.')
+          router.push('/admin/notices')
+        }
+      } else {
+        alert('공지사항을 불러오는데 실패했습니다.')
+        router.push('/admin/notices')
+      }
+    } catch (error) {
+      console.error('공지사항 조회 실패:', error)
+      alert('공지사항을 불러오는데 실패했습니다.')
+      router.push('/admin/notices')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,21 +77,12 @@ export default function CreateNoticePage() {
       return
     }
 
-    setLoading(true)
+    setSaving(true)
 
     try {
-      // 현재 관리자 정보 가져오기
+      // 관리자 세션 정보 가져오기
       const adminUser = sessionStorage.getItem('adminUser')
-      let authorName = '관리자'
-      let authorRole = 'admin'
       
-      if (adminUser) {
-        const adminData = JSON.parse(adminUser)
-        authorName = adminData.name || adminData.email || '관리자'
-        authorRole = adminData.role || 'admin'
-      }
-
-      // API를 통해 공지사항 생성
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       }
@@ -52,34 +92,59 @@ export default function CreateNoticePage() {
         headers['x-admin-session'] = adminUser
       }
       
-      const response = await fetch('/api/admin/notices', {
-        method: 'POST',
+      const response = await fetch(`/api/admin/notices/${params.id}`, {
+        method: 'PUT',
         headers,
         body: JSON.stringify({
           title: title.trim(),
           content: content.trim(),
           is_important: isImportant,
-          target_audience: targetAudience,
-          author_name: authorName,
-          author_role: authorRole
+          target_audience: targetAudience
         })
       })
 
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || '공지사항 저장에 실패했습니다.')
+        throw new Error(result.error || '공지사항 수정에 실패했습니다.')
       }
 
-      alert('공지사항이 성공적으로 작성되었습니다.')
-      router.push('/admin/notices')
+      alert('공지사항이 성공적으로 수정되었습니다.')
+      router.push(`/admin/notices/${params.id}`)
       
     } catch (error) {
-      console.error('공지사항 저장 실패:', error)
-      alert(error instanceof Error ? error.message : '공지사항 저장에 실패했습니다.')
+      console.error('공지사항 수정 실패:', error)
+      alert(error instanceof Error ? error.message : '공지사항 수정에 실패했습니다.')
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">공지사항을 불러오는 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!notice) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">공지사항을 찾을 수 없습니다.</p>
+          <Button 
+            onClick={() => router.push('/admin/notices')}
+            className="mt-4"
+          >
+            목록으로 돌아가기
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -89,19 +154,19 @@ export default function CreateNoticePage() {
         <div className="flex items-center mb-6">
           <Button
             variant="ghost"
-            onClick={() => router.back()}
+            onClick={() => router.push(`/admin/notices/${params.id}`)}
             className="mr-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             뒤로가기
           </Button>
-          <h1 className="text-2xl font-bold text-gray-900">새 공지사항 작성</h1>
+          <h1 className="text-2xl font-bold text-gray-900">공지사항 수정</h1>
         </div>
 
-        {/* 작성 폼 */}
+        {/* 수정 폼 */}
         <Card>
           <CardHeader>
-            <CardTitle>공지사항 작성</CardTitle>
+            <CardTitle>공지사항 수정</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -174,21 +239,22 @@ export default function CreateNoticePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.back()}
-                  disabled={loading}
+                  onClick={() => router.push(`/admin/notices/${params.id}`)}
+                  disabled={saving}
                 >
                   취소
                 </Button>
                 <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={saving}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  {loading ? (
-                    <>저장 중...</>
+                  {saving ? (
+                    <>수정 중...</>
                   ) : (
                     <>
                       <Save className="w-4 h-4 mr-2" />
-                      공지사항 저장
+                      수정 완료
                     </>
                   )}
                 </Button>

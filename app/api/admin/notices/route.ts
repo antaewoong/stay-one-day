@@ -57,14 +57,37 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// 관리자 인증 확인 함수
+function checkAdminAuth(request: NextRequest) {
+  const authHeader = request.headers.get('authorization')
+  const adminSession = request.headers.get('x-admin-session')
+  
+  // 세션스토리지에서 온 관리자 정보가 있는지 확인
+  if (adminSession) {
+    try {
+      const adminData = JSON.parse(adminSession)
+      if (adminData.role === 'admin' || adminData.role === 'super_admin') {
+        return { isValid: true, adminId: adminData.id, adminName: adminData.name }
+      }
+    } catch (error) {
+      console.error('Admin session parsing error:', error)
+    }
+  }
+  
+  return { isValid: false }
+}
+
 // POST: 새 공지사항 생성
 export async function POST(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
-    // 인증 확인
+    // 관리자 인증 확인
+    const adminAuth = checkAdminAuth(request)
+    
+    // Supabase 세션 또는 관리자 세션 확인
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    if (!session && !adminAuth.isValid) {
       return NextResponse.json(
         { error: '인증이 필요합니다' },
         { status: 401 }
@@ -87,7 +110,7 @@ export async function POST(request: NextRequest) {
       .insert({
         title: title.trim(),
         content: content?.trim() || '',
-        admin_id: session.user.id,
+        admin_id: adminAuth.isValid ? adminAuth.adminId : session?.user?.id,
         notice_type: 'general',
         target_audience: target_audience || 'all',
         is_pinned: is_important || false,
