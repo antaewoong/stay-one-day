@@ -373,7 +373,6 @@ export default function InfluencerApplyPage() {
                           className="text-blue-600"
                         />
                         <span className="font-semibold text-lg">무상 협업</span>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">추천</Badge>
                       </div>
                       <p className="text-sm text-gray-600 ml-6">
                         숙박 무료 제공 + 콘텐츠 제작<br/>
@@ -410,14 +409,10 @@ export default function InfluencerApplyPage() {
                           className="text-purple-600"
                         />
                         <span className="font-semibold text-lg">유상 협업</span>
-                        <Badge variant="outline" className="border-purple-200 text-purple-800">프리미엄</Badge>
                       </div>
                       <p className="text-sm text-gray-600 ml-6">
                         <span className="font-medium text-purple-600">70% 할인된 가격 (30% 비용 지급)</span><br/>
-                        내돈내산 콘텐츠의 마케팅 효율이 높기에 일부 유상 항목을 선택할 수 있습니다.<br/>
-                        <span className="text-green-600 font-medium">
-                          ✓ 유상 선택시 일반 예약과 동등한 서비스를 제공받게 됩니다.
-                        </span>
+                        블로그 지수 관리가 필요한 인플루언서를 위한 옵션입니다.
                       </p>
                     </div>
                     <div className="text-right">
@@ -428,21 +423,6 @@ export default function InfluencerApplyPage() {
                   </div>
                 </div>
 
-                {/* 선택된 유상 협업일 때 추가 정보 */}
-                {formData.request_type === 'paid' && (
-                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mt-3">
-                    <div className="text-sm space-y-2">
-                      <div className="font-semibold text-purple-800">📋 유상 협업 혜택</div>
-                      <div className="space-y-1 text-purple-700">
-                        <div>• 정가 대비 70% 할인된 특가</div>
-                        <div>• 일반 예약 고객과 동일한 서비스</div>
-                        <div>• 객실 업그레이드 가능 (상황에 따라)</div>
-                        <div>• 추가 편의시설 이용 가능</div>
-                        <div>• 체크인/아웃 시간 유연 조정</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* 예상 비용 안내 */}
