@@ -42,7 +42,7 @@ export default function NoticesPage() {
       setLoading(true)
       
       // 실제 API 호출
-      const response = await fetch('/api/notices?limit=50')
+      const response = await fetch('/api/admin/notices?limit=50')
       const result = await response.json()
       
       if (result.success && result.data) {
@@ -50,10 +50,10 @@ export default function NoticesPage() {
           id: notice.id,
           title: notice.title,
           content: notice.content,
-          author: notice.author_name,
+          author: notice.admin_id ? '관리자' : '시스템',
           views: notice.view_count || 0,
-          status: notice.is_published ? 'published' : 'draft',
-          is_important: notice.is_important,
+          status: notice.status === 'published' ? 'published' : 'draft',
+          is_important: notice.is_pinned || notice.notice_type === 'urgent',
           created_at: notice.created_at,
           updated_at: notice.updated_at
         })))

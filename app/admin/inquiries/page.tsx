@@ -71,7 +71,7 @@ export default function InquiriesPage() {
     try {
       setLoading(true)
       
-      let url = '/api/inquiries?limit=100'
+      let url = '/api/admin/inquiries?limit=100'
       if (statusFilter !== 'all') {
         url += `&status=${statusFilter}`
       }
@@ -82,8 +82,8 @@ export default function InquiriesPage() {
       const response = await fetch(url)
       const result = await response.json()
       
-      if (result.success && result.data) {
-        setInquiries(result.data)
+      if (result.success && result.inquiries) {
+        setInquiries(result.inquiries)
       } else {
         console.log('문의사항이 없거나 API 호출 실패')
         setInquiries([])

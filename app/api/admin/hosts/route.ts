@@ -3,10 +3,23 @@ import { validateAdminAuth, supabaseService } from '@/lib/auth/admin-service'
 
 export async function GET() {
   try {
-    // Service Role로 RLS 우회하여 호스트 목록 조회
+    // Service Role로 RLS 우회하여 호스트 목록과 숙소 카운트 조회
     const { data: hostData, error: hostsError } = await supabaseService
       .from('hosts')
-      .select('*')
+      .select(`
+        id,
+        representative_name,
+        email,
+        phone,
+        business_name,
+        business_number,
+        address,
+        status,
+        host_id,
+        password_hash,
+        created_at,
+        accommodations!host_id(count)
+      `)
       .order('created_at', { ascending: false })
 
     if (hostsError) {
@@ -30,7 +43,7 @@ export async function GET() {
       host_id: host.host_id || null,
       password: host.password_hash || null,
       created_at: host.created_at,
-      accommodation_count: 0
+      accommodation_count: host.accommodations?.[0]?.count || 0
     }))
 
     return NextResponse.json({ 

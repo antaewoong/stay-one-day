@@ -22,7 +22,7 @@ import {
   Building,
   Zap
 } from 'lucide-react'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 import Link from 'next/link'
 
 interface PaymentInfo {
@@ -343,7 +343,7 @@ export default function PaymentPageContent() {
                   <CardContent>
                     {/* 숙소 정보 */}
                     <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-4">
-                      <Image
+                      <OptimizedImage
                         src={paymentInfo.accommodationImage}
                         alt={paymentInfo.accommodationName}
                         fill

@@ -19,7 +19,7 @@ import {
   Star,
   Clock
 } from 'lucide-react'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 import Link from 'next/link'
 
 interface PaymentResult {
@@ -221,7 +221,7 @@ export default function PaymentSuccessContent() {
               {/* 숙소 정보 */}
               <div className="flex items-center space-x-4 mb-6">
                 <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                  <Image
+                  <OptimizedImage
                     src={paymentResult.accommodationImage}
                     alt={paymentResult.accommodationName}
                     fill

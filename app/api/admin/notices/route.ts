@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('notices')
       .select('*')
-      .eq('is_published', true)
+      .eq('status', 'published')
       .order('created_at', { ascending: false })
 
     // 대상 필터링
@@ -37,7 +37,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      notices: notices || [],
+      success: true,
+      data: notices || [],
       pagination: {
         page,
         limit,
@@ -84,11 +85,11 @@ export async function POST(request: NextRequest) {
       .insert({
         title: title.trim(),
         content: content?.trim() || '',
-        author_id: session.user.id,
-        author_name: author_name || '관리자',
-        author_role: author_role || 'admin',
-        is_important: is_important || false,
-        target_audience: target_audience || 'all'
+        admin_id: session.user.id,
+        notice_type: 'general',
+        target_audience: target_audience || 'all',
+        is_pinned: is_important || false,
+        status: 'published'
       })
       .select()
       .single()

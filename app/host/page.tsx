@@ -418,6 +418,16 @@ export default function HostPage() {
                   요금 관리
                 </Link>
               </Button>
+              <Button asChild variant="outline" className="w-full justify-start text-sm h-9 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 hover:bg-blue-50">
+                <Link href="/host/marketing-analysis">
+                  <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L13.09 6.26L18 7L13.09 7.74L12 12L10.91 7.74L6 7L10.91 6.26L12 2Z" fill="currentColor"/>
+                    <path d="M19 15L20.09 17.26L23 18L20.09 18.74L19 21L17.91 18.74L15 18L17.91 17.26L19 15Z" fill="currentColor"/>
+                    <path d="M5 15L6.09 17.26L9 18L6.09 18.74L5 21L3.91 18.74L1 18L3.91 17.26L5 15Z" fill="currentColor"/>
+                  </svg>
+                  AI 마케팅 분석
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 

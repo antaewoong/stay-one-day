@@ -27,7 +27,7 @@ import {
   Shield,
   Camera
 } from 'lucide-react'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 
 export default function NewAccommodationPage() {
   const router = useRouter()
@@ -273,7 +273,7 @@ export default function NewAccommodationPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {uploadedImages.map((url, index) => (
                       <div key={index} className="relative">
-                        <Image
+                        <OptimizedImage
                           src={url}
                           alt={`업로드 이미지 ${index + 1}`}
                           width={200}

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import Header from '@/components/header'
 import Link from 'next/link'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 import { useRouter } from 'next/navigation'
 
 interface WishlistItem {
@@ -141,7 +141,7 @@ export default function WishlistPage() {
               {wishlistItems.map((item) => (
                 <Card key={item.id} className="border-0 shadow-md overflow-hidden group hover:shadow-lg transition-shadow">
                   <div className="relative">
-                    <Image
+                    <OptimizedImage
                       src={item.image_url}
                       alt={item.name}
                       width={300}

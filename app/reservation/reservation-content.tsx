@@ -22,7 +22,7 @@ import {
   Mail,
   MessageCircle
 } from 'lucide-react'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 import Link from 'next/link'
 import { trackBookingCompleted, trackBookingStarted } from '@/lib/analytics/booking-tracker'
 
@@ -367,7 +367,7 @@ export default function ReservationPageContent() {
                   {/* 숙소 정보 */}
                   <div className="mb-6">
                     <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-4">
-                      <Image
+                      <OptimizedImage
                         src={accommodation.accommodation_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&crop=center'}
                         alt={accommodation.name}
                         fill

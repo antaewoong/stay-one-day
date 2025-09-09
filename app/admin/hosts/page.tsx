@@ -49,57 +49,6 @@ export default function HostsPage() {
     host_id: ''
   })
 
-  // Mock data
-  const mockHosts: Host[] = [
-    {
-      id: 'host-1',
-      name: '김호스트',
-      email: 'host1@example.com',
-      phone: '010-1234-5678',
-      business_name: '구공스테이',
-      business_number: '123-45-67890',
-      address: '충북 청주시 서원구',
-      status: 'active',
-      created_at: '2024-01-15T00:00:00.000Z',
-      accommodation_count: 3
-    },
-    {
-      id: 'host-2',
-      name: '박호스트',
-      email: 'host2@example.com',
-      phone: '010-2345-6789',
-      business_name: '스테이도고',
-      business_number: '234-56-78901',
-      address: '충남 아산시 도고면',
-      status: 'active',
-      created_at: '2024-02-10T00:00:00.000Z',
-      accommodation_count: 2
-    },
-    {
-      id: 'host-3',
-      name: '이호스트',
-      email: 'host3@example.com',
-      phone: '010-3456-7890',
-      business_name: '마담아네뜨',
-      business_number: '345-67-89012',
-      address: '강원 양양군',
-      status: 'pending',
-      created_at: '2024-03-05T00:00:00.000Z',
-      accommodation_count: 0
-    },
-    {
-      id: 'host-4',
-      name: '최호스트',
-      email: 'host4@example.com',
-      phone: '010-4567-8901',
-      business_name: '잇츠유스테이',
-      business_number: '456-78-90123',
-      address: '경기 가평군',
-      status: 'suspended',
-      created_at: '2024-01-20T00:00:00.000Z',
-      accommodation_count: 1
-    }
-  ]
 
   useEffect(() => {
     loadHosts()
@@ -124,15 +73,15 @@ export default function HostsPage() {
       const result = await response.json()
       console.log('API에서 조회된 호스트 데이터:', result)
 
-      if (result.hosts && result.hosts.length > 0) {
+      if (result.hosts) {
         setHosts(result.hosts)
       } else {
-        console.log('데이터가 없음 - Mock 데이터 사용')
-        setHosts(mockHosts)
+        console.log('데이터가 없습니다')
+        setHosts([])
       }
     } catch (error) {
       console.error('호스트 데이터 로드 실패:', error)
-      setHosts(mockHosts)
+      setHosts([])
     } finally {
       setLoading(false)
     }

@@ -55,39 +55,7 @@ export default function AdminPage() {
   
   const supabase = createClient()
 
-  // 실제 데이터 더미 (실제로는 Supabase에서 가져올 데이터)
-  const recentBookings = [
-    {
-      id: 1,
-      propertyName: '구공스테이 청주 풀빌라',
-      guestName: '김민수',
-      checkIn: '2024-02-15',
-      checkOut: '2024-02-17',
-      amount: 360000,
-      status: 'confirmed',
-      paymentStatus: 'paid'
-    },
-    {
-      id: 2,
-      propertyName: '스카이뷰 루프탑 펜션',
-      guestName: '박지영',
-      checkIn: '2024-02-20',
-      checkOut: '2024-02-22',
-      amount: 320000,
-      status: 'pending',
-      paymentStatus: 'pending'
-    },
-    {
-      id: 3,
-      propertyName: '힐링 포레스트 독채',
-      guestName: '이준호',
-      checkIn: '2024-02-18',
-      checkOut: '2024-02-19',
-      amount: 120000,
-      status: 'confirmed',
-      paymentStatus: 'paid'
-    }
-  ]
+  const [recentBookings, setRecentBookings] = useState([])
 
   const [notices, setNotices] = useState([])  
   const [loadingNotices, setLoadingNotices] = useState(true)
@@ -136,7 +104,11 @@ export default function AdminPage() {
       // 실제 통계 데이터 가져오기
       const [accommodationsRes, reservationsRes] = await Promise.all([
         supabase.from('accommodations').select('*', { count: 'exact' }),
-        supabase.from('reservations').select('*', { count: 'exact' })
+        supabase.from('reservations').select(`
+          *,
+          accommodations(name),
+          profiles(name)
+        `, { count: 'exact' }).order('created_at', { ascending: false }).limit(5)
       ])
       
       // 공지사항 데이터도 로드
@@ -146,6 +118,20 @@ export default function AdminPage() {
       const activeProperties = accommodationsRes.data?.filter(acc => acc.status === 'active').length || 0
       const featuredProperties = accommodationsRes.data?.filter(acc => acc.is_featured === true).length || 0
       const totalReservations = reservationsRes.count || 0
+
+      // 최근 예약 데이터 설정
+      const recentReservations = reservationsRes.data?.map(reservation => ({
+        id: reservation.id,
+        propertyName: reservation.accommodations?.name || '알 수 없는 숙소',
+        guestName: reservation.profiles?.name || reservation.guest_name || '게스트',
+        checkIn: reservation.check_in_date,
+        checkOut: reservation.check_out_date,
+        amount: reservation.total_amount,
+        status: reservation.status,
+        paymentStatus: reservation.payment_status
+      })) || []
+
+      setRecentBookings(recentReservations)
 
       // 월간 매출 계산
       const monthlyRevenue = reservationsRes.data?.reduce((sum, reservation) => {
@@ -178,18 +164,18 @@ export default function AdminPage() {
       
     } catch (error) {
       console.error('대시보드 데이터 로드 실패:', error)
-      // 오류 시 더미 데이터 사용
       setStats({
-        totalReservations: 1247,
-        monthlyGuests: 234,
-        monthlyRevenue: 12340000,
-        averageRating: 4.8,
-        totalProperties: 89,
-        activeProperties: 76,
-        featuredProperties: 12,
-        totalUsers: 3456,
-        occupancyRate: 87.5
+        totalReservations: 0,
+        monthlyGuests: 0,
+        monthlyRevenue: 0,
+        averageRating: 0,
+        totalProperties: 0,
+        activeProperties: 0,
+        featuredProperties: 0,
+        totalUsers: 0,
+        occupancyRate: 0
       })
+      setRecentBookings([])
     } finally {
       setLoading(false)
     }
@@ -421,6 +407,52 @@ export default function AdminPage() {
             )
           })}
         </div>
+
+        {/* 최근 예약 현황 */}
+        {recentBookings.length > 0 && (
+          <Card className="border shadow-sm">
+            <CardHeader className="border-b bg-gray-50">
+              <CardTitle className="text-gray-900">최근 예약 현황</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">숙소명</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">게스트</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">체크인</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">체크아웃</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">금액</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {recentBookings.map((booking) => (
+                      <tr key={booking.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{booking.propertyName}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{booking.guestName}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{booking.checkIn}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{booking.checkOut}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">₩{booking.amount?.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <Badge className={`text-xs ${
+                            booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                            booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {booking.status === 'confirmed' ? '확정' :
+                             booking.status === 'pending' ? '대기' : booking.status}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* 메인 콘텐츠 영역 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -65,6 +65,15 @@ const menuItems: MenuItem[] = [
     ]
   },
   {
+    title: '인플루언서 관리',
+    icon: <Users className="w-4 h-4" />,
+    children: [
+      { title: '인플루언서 목록', href: '/admin/influencers', icon: <></> },
+      { title: '협업신청 링크', href: '/admin/influencers/tokens', icon: <></> },
+      { title: '커뮤니티 게시판', href: '/admin/influencers/board', icon: <></> }
+    ]
+  },
+  {
     title: '통합 CRM',
     href: '/admin/crm',
     icon: <Users className="w-4 h-4" />

@@ -9,7 +9,7 @@ declare global {
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 import Link from 'next/link'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
@@ -647,7 +647,7 @@ export default function AccommodationDetailPage() {
                 typeof accommodation.images[currentImageIndex] === 'string' &&
                 (accommodation.images[currentImageIndex].startsWith('http') || accommodation.images[currentImageIndex].startsWith('/')) ? (
                 <>
-                  <Image
+                  <OptimizedImage
                     src={accommodation.images[currentImageIndex]}
                     alt={accommodation.name}
                     fill

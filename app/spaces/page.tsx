@@ -35,7 +35,7 @@ import {
   Sparkles,
   Home
 } from 'lucide-react'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 import Link from 'next/link'
 import Header from '@/components/header'
 import { createClient } from '@/lib/supabase/client'
@@ -367,7 +367,7 @@ export default function SpacesPage() {
                   <Link key={accommodation.id} href={`/spaces/${accommodation.id}`} className="group block">
                     <Card className="overflow-hidden border border-purple-100 shadow-md hover:shadow-lg transition-all duration-300">
                       <div className="relative aspect-[4/3]">
-                        <Image
+                        <OptimizedImage
                           src={accommodation.images?.[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&crop=center'}
                           alt={accommodation.name}
                           fill
@@ -426,7 +426,7 @@ export default function SpacesPage() {
                 <Card className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 md:hover:-translate-y-3 bg-white cursor-pointer">
                   {/* 이미지 섹션 */}
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image
+                    <OptimizedImage
                       src={accommodation.images?.[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&crop=center'}
                       alt={accommodation.name}
                       fill

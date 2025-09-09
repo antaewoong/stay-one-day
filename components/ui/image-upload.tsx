@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef } from 'react'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -295,7 +295,7 @@ export function ImageUpload({
               {images.map((imageUrl, index) => (
                 <div key={index} className="relative group">
                   <div className="relative aspect-square rounded-lg overflow-hidden">
-                    <Image
+                    <OptimizedImage
                       src={imageUrl}
                       alt={`업로드된 이미지 ${index + 1}`}
                       fill

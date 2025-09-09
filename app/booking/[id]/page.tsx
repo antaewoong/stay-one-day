@@ -27,7 +27,7 @@ import {
   Mail,
   User
 } from 'lucide-react'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 import Link from 'next/link'
 
 interface Accommodation {
@@ -322,19 +322,13 @@ export default function BookingPage() {
               <CardContent>
                 <div className="flex gap-4">
                   <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                    {accommodation.images && accommodation.images.length > 0 ? (
-                      <Image
-                        src={accommodation.images[0]}
-                        alt={accommodation.name}
-                        width={96}
-                        height={96}
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <MapPin className="w-6 h-6 text-gray-400" />
-                      </div>
-                    )}
+                    <OptimizedImage
+                      src={accommodation.images?.[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=96&h=96&fit=crop&crop=center'}
+                      alt={accommodation.name}
+                      width={96}
+                      height={96}
+                      className="object-cover w-full h-full"
+                    />
                   </div>
                   
                   <div className="flex-1">

@@ -9,7 +9,7 @@ import {
   ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 import { motion } from 'framer-motion'
 import { StarRating } from '@/components/ui/star-rating'
 import { memo } from 'react'
@@ -79,7 +79,7 @@ const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, load
               }}>
           <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: '1/1' }}>
             {useNextImage ? (
-              <Image 
+              <OptimizedImage 
                 src={stay.image} 
                 alt={stay.name} 
                 fill

@@ -28,7 +28,7 @@ import {
   X
 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
+import OptimizedImage from '@/components/optimized-image'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { getFeaturedAccommodations, getAccommodations } from '@/lib/supabase/accommodations'
@@ -37,6 +37,9 @@ import { StarRating } from '@/components/ui/star-rating'
 import HeroSection from '@/components/HeroSection'
 import StayCard from '@/components/StayCard'
 import SectionContainer from '@/components/SectionContainer'
+
+// Supabase 클라이언트를 컴포넌트 외부에서 생성
+const supabase = createClient()
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -271,6 +274,19 @@ export default function HomePage() {
               setHeroSlides(heroData)
             }
           }
+
+          // 히어로 텍스트 로드
+          if (heroTextsResponse.ok) {
+            const heroTextsResult = await heroTextsResponse.json()
+            if (heroTextsResult.data && heroTextsResult.data.length > 0) {
+              const textData = heroTextsResult.data.map((text: any) => ({
+                accent: text.english_phrase,
+                main: text.main_text,
+                sub: text.sub_text
+              }))
+              setHeroTexts(textData)
+            }
+          }
         }
       } catch (error) {
         console.error('데이터 로드 실패:', error)
@@ -281,37 +297,6 @@ export default function HomePage() {
 
     loadAllData()
   }, [])
-
-  // 히어로 텍스트 로드
-  useEffect(() => {
-    const loadHeroTexts = async () => {
-      try {
-        const response = await fetch('/api/admin/hero-texts')
-        if (response.ok) {
-          const result = await response.json()
-          const activeTexts = result.data?.filter((text: any) => text.is_active) || []
-          setHeroTexts(activeTexts.map((text: any) => ({
-            main: text.main_text,
-            sub: text.sub_text,
-            accent: text.english_phrase
-          })))
-        }
-      } catch (error) {
-        console.error('히어로 텍스트 로드 실패:', error)
-        // 기본 텍스트 설정
-        setHeroTexts([{
-          main: '일상에서 벗어나, 특별한 공간에서',
-          sub: '첫 예약 시 15% 할인 혜택',
-          accent: 'Escape the Ordinary'
-        }])
-      }
-    }
-    
-    loadHeroTexts()
-  }, [])
-
-  
-  const supabase = createClient()
 
   // Framer Motion 스크롤 애니메이션 훅들
   const { scrollY } = useScroll()
@@ -686,21 +671,16 @@ export default function HomePage() {
     return () => clearInterval(interval)
   }, [heroSlides.length])
 
-  // 감성 문구 자동 전환 - 10초마다
+  // 감성 문구 자동 전환 - 안전한 구현
   useEffect(() => {
-    if (heroTexts.length === 0) return
+    if (heroTexts.length <= 1) return
     
     const interval = setInterval(() => {
-      setCurrentEmotionalText((prev) => {
-        if (prev >= heroTexts.length - 1) {
-          return prev // 마지막 문구에서 멈춤
-        }
-        return prev + 1
-      })
-    }, 10000) // 10초마다 전환
-
+      setCurrentEmotionalText((prev) => (prev + 1) % heroTexts.length)
+    }, 5000) // 5초마다 전환
+    
     return () => clearInterval(interval)
-  }, [heroTexts.length])
+  }, [heroTexts.length]) // 안정적인 의존성만 사용
 
   // 페이드 효과를 위한 추가 상태
   const [textOpacity, setTextOpacity] = useState(1)
@@ -738,12 +718,10 @@ export default function HomePage() {
     }
   }, [])
 
-  // 초기 데이터 로드 (한 번만 실행)
+  // 초기 로딩 상태 해제 (한 번만 실행)
   useEffect(() => {
-    loadSearchSuggestions()
-    loadAdminHeroSlides()
     setTimeout(() => setIsLoading(false), 2000)
-  }, [loadSearchSuggestions, loadAdminHeroSlides])
+  }, [])
 
   // 추천 검색어 자동 스크롤 (항상 실행)
   useEffect(() => {

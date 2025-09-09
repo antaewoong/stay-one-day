@@ -47,6 +47,11 @@ const menuItems: MenuItem[] = [
     icon: <Users className="w-4 h-4" />
   },
   {
+    title: '인플루언서 협업',
+    href: '/host/collaboration-requests',
+    icon: <Users className="w-4 h-4" />
+  },
+  {
     title: '마케팅 분석',
     href: '/host/marketing',
     icon: <TrendingUp className="w-4 h-4" />
