@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Menu, User, LogOut, Bell, Home } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 
 export default function HostHeader() {
   const [currentDate] = useState(new Date())
@@ -15,7 +14,6 @@ export default function HostHeader() {
     reservations: 0
   })
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
     const userData = sessionStorage.getItem('hostUser')
@@ -27,56 +25,19 @@ export default function HostHeader() {
 
   const loadTodayStats = async (hostInfo: any) => {
     try {
-      const today = new Date().toISOString().split('T')[0]
+      const response = await fetch(`/api/host/stats?host_id=${encodeURIComponent(hostInfo.host_id)}`)
       
-      // 호스트 정보 가져오기
-      const { data: hostData } = await supabase
-        .from('hosts')
-        .select('id')
-        .eq('host_id', hostInfo.host_id)
-        .single()
+      if (!response.ok) {
+        throw new Error('Failed to fetch host stats')
+      }
 
-      if (!hostData) return
-
-      // 호스트의 숙소들 가져오기
-      const { data: accommodations } = await supabase
-        .from('accommodations')
-        .select('id')
-        .eq('host_id', hostData.id)
-
-      if (!accommodations || accommodations.length === 0) return
-
-      const accommodationIds = accommodations.map(acc => acc.id)
-
-      // 오늘의 체크인 예약 가져오기
-      const { data: todayCheckins } = await supabase
-        .from('reservations')
-        .select('id')
-        .in('accommodation_id', accommodationIds)
-        .eq('checkin_date', today)
-        .eq('status', 'confirmed')
-
-      // 오늘의 체크아웃 예약 가져오기  
-      const { data: todayCheckouts } = await supabase
-        .from('reservations')
-        .select('id')
-        .in('accommodation_id', accommodationIds)
-        .eq('checkout_date', today)
-        .eq('status', 'confirmed')
-
-      // 오늘의 신규 예약 가져오기
-      const { data: todayReservations } = await supabase
-        .from('reservations')
-        .select('id')
-        .in('accommodation_id', accommodationIds)
-        .gte('created_at', `${today}T00:00:00`)
-        .lt('created_at', `${today}T23:59:59`)
-
-      setTodayStats({
-        checkins: todayCheckins?.length || 0,
-        checkouts: todayCheckouts?.length || 0,
-        reservations: todayReservations?.length || 0
-      })
+      const result = await response.json()
+      
+      if (result.success) {
+        setTodayStats(result.stats)
+      } else {
+        throw new Error(result.error || 'Unknown error')
+      }
     } catch (error) {
       console.error('오늘 통계 로드 실패:', error)
       setTodayStats({
