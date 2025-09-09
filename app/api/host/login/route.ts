@@ -38,13 +38,26 @@ export async function POST(request: Request) {
       )
     }
 
+    console.log('Host login attempt:', { hostId, passwordLength: password.length })
+
     try {
       // 데이터베이스에서 호스트 계정 조회 (host_id 또는 email로)
-      const { data: hostAccounts, error } = await supabase
+      let { data: hostAccounts, error } = await supabase
         .from('hosts')
         .select('*')
-        .eq('status', 'active') // 활성 상태인 호스트만
-        .or(`host_id.eq.${hostId},email.eq.${hostId}`)
+        .eq('status', 'active')
+        .eq('host_id', hostId)
+
+      // host_id로 찾지 못했으면 email로 시도
+      if (!hostAccounts || hostAccounts.length === 0) {
+        const result = await supabase
+          .from('hosts')
+          .select('*')
+          .eq('status', 'active')
+          .eq('email', hostId)
+        hostAccounts = result.data
+        error = result.error
+      }
 
       if (error || !hostAccounts || hostAccounts.length === 0) {
         return NextResponse.json(
