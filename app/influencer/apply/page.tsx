@@ -412,7 +412,7 @@ export default function InfluencerApplyPage() {
                       </div>
                       <p className="text-sm text-gray-600 ml-6">
                         <span className="font-medium text-purple-600">70% 할인된 가격 (30% 비용 지급)</span><br/>
-                        블로그 지수 관리가 필요한 인플루언서를 위한 옵션입니다.
+                        블로그 지수 관리나 가족 여행으로 실제 활용하려는 인플루언서를 위한 옵션입니다.
                       </p>
                     </div>
                     <div className="text-right">
