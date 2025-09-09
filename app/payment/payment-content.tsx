@@ -133,9 +133,15 @@ export default function PaymentPageContent() {
     setIsProcessing(true)
 
     try {
-      // 토스페이먼츠 초기화 (실제 환경에서는 환경변수로 관리)
+      // 토스페이먼츠 초기화
       const TossPayments = await loadTossPayments()
-      const tossPayments = (TossPayments as any)('test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq') // 테스트 키
+      const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY
+      
+      if (!clientKey) {
+        throw new Error('토스페이먼츠 클라이언트 키가 설정되지 않았습니다.')
+      }
+      
+      const tossPayments = (TossPayments as any)(clientKey)
 
       // 결제 요청
       const paymentData = {

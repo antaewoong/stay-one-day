@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const TOSS_PAYMENTS_SECRET_KEY = process.env.TOSS_PAYMENTS_SECRET_KEY || 'test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R'
+const TOSS_PAYMENTS_SECRET_KEY = process.env.TOSS_PAYMENTS_SECRET_KEY
+
+if (!TOSS_PAYMENTS_SECRET_KEY) {
+  throw new Error('TOSS_PAYMENTS_SECRET_KEY is not configured')
+}
 
 export async function POST(request: NextRequest) {
   try {
