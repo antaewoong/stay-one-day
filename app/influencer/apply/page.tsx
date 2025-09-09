@@ -62,8 +62,7 @@ export default function InfluencerApplyPage() {
   const [formData, setFormData] = useState({
     accommodation_id: '',
     guest_count: 2,
-    request_type: 'barter' as 'paid' | 'barter' | 'partnership',
-    proposed_rate: 0,
+    request_type: 'free' as 'free' | 'paid',
     message: ''
   })
 
@@ -149,7 +148,6 @@ export default function InfluencerApplyPage() {
           influencer_id: influencer.id,
           accommodation_id: formData.accommodation_id,
           request_type: formData.request_type,
-          proposed_rate: formData.request_type === 'paid' ? formData.proposed_rate : null,
           message: formData.message,
           check_in_date: format(checkInDate, 'yyyy-MM-dd'),
           check_out_date: format(checkOutDate, 'yyyy-MM-dd'),
@@ -375,32 +373,145 @@ export default function InfluencerApplyPage() {
                 </Select>
               </div>
 
-              {/* 협업 유형 */}
+              {/* 협업 유형 선택 */}
               <div>
-                <Label>협업 유형 *</Label>
-                <Select value={formData.request_type} onValueChange={(value: 'paid' | 'barter' | 'partnership') => setFormData(prev => ({ ...prev, request_type: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="barter">물물교환 (무료 숙박 + 콘텐츠 제작)</SelectItem>
-                    <SelectItem value="paid">유료 협업 (숙박비 + 추가 수수료)</SelectItem>
-                    <SelectItem value="partnership">파트너십 (장기 협업)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label className="text-base font-semibold mb-4 block">협업 유형 선택 *</Label>
+                
+                {/* 무상 협업 옵션 */}
+                <div 
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all mb-3 ${
+                    formData.request_type === 'free' 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                  onClick={() => setFormData(prev => ({ ...prev, request_type: 'free' }))}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <input
+                          type="radio"
+                          name="request_type"
+                          value="free"
+                          checked={formData.request_type === 'free'}
+                          onChange={() => setFormData(prev => ({ ...prev, request_type: 'free' }))}
+                          className="text-blue-600"
+                        />
+                        <span className="font-semibold text-lg">무상 협업</span>
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">추천</Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 ml-6">
+                        숙박 무료 제공 + 콘텐츠 제작<br/>
+                        <span className="text-orange-600 font-medium">
+                          ※ 무료 제공시 일반 이용 대비 일부 제한이 있을 수 있습니다.
+                        </span>
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-green-600">무료</div>
+                      <div className="text-xs text-gray-500">콘텐츠 제작만</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 유상 협업 옵션 */}
+                <div 
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    formData.request_type === 'paid' 
+                      ? 'border-purple-500 bg-purple-50' 
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                  onClick={() => setFormData(prev => ({ ...prev, request_type: 'paid' }))}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <input
+                          type="radio"
+                          name="request_type"
+                          value="paid"
+                          checked={formData.request_type === 'paid'}
+                          onChange={() => setFormData(prev => ({ ...prev, request_type: 'paid' }))}
+                          className="text-purple-600"
+                        />
+                        <span className="font-semibold text-lg">유상 협업</span>
+                        <Badge variant="outline" className="border-purple-200 text-purple-800">프리미엄</Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 ml-6">
+                        <span className="font-medium text-purple-600">70% 할인된 가격 (30% 비용 지급)</span><br/>
+                        내돈내산 콘텐츠의 마케팅 효율이 높기에 일부 유상 항목을 선택할 수 있습니다.<br/>
+                        <span className="text-green-600 font-medium">
+                          ✓ 유상 선택시 일반 예약과 동등한 서비스를 제공받게 됩니다.
+                        </span>
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-purple-600">30%</div>
+                      <div className="text-xs text-gray-500">할인된 가격</div>
+                      <div className="text-xs text-purple-600 font-medium">정가의 30%만</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 선택된 유상 협업일 때 추가 정보 */}
+                {formData.request_type === 'paid' && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mt-3">
+                    <div className="text-sm space-y-2">
+                      <div className="font-semibold text-purple-800">📋 유상 협업 혜택</div>
+                      <div className="space-y-1 text-purple-700">
+                        <div>• 정가 대비 70% 할인된 특가</div>
+                        <div>• 일반 예약 고객과 동일한 서비스</div>
+                        <div>• 객실 업그레이드 가능 (상황에 따라)</div>
+                        <div>• 추가 편의시설 이용 가능</div>
+                        <div>• 체크인/아웃 시간 유연 조정</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* 희망 수수료 (유료일 때만) */}
-              {formData.request_type === 'paid' && (
-                <div>
-                  <Label htmlFor="proposed_rate">희망 수수료 (원)</Label>
-                  <Input
-                    id="proposed_rate"
-                    type="number"
-                    value={formData.proposed_rate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, proposed_rate: parseInt(e.target.value) || 0 }))}
-                    placeholder="희망하는 수수료를 입력해주세요"
-                  />
+              {/* 예상 비용 안내 */}
+              {formData.accommodation_id && (
+                <div className="bg-gray-50 border rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3">💰 예상 비용</h3>
+                  {(() => {
+                    const selectedAccommodation = accommodations.find(acc => acc.id === formData.accommodation_id)
+                    if (!selectedAccommodation || !checkInDate || !checkOutDate) return null
+                    
+                    const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
+                    const totalPrice = selectedAccommodation.price_per_night * nights
+                    const discountedPrice = Math.round(totalPrice * 0.3)
+                    
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center text-sm">
+                          <span>{selectedAccommodation.name} × {nights}박</span>
+                          <span className="text-gray-600">₩{totalPrice.toLocaleString()}</span>
+                        </div>
+                        
+                        {formData.request_type === 'free' ? (
+                          <div className="flex justify-between items-center font-semibold text-green-600 border-t pt-2">
+                            <span>최종 금액 (무상 협업)</span>
+                            <span className="text-xl">무료</span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex justify-between items-center text-sm text-red-600">
+                              <span>할인 금액 (70% 할인)</span>
+                              <span>-₩{(totalPrice - discountedPrice).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between items-center font-semibold text-purple-600 border-t pt-2">
+                              <span>최종 금액 (30% 지급)</span>
+                              <span className="text-xl">₩{discountedPrice.toLocaleString()}</span>
+                            </div>
+                            <div className="text-xs text-gray-500 text-center">
+                              일반 예약 대비 70% 절약!
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )
+                  })()}
                 </div>
               )}
 
