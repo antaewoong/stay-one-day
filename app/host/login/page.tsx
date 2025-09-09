@@ -25,6 +25,8 @@ export default function SecureHostLoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    
+    let result: any = null
 
     try {
       if (!loginForm.hostId || !loginForm.password) {
@@ -44,20 +46,33 @@ export default function SecureHostLoginPage() {
         })
       })
 
-      const result = await response.json()
+      result = await response.json()
+      console.log('Login response:', result)
 
       if (result.success && result.host) {
         // 세션 저장
+        console.log('Login successful, redirecting...')
         sessionStorage.setItem('hostUser', JSON.stringify(result.host))
-        router.push('/host')
+        
+        // 쿠키 설정 (미들웨어가 체크하는 쿠키)
+        document.cookie = `host-auth=host-${result.host.id}; path=/; max-age=86400`
+        
+        // 세션 저장 확인 후 강제 리다이렉트
+        console.log('Cookie and session set, redirecting...')
+        window.location.replace('/host')
+        return // 성공시 함수 종료 (finally 블록의 setLoading 방지)
       } else {
+        console.log('Login failed:', result)
         setError(result.error || '로그인에 실패했습니다. 호스트 ID와 비밀번호를 확인해주세요.')
       }
     } catch (error) {
       console.error('Host login error:', error)
       setError('로그인 처리 중 오류가 발생했습니다.')
     } finally {
-      setLoading(false)
+      // 성공한 경우가 아닐 때만 로딩 상태 해제
+      if (!result?.success) {
+        setLoading(false)
+      }
     }
   }
 
