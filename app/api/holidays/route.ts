@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 interface HolidayItem {
   dateKind: string // 01: 국경일, 02: 기념일, 03: 24절기, 04: 잡절
   dateName: string // 공휴일명

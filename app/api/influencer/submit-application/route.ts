@@ -2,6 +2,8 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 // POST: 인플루언서 협업 신청 제출
 export async function POST(request: NextRequest) {
   try {

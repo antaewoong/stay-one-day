@@ -3,6 +3,8 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 
+export const dynamic = 'force-dynamic'
+
 // POST: 인플루언서용 협업신청 토큰 생성
 export async function POST(request: NextRequest) {
   try {

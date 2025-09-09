@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 // 숙소 목록 조회 (GET)
 export async function GET(request: NextRequest) {
   try {

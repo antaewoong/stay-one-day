@@ -3,6 +3,8 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 
+export const dynamic = 'force-dynamic'
+
 // POST: 인플루언서 리뷰 제출
 export async function POST(request: NextRequest) {
   try {

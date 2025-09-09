@@ -3,6 +3,8 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 
+export const dynamic = 'force-dynamic'
+
 // GET: 협업 정보 조회 (리뷰 제출용)
 export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
   try {

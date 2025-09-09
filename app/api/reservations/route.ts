@@ -7,6 +7,8 @@ import {
 } from '@/lib/utils/reservation'
 import { CreateReservationData } from '@/lib/types/reservation'
 
+export const dynamic = 'force-dynamic'
+
 // 예약 목록 조회 (GET)
 export async function GET(request: NextRequest) {
   try {

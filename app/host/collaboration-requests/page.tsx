@@ -216,124 +216,180 @@ export default function HostCollaborationRequestsPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50">
-                    <TableHead>인플루언서</TableHead>
-                    <TableHead>숙소</TableHead>
-                    <TableHead>일정</TableHead>
-                    <TableHead>협업 유형</TableHead>
+                    <TableHead className="w-12 text-center">#</TableHead>
+                    <TableHead>인플루언서명</TableHead>
+                    <TableHead>스테이명</TableHead>
+                    <TableHead>신청일</TableHead>
+                    <TableHead>이용희망일</TableHead>
                     <TableHead>상태</TableHead>
-                    <TableHead className="w-32">작업</TableHead>
+                    <TableHead>연락처</TableHead>
+                    <TableHead>인원</TableHead>
+                    <TableHead>유무상</TableHead>
+                    <TableHead>참여율</TableHead>
+                    <TableHead>요청메모</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {requests.map((request) => (
+                  {requests.map((request, index) => (
                     <TableRow key={request.id} className="hover:bg-gray-50">
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage src={request.influencer.profile_image_url} />
-                            <AvatarFallback>
-                              {request.influencer.name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">{request.influencer.name}</div>
-                            <div className="text-sm text-gray-600">
-                              팔로워 {request.influencer.follower_count?.toLocaleString()}명
-                            </div>
-                          </div>
-                        </div>
+                      {/* # */}
+                      <TableCell className="text-center text-sm">
+                        {index + 1}
                       </TableCell>
+                      
+                      {/* 인플루언서명 (클릭 시 채널 정보 모달) */}
+                      <TableCell>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="link" className="p-0 h-auto font-medium text-blue-600 hover:text-blue-800">
+                              {request.influencer.name}
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>인플루언서 채널 정보</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="w-12 h-12">
+                                  <AvatarImage src={request.influencer.profile_image_url} />
+                                  <AvatarFallback>
+                                    {request.influencer.name.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-medium text-lg">{request.influencer.name}</div>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                  <TrendingUp className="w-4 h-4 text-gray-400" />
+                                  <span className="text-sm">팔로워: {request.influencer.follower_count?.toLocaleString()}명</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  <TrendingUp className="w-4 h-4 text-gray-400" />
+                                  <span className="text-sm">참여율: {request.influencer.engagement_rate}%</span>
+                                </div>
+                                
+                                {request.influencer.instagram_handle && (
+                                  <div className="flex items-center gap-2">
+                                    <Instagram className="w-4 h-4 text-gray-400" />
+                                    <span className="text-sm">{request.influencer.instagram_handle}</span>
+                                  </div>
+                                )}
+                                
+                                {request.influencer.youtube_channel && (
+                                  <div className="flex items-center gap-2">
+                                    <Youtube className="w-4 h-4 text-gray-400" />
+                                    <span className="text-sm">{request.influencer.youtube_channel}</span>
+                                  </div>
+                                )}
+                                
+                                <div className="text-sm">
+                                  <span className="font-medium">콘텐츠 카테고리: </span>
+                                  <span>{request.influencer.content_category?.join(', ')}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </TableCell>
+                      
+                      {/* 스테이명 */}
                       <TableCell>
                         <div>
                           <div className="font-medium">{request.accommodation.name}</div>
                           <div className="text-sm text-gray-600">{request.accommodation.location}</div>
                         </div>
                       </TableCell>
+                      
+                      {/* 신청일 */}
                       <TableCell>
                         <div className="text-sm">
-                          <div>{format(new Date(request.check_in_date), 'MM/dd', { locale: ko })} - {format(new Date(request.check_out_date), 'MM/dd', { locale: ko })}</div>
-                          <div className="text-gray-600">{request.guest_count}명</div>
+                          {format(new Date(request.created_at), 'MM/dd', { locale: ko })}
                         </div>
                       </TableCell>
+                      
+                      {/* 이용희망일 */}
                       <TableCell>
-                        <div className="space-y-1">
-                          {getRequestTypeBadge(request.request_type)}
-                          {request.proposed_rate && (
-                            <div className="text-sm text-gray-600">₩{request.proposed_rate.toLocaleString()}</div>
-                          )}
+                        <div className="text-sm">
+                          {format(new Date(request.check_in_date), 'MM/dd', { locale: ko })}
                         </div>
                       </TableCell>
+                      
+                      {/* 상태 */}
                       <TableCell>
                         {getStatusBadge(request.status)}
                       </TableCell>
+                      
+                      {/* 연락처 */}
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="text-sm">{request.influencer.phone}</div>
+                          <div className="text-xs text-gray-600">{request.influencer.email}</div>
+                        </div>
+                      </TableCell>
+                      
+                      {/* 희망인원 */}
+                      <TableCell>
+                        <div className="text-sm flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          {request.guest_count}명
+                        </div>
+                      </TableCell>
+                      
+                      {/* 유상/무상 */}
+                      <TableCell>
+                        {request.request_type === 'free' ? (
+                          <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">무상</Badge>
+                        ) : request.request_type === 'paid' ? (
+                          <Badge variant="outline" className="text-purple-700 border-purple-300 bg-purple-50">유상</Badge>
+                        ) : (
+                          <Badge variant="secondary">기타</Badge>
+                        )}
+                      </TableCell>
+                      
+                      {/* 인게이지먼트 */}
+                      <TableCell>
+                        <div className="text-center">
+                          <div className="text-sm font-medium">{request.influencer.engagement_rate}%</div>
+                          <div className="text-xs text-gray-500">참여율</div>
+                        </div>
+                      </TableCell>
+                      
+                      {/* 요청메모 (클릭 시 모달) */}
                       <TableCell>
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button
+                            <Button 
+                              variant="outline" 
                               size="sm"
-                              variant="outline"
                               onClick={() => setSelectedRequest(request)}
                             >
-                              <Eye className="mr-1 h-3 w-3" />
-                              상세
+                              <MessageCircle className="mr-1 h-3 w-3" />
+                              메모보기
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                          <DialogContent className="max-w-xl">
                             <DialogHeader>
-                              <DialogTitle>협업 요청 상세</DialogTitle>
+                              <DialogTitle>협업 요청 메모</DialogTitle>
                             </DialogHeader>
                             
                             {selectedRequest && (
-                              <div className="space-y-6">
-                                {/* 인플루언서 정보 */}
-                                <div className="bg-blue-50 p-4 rounded-lg">
-                                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                                    <Users className="w-4 h-4" />
-                                    인플루언서 정보
-                                  </h3>
-                                  <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div className="flex items-center gap-2">
-                                      <Mail className="w-4 h-4 text-gray-400" />
-                                      {selectedRequest.influencer.email}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Phone className="w-4 h-4 text-gray-400" />
-                                      {selectedRequest.influencer.phone}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <MapPin className="w-4 h-4 text-gray-400" />
-                                      {selectedRequest.influencer.location}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <TrendingUp className="w-4 h-4 text-gray-400" />
-                                      참여율 {selectedRequest.influencer.engagement_rate}%
-                                    </div>
-                                    {selectedRequest.influencer.instagram_handle && (
-                                      <div className="flex items-center gap-2">
-                                        <Instagram className="w-4 h-4 text-gray-400" />
-                                        {selectedRequest.influencer.instagram_handle}
-                                      </div>
-                                    )}
-                                    {selectedRequest.influencer.youtube_channel && (
-                                      <div className="flex items-center gap-2">
-                                        <Youtube className="w-4 h-4 text-gray-400" />
-                                        {selectedRequest.influencer.youtube_channel}
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="mt-2">
-                                    <span className="text-sm font-medium">콘텐츠 카테고리: </span>
-                                    <span className="text-sm">{selectedRequest.influencer.content_category?.join(', ')}</span>
-                                  </div>
+                              <div className="space-y-4">
+                                {/* 기본 정보 */}
+                                <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                                  <div><span className="font-medium">신청자:</span> {selectedRequest.influencer.name}</div>
+                                  <div><span className="font-medium">숙소:</span> {selectedRequest.accommodation.name}</div>
+                                  <div><span className="font-medium">이용일:</span> {format(new Date(selectedRequest.check_in_date), 'PPP', { locale: ko })}</div>
                                 </div>
 
-                                {/* 협업 요청 내용 */}
+                                {/* 협업 요청 메시지 */}
                                 <div>
-                                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                                    <MessageCircle className="w-4 h-4" />
-                                    협업 요청 메시지
-                                  </h3>
-                                  <div className="bg-gray-50 p-4 rounded-lg text-sm whitespace-pre-wrap">
+                                  <h3 className="font-semibold mb-2">인플루언서 요청 메시지</h3>
+                                  <div className="bg-blue-50 p-4 rounded-lg text-sm whitespace-pre-wrap max-h-40 overflow-y-auto">
                                     {selectedRequest.message || '메시지가 없습니다.'}
                                   </div>
                                 </div>
@@ -341,7 +397,7 @@ export default function HostCollaborationRequestsPage() {
                                 {/* 승인/거부 (pending 상태일 때만) */}
                                 {selectedRequest.status === 'pending' && (
                                   <div>
-                                    <h3 className="font-semibold mb-3">호스트 메모 (선택사항)</h3>
+                                    <h3 className="font-semibold mb-2">호스트 메모 (선택사항)</h3>
                                     <Textarea
                                       value={hostNotes}
                                       onChange={(e) => setHostNotes(e.target.value)}

@@ -3,6 +3,8 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 
+export const dynamic = 'force-dynamic'
+
 // POST: 인플루언서 로그인
 export async function POST(request: NextRequest) {
   try {

@@ -2,6 +2,8 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 // GET: 모든 협업 요청 조회 (관리자용)
 export async function GET(request: NextRequest) {
   try {

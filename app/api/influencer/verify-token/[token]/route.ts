@@ -3,6 +3,8 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 
+export const dynamic = 'force-dynamic'
+
 // GET: 토큰 검증 및 인플루언서 정보 반환
 export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
   try {

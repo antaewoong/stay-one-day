@@ -2,6 +2,8 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 // GET: 현재 협업 기간 정보 조회
 export async function GET() {
   try {
