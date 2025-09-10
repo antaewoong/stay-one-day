@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // GET: 호스트의 협업 요청 목록 조회
 export async function GET(request: NextRequest) {
-  try
+  try {
     
     // 호스트 인증 확인 (세션 또는 쿼리 파라미터로 host_id 전달)
     const { searchParams } = new URL(request.url)
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
 
 // PUT: 협업 요청 상태 업데이트 (승인/거부)
 export async function PUT(request: NextRequest) {
-  try
+  try {
     const body = await request.json()
     const { request_id, status, host_notes, host_id } = body
 

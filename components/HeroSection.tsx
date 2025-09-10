@@ -68,8 +68,50 @@ const HeroSection = memo(function HeroSection({
   searchLocation,
   setShowSearchModal
 }: HeroSectionProps) {
+  // 터치 스와이프를 위한 상태
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
+
+  // 슬라이드 네비게이션 함수들
+  const nextSlide = () => {
+    setCurrentSlide((currentSlide + 1) % heroSlides.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((currentSlide - 1 + heroSlides.length) % heroSlides.length)
+  }
+
+  // 터치 이벤트 핸들러
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null) // 이전 터치 종료점 초기화
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe && heroSlides.length > 0) {
+      nextSlide()
+    }
+    if (isRightSwipe && heroSlides.length > 0) {
+      prevSlide()
+    }
+  }
   return (
-    <section className="relative h-[65vh] sm:h-[45vh] md:h-[45vh] lg:h-[50vh] overflow-hidden">
+    <section 
+      className="relative h-[65vh] sm:h-[45vh] md:h-[45vh] lg:h-[50vh] overflow-hidden touch-pan-y"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {/* 배경 이미지 슬라이더 */}
       <motion.div 
         className="absolute inset-0"
@@ -357,6 +399,7 @@ const HeroSection = memo(function HeroSection({
           </div>
         </div>
       </div>
+
 
       {/* 슬라이드 인디케이터 */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
