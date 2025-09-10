@@ -46,7 +46,8 @@ const menuItems: MenuItem[] = [
     icon: <Building2 className="w-4 h-4" />,
     children: [
       { title: '숙소 목록', href: '/admin/accommodations', icon: <></> },
-      { title: '새 숙소 등록', href: '/admin/accommodations/add', icon: <></> }
+      { title: '새 숙소 등록', href: '/admin/accommodations/add', icon: <></> },
+      { title: '숙소할인관리', href: '/admin/accommodations/discount-management', icon: <></> }
     ]
   },
   {

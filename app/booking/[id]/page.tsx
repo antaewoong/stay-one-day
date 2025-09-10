@@ -25,7 +25,9 @@ import {
   Loader2,
   Phone,
   Mail,
-  User
+  User,
+  Tag,
+  X
 } from 'lucide-react'
 import OptimizedImage from '@/components/optimized-image'
 import Link from 'next/link'
@@ -75,6 +77,11 @@ export default function BookingPage() {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  
+  // Discount code states
+  const [discountCode, setDiscountCode] = useState('')
+  const [appliedDiscount, setAppliedDiscount] = useState<any>(null)
+  const [discountLoading, setDiscountLoading] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -171,22 +178,89 @@ export default function BookingPage() {
     )
   }
 
-  const calculateTotalPrice = () => {
+  const validateDiscountCode = async () => {
+    if (!discountCode.trim()) {
+      alert('할인코드를 입력해주세요.')
+      return
+    }
+
+    if (!bookingData) return
+
+    setDiscountLoading(true)
+    
+    try {
+      const response = await fetch('/api/discount-codes/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: discountCode.trim().toUpperCase(),
+          accommodation_id: bookingData.accommodation_id,
+          subtotal: calculateSubtotal()
+        })
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.valid) {
+        setAppliedDiscount(result.discount)
+        alert(`할인코드가 적용되었습니다! ${result.discount.type === 'percentage' ? result.discount.value + '%' : '₩' + result.discount.value.toLocaleString()} 할인`)
+      } else {
+        alert(result.message || '유효하지 않은 할인코드입니다.')
+        setAppliedDiscount(null)
+      }
+    } catch (error) {
+      console.error('할인코드 검증 실패:', error)
+      alert('할인코드 검증 중 오류가 발생했습니다.')
+    } finally {
+      setDiscountLoading(false)
+    }
+  }
+
+  const removeDiscountCode = () => {
+    setDiscountCode('')
+    setAppliedDiscount(null)
+  }
+
+  const calculateSubtotal = () => {
     if (!accommodation || !bookingData) return 0
     
-    let total = bookingData.price
+    let subtotal = bookingData.price
     
     // Add option prices
     if (accommodation.extra_options) {
       selectedOptions.forEach(optionName => {
         const option = accommodation.extra_options.find((opt: any) => opt.name === optionName)
         if (option) {
-          total += option.price
+          subtotal += option.price
         }
       })
     }
     
-    return total
+    return subtotal
+  }
+
+  const calculateDiscountAmount = () => {
+    if (!appliedDiscount) return 0
+    
+    const subtotal = calculateSubtotal()
+    
+    if (appliedDiscount.type === 'percentage') {
+      let discountAmount = subtotal * (appliedDiscount.value / 100)
+      if (appliedDiscount.maxDiscount) {
+        discountAmount = Math.min(discountAmount, appliedDiscount.maxDiscount)
+      }
+      return discountAmount
+    } else {
+      return appliedDiscount.value
+    }
+  }
+
+  const calculateTotalPrice = () => {
+    const subtotal = calculateSubtotal()
+    const discountAmount = calculateDiscountAmount()
+    return Math.max(0, subtotal - discountAmount)
   }
 
   const handleSubmit = async () => {
@@ -206,7 +280,10 @@ export default function BookingPage() {
         guest_name: guestName.trim(),
         guest_phone: guestPhone.replace(/[^0-9]/g, ''),
         guest_email: guestEmail.trim() || undefined,
-        special_requests: specialRequests.trim() || undefined
+        special_requests: specialRequests.trim() || undefined,
+        discount_code: appliedDiscount ? discountCode.trim().toUpperCase() : undefined,
+        discount_amount: appliedDiscount ? calculateDiscountAmount() : 0,
+        total_price: calculateTotalPrice()
       }
 
       const response = await fetch('/api/reservations', {
@@ -520,6 +597,57 @@ export default function BookingPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  {/* Discount Code Section - Subtle */}
+                  <div className="border-b pb-4">
+                    {!appliedDiscount ? (
+                      <details className="group">
+                        <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                          할인코드가 있으신가요?
+                          <Tag className="w-3 h-3" />
+                        </summary>
+                        <div className="mt-3 flex gap-2">
+                          <Input
+                            value={discountCode}
+                            onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                            placeholder="코드 입력"
+                            className="flex-1 text-sm"
+                            size="sm"
+                          />
+                          <Button
+                            onClick={validateDiscountCode}
+                            disabled={discountLoading || !discountCode.trim()}
+                            variant="outline"
+                            size="sm"
+                            className="text-sm"
+                          >
+                            {discountLoading ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              '적용'
+                            )}
+                          </Button>
+                        </div>
+                      </details>
+                    ) : (
+                      <div className="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded text-sm">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="font-medium text-green-800">
+                            {discountCode} 할인 적용됨
+                          </span>
+                        </div>
+                        <Button
+                          onClick={removeDiscountCode}
+                          variant="ghost"
+                          size="sm"
+                          className="text-green-600 hover:text-green-800 h-6 w-6 p-0"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Price Breakdown */}
                   <div className="space-y-3">
                     <div className="flex justify-between">
@@ -539,6 +667,20 @@ export default function BookingPage() {
                             </div>
                           ) : null
                         })}
+                      </>
+                    )}
+                    
+                    {appliedDiscount && (
+                      <>
+                        <Separator />
+                        <div className="flex justify-between text-sm">
+                          <span>소계</span>
+                          <span>₩{formatPrice(calculateSubtotal())}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-green-600">
+                          <span>할인 ({discountCode})</span>
+                          <span>-₩{formatPrice(calculateDiscountAmount())}</span>
+                        </div>
                       </>
                     )}
                     
