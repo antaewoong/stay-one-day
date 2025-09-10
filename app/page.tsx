@@ -1032,10 +1032,12 @@ export default function HomePage() {
               <h2 className="text-2xl md:text-3xl font-light text-gray-900 tracking-tight">추천 스테이</h2>
               <p className="text-gray-500 font-light mt-1">엄선된 프리미엄 숙소</p>
             </div>
-            <Link href="/spaces" className="text-gray-400 hover:text-gray-900 flex items-center transition-colors duration-300 group">
-              <span className="font-light">더보기</span>
-              <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
+            <Button variant="tertiary" asChild>
+              <Link href="/spaces" className="flex items-center transition-colors duration-300 group">
+                <span>더보기</span>
+                <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
           </div>
 
           <div 
@@ -1178,10 +1180,12 @@ export default function HomePage() {
               <h2 className="text-2xl md:text-3xl font-light text-gray-900 tracking-tight">신규</h2>
               <p className="text-gray-500 font-light mt-1">새롭게 추가된 특별한 공간들</p>
             </div>
-            <Link href="/spaces" className="text-gray-400 hover:text-gray-900 flex items-center transition-colors duration-300 group">
-              <span className="font-light">더보기</span>
-              <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
+            <Button variant="tertiary" asChild>
+              <Link href="/spaces" className="flex items-center transition-colors duration-300 group">
+                <span>더보기</span>
+                <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
           </div>
 
           <div 
@@ -1480,20 +1484,33 @@ export default function HomePage() {
             className="bg-white rounded-3xl shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto border border-gray-100"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* 모달 헤더 */}
+            {/* 모달 헤더 - 키보드 친화적 설계: 완료 버튼 상단 우측 */}
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">검색</h2>
                 <p className="text-sm text-gray-500 mt-1">원하시는 조건을 선택해주세요</p>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setShowSearchModal(false)}
-                className="rounded-full hover:bg-gray-100 w-10 h-10 p-0 text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-5 h-5" />
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="primary"
+                  size="sm"
+                  className="px-4"
+                  onClick={() => {
+                    console.log('검색 실행:', { searchLocation, selectedDate, guestCount })
+                    setShowSearchModal(false)
+                  }}
+                >
+                  검색
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowSearchModal(false)}
+                  className="rounded-full hover:bg-gray-100 w-10 h-10 p-0 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
 
             {/* 검색 폼 */}
@@ -1577,16 +1594,10 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* 검색 버튼 - 스테이폴리오 스타일 */}
-              <Button
-                className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-medium transition-colors text-base"
-                onClick={() => {
-                  console.log('검색 실행:', { searchLocation, selectedDate, guestCount })
-                  setShowSearchModal(false)
-                }}
-              >
-                검색하기
-              </Button>
+              {/* 키보드 사용 시 상단 검색 버튼 사용 안내 */}
+              <p className="text-sm text-gray-500 text-center mt-4">
+                키보드 입력 중에는 상단의 검색 버튼을 이용해주세요
+              </p>
             </div>
           </div>
         </div>

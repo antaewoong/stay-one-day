@@ -158,9 +158,9 @@ const HeroSection = memo(function HeroSection({
             {/* 오른쪽: 공유하기 + 위시리스트 + 마이페이지 */}
             <div className="flex items-center gap-3">
               <Button 
-                variant="ghost" 
+                variant="secondary" 
                 size="sm" 
-                className="text-white hover:bg-white/10 rounded-full w-10 h-10 p-0"
+                className="text-white border-white/20 hover:bg-white/10 hover:border-white/30 rounded-full w-10 h-10 p-0"
                 onClick={() => {
                   if (navigator.share) {
                     navigator.share({
@@ -177,7 +177,7 @@ const HeroSection = memo(function HeroSection({
                 <Share2 className="w-5 h-5" />
               </Button>
               <Link href="/wishlist">
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 rounded-full w-10 h-10 p-0">
+                <Button variant="secondary" size="sm" className="text-white border-white/20 hover:bg-white/10 hover:border-white/30 rounded-full w-10 h-10 p-0">
                   <Heart className="w-5 h-5" />
                 </Button>
               </Link>

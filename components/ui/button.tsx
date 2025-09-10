@@ -9,15 +9,20 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        // Primary: 가장 중요한 액션 (예약하기, 결제하기)
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        primary: "bg-blue-600 text-white hover:bg-blue-700 font-medium shadow-sm",
+        
+        // Secondary: 보조 액션 (위시리스트, 공유하기)  
+        secondary: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 font-medium",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        
+        // Tertiary: 3차 액션 (더보기, 취소)
+        tertiary: "text-gray-600 hover:text-gray-900 font-normal underline-offset-4 hover:underline",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
       },
       size: {
         default: "h-10 px-4 py-2",
