@@ -36,7 +36,7 @@ export default function HostReviewsPage() {
     if (userData) {
       const parsedData = JSON.parse(userData)
       setHostData(parsedData)
-      loadReviews(parsedData.host_id)
+      loadReviews(parsedData.id)
     }
   }, [])
 
@@ -94,7 +94,7 @@ export default function HostReviewsPage() {
   useEffect(() => {
     if (hostData) {
       const timeoutId = setTimeout(() => {
-        loadReviews(hostData.host_id)
+        loadReviews(hostData.id)
       }, 300)
 
       return () => clearTimeout(timeoutId)
@@ -112,15 +112,15 @@ export default function HostReviewsPage() {
         },
         body: JSON.stringify({
           reply: replyText,
-          hostId: hostData?.host_id || 'host-001',
-          hostName: hostData?.host_name || '호스트'
+          hostId: hostData?.id || hostData?.host_id || 'host-001',
+          hostName: hostData?.representative_name || hostData?.host_name || '호스트'
         })
       })
 
       const result = await response.json()
 
       if (result.success) {
-        await loadReviews(hostData?.host_id)
+        await loadReviews(hostData?.id)
         setReplyingTo(null)
         setReplyText('')
         alert('답글이 등록되었습니다.')

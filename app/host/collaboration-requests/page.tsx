@@ -84,16 +84,29 @@ export default function HostCollaborationRequestsPage() {
   const [processing, setProcessing] = useState<string | null>(null)
   const [hostNotes, setHostNotes] = useState('')
 
-  const hostId = '550e8400-e29b-41d4-a716-446655440000' // 임시 호스트 ID
+  const [hostData, setHostData] = useState<any>(null)
 
   useEffect(() => {
-    loadCollaborationRequests()
-  }, [statusFilter])
+    // 호스트 정보 확인
+    const userData = sessionStorage.getItem('hostUser')
+    if (userData) {
+      const parsedData = JSON.parse(userData)
+      setHostData(parsedData)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (hostData?.id) {
+      loadCollaborationRequests()
+    }
+  }, [hostData, statusFilter])
 
   const loadCollaborationRequests = async () => {
+    if (!hostData?.id) return
+    
     try {
       setLoading(true)
-      const response = await fetch(`/api/host/collaboration-requests?host_id=${hostId}&status=${statusFilter}&limit=50`)
+      const response = await fetch(`/api/host/collaboration-requests?host_id=${hostData.id}&status=${statusFilter}&limit=50`)
       const result = await response.json()
       
       if (result.success) {
@@ -122,7 +135,7 @@ export default function HostCollaborationRequestsPage() {
           request_id: requestId,
           status,
           host_notes: hostNotes,
-          host_id: hostId
+          host_id: hostData?.id
         })
       })
 

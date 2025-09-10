@@ -7,23 +7,28 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { createClient } from '@/lib/supabase/client'
 import { Search, Calendar, Users, MapPin, Phone, Mail, CheckCircle, XCircle, Clock, CreditCard, AlertCircle } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 
 interface Reservation {
   id: string
   guest_name: string
   guest_phone: string
   guest_email: string
-  accommodation_name: string
-  check_in: string
-  check_out: string
-  guests: number
+  checkin_date: string
+  checkout_date: string
+  guest_count: number
   total_amount: number
   status: 'confirmed' | 'pending' | 'cancelled' | 'completed'
   payment_status: 'paid' | 'pending' | 'failed' | 'refunded'
   created_at: string
   special_requests?: string
+  accommodation: {
+    id: string
+    name: string
+    accommodation_type: string
+    address: string
+  }
 }
 
 export default function HostReservationsPage() {
@@ -34,154 +39,79 @@ export default function HostReservationsPage() {
   const [hostData, setHostData] = useState<any>(null)
 
   useEffect(() => {
+    // 호스트 정보 확인
     const userData = sessionStorage.getItem('hostUser')
     if (userData) {
       const parsedData = JSON.parse(userData)
       setHostData(parsedData)
-      loadReservations(parsedData.host_id)
     }
   }, [])
 
-  const loadReservations = async (hostId: string) => {
+  useEffect(() => {
+    if (hostData?.id) {
+      loadReservations()
+    }
+  }, [hostData, statusFilter, searchQuery])
+
+  const loadReservations = async () => {
+    if (!hostData?.id) return
+    
     try {
       setLoading(true)
-      const supabase = createClient()
       
-      // 먼저 호스트 정보를 가져와서 hosts 테이블의 id를 찾습니다
-      const { data: hostData, error: hostError } = await supabase
-        .from('hosts')
-        .select('id')
-        .eq('host_id', hostId)
-        .single()
-
-      if (hostError || !hostData) {
-        console.error('호스트 정보를 찾을 수 없습니다:', hostError)
-        setReservations([])
-        return
-      }
-
-      // 호스트의 숙소 목록을 가져옵니다
-      const { data: accommodations, error: accommodationsError } = await supabase
-        .from('accommodations')
-        .select('id, name')
-        .eq('host_id', hostData.id)
-
-      if (accommodationsError || !accommodations) {
-        console.error('숙소 정보를 찾을 수 없습니다:', accommodationsError)
-        setReservations([])
-        return
-      }
-
-      const accommodationIds = accommodations.map(acc => acc.id)
+      const params = new URLSearchParams({
+        host_id: hostData.id,
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(searchQuery && { search: searchQuery }),
+        limit: '100'
+      })
       
-      if (accommodationIds.length === 0) {
+      const response = await fetch(`/api/host/reservations?${params}`)
+      const result = await response.json()
+      
+      if (response.ok) {
+        setReservations(result.data || [])
+      } else {
+        console.error('예약 데이터 로드 실패:', result.error)
+        toast.error('예약 데이터를 불러올 수 없습니다')
         setReservations([])
-        return
       }
-
-      // 예약 데이터를 가져옵니다
-      let query = supabase
-        .from('reservations')
-        .select(`
-          id,
-          guest_name,
-          guest_phone,
-          guest_email,
-          checkin_date,
-          checkout_date,
-          guest_count,
-          total_amount,
-          status,
-          payment_status,
-          created_at,
-          special_requests,
-          accommodations!inner(name)
-        `)
-        .in('accommodation_id', accommodationIds)
-        .order('created_at', { ascending: false })
-
-      // 상태 필터 적용
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter)
-      }
-
-      const { data: reservationsData, error: reservationsError } = await query
-
-      if (reservationsError) {
-        console.error('예약 데이터 로드 실패:', reservationsError)
-        setReservations([])
-        return
-      }
-
-      // 데이터를 컴포넌트가 기대하는 형식으로 변환
-      const formattedReservations = (reservationsData || []).map(reservation => ({
-        id: reservation.id,
-        guest_name: reservation.guest_name,
-        guest_phone: reservation.guest_phone || '정보없음',
-        guest_email: reservation.guest_email || '정보없음',
-        accommodation_name: reservation.accommodations?.name || '숙소명 없음',
-        check_in: reservation.checkin_date,
-        check_out: reservation.checkout_date,
-        guests: reservation.guest_count,
-        total_amount: reservation.total_amount,
-        status: reservation.status,
-        payment_status: reservation.payment_status || 'pending',
-        created_at: reservation.created_at,
-        special_requests: reservation.special_requests
-      }))
-
-      // 검색 필터 적용
-      let filteredReservations = formattedReservations
-      if (searchQuery) {
-        filteredReservations = filteredReservations.filter(r => 
-          r.guest_name.includes(searchQuery) || 
-          r.accommodation_name.includes(searchQuery) ||
-          r.guest_phone.includes(searchQuery)
-        )
-      }
-
-      setReservations(filteredReservations)
     } catch (error) {
       console.error('예약 목록 로드 실패:', error)
+      toast.error('서버 오류가 발생했습니다')
       setReservations([])
     } finally {
       setLoading(false)
     }
   }
 
-
-  useEffect(() => {
-    if (hostData) {
-      const timeoutId = setTimeout(() => {
-        loadReservations(hostData.host_id)
-      }, 300)
-
-      return () => clearTimeout(timeoutId)
-    }
-  }, [searchQuery, statusFilter, hostData])
-
   const handleStatusUpdate = async (reservationId: string, newStatus: string) => {
+    if (!hostData?.id) return
+    
     try {
-      const supabase = createClient()
+      const response = await fetch('/api/host/reservations', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: reservationId,
+          status: newStatus,
+          hostId: hostData.id
+        })
+      })
+
+      const result = await response.json()
       
-      const { error } = await supabase
-        .from('reservations')
-        .update({ status: newStatus })
-        .eq('id', reservationId)
-
-      if (error) {
-        console.error('상태 변경 실패:', error)
-        alert('상태 변경에 실패했습니다.')
-        return
+      if (response.ok) {
+        toast.success('예약 상태가 변경되었습니다')
+        await loadReservations() // 데이터 새로고침
+      } else {
+        toast.error(result.error || '상태 변경에 실패했습니다')
       }
-
-      setReservations(prev => 
-        prev.map(r => r.id === reservationId ? { ...r, status: newStatus as any } : r)
-      )
-      alert('예약 상태가 변경되었습니다.')
     } catch (error) {
       console.error('상태 변경 실패:', error)
-      alert('상태 변경에 실패했습니다.')
+      toast.error('서버 오류가 발생했습니다')
     }
   }
 
@@ -332,18 +262,18 @@ export default function HostReservationsPage() {
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
                             <Phone className="w-3 h-3" />
-                            <span>{reservation.guest_phone}</span>
+                            <span>{reservation.guest_phone || '정보없음'}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
                             <Mail className="w-3 h-3" />
-                            <span>{reservation.guest_email}</span>
+                            <span>{reservation.guest_email || '정보없음'}</span>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-gray-400" />
-                          <span className="text-gray-900">{reservation.accommodation_name}</span>
+                          <span className="text-gray-900">{reservation.accommodation?.name || '숙소명 없음'}</span>
                         </div>
                         {reservation.special_requests && (
                           <div className="text-xs text-gray-500 mt-1">
@@ -353,11 +283,11 @@ export default function HostReservationsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          <div className="text-gray-900">{reservation.check_in}</div>
-                          <div className="text-gray-500">~ {reservation.check_out}</div>
+                          <div className="text-gray-900">{reservation.checkin_date}</div>
+                          <div className="text-gray-500">~ {reservation.checkout_date}</div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-gray-700">{reservation.guests}명</TableCell>
+                      <TableCell className="text-gray-700">{reservation.guest_count}명</TableCell>
                       <TableCell className="font-medium text-gray-900">
                         ₩{reservation.total_amount.toLocaleString()}
                       </TableCell>
