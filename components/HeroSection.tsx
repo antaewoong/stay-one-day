@@ -92,18 +92,22 @@ const HeroSection = memo(function HeroSection({
   }
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
+    if (!touchStart || !touchEnd || heroSlides.length <= 1) return
     
     const distance = touchStart - touchEnd
     const isLeftSwipe = distance > 50
     const isRightSwipe = distance < -50
 
-    if (isLeftSwipe && heroSlides.length > 0) {
+
+    if (isLeftSwipe) {
       nextSlide()
-    }
-    if (isRightSwipe && heroSlides.length > 0) {
+    } else if (isRightSwipe) {
       prevSlide()
     }
+    
+    // 터치 상태 초기화
+    setTouchStart(null)
+    setTouchEnd(null)
   }
   return (
     <section 

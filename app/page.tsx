@@ -88,6 +88,7 @@ export default function HomePage() {
     
     const loadAllData = async () => {
       if (!isActive) return
+      
       try {
         // 1. 평점 데이터 먼저 로드
         const { data: reviewsData, error: reviewError } = await supabase
