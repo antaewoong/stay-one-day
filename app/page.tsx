@@ -61,6 +61,7 @@ export default function HomePage() {
   const [partyStays, setPartyStays] = useState<any[]>([])
   const [newStays, setNewStays] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [dataLoadTimeout, setDataLoadTimeout] = useState<NodeJS.Timeout | null>(null)
   const [allAccommodations, setAllAccommodations] = useState<any[]>([])
   const [searchLocation, setSearchLocation] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
@@ -88,6 +89,14 @@ export default function HomePage() {
     
     const loadAllData = async () => {
       if (!isActive) return
+      
+      // 2초 타임아웃 설정 - Vercel에서 로딩이 무한정 걸리는 문제 방지
+      const timeoutId = setTimeout(() => {
+        if (isActive) {
+          console.warn('Data loading timeout - proceeding with default state')
+          setLoading(false)
+        }
+      }, 2000)
       
       try {
         // 1. 평점 데이터 먼저 로드
@@ -293,6 +302,7 @@ export default function HomePage() {
       } catch (error) {
         console.error('데이터 로드 실패:', error)
       } finally {
+        clearTimeout(timeoutId)
         if (isActive) {
           setLoading(false)
         }
