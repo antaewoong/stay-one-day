@@ -36,51 +36,46 @@ export default function HostAccommodationsPage() {
   useEffect(() => {
     // 호스트 정보 가져오기
     const userData = sessionStorage.getItem('hostUser')
+    console.log('=== 초기 호스트 데이터 로드 ===')
+    console.log('sessionStorage userData:', userData)
+    
     if (userData) {
       const parsedData = JSON.parse(userData)
+      console.log('파싱된 데이터:', parsedData)
       setHostData(parsedData)
-      loadAccommodations(parsedData.host_id || 'host-1') // 기본값 설정
+      
+      const hostUUID = parsedData.id  // 이미 UUID가 있음
+      console.log('사용할 호스트 UUID:', hostUUID)
+      
+      loadAccommodations(hostUUID)
+    } else {
+      console.log('sessionStorage에 hostUser 데이터 없음')
     }
   }, [])
 
-  const loadAccommodations = async (hostId: string) => {
+  const loadAccommodations = async (hostUUID: string) => {
     try {
       setLoading(true)
+      console.log('=== 숙소 API 호출 ===')
+      console.log('호스트 UUID:', hostUUID)
       
-      // 먼저 호스트 정보를 가져와서 hosts 테이블의 id를 찾습니다
-      const { data: hostData, error: hostError } = await supabase
-        .from('hosts')
-        .select('id')
-        .eq('host_id', hostId)
-        .single()
-
-      if (hostError || !hostData) {
-        console.error('호스트 정보를 찾을 수 없습니다:', hostError)
-        setAccommodations([])
+      // API를 통해서 숙소 조회 (RLS 문제 해결)
+      const response = await fetch(`/api/host/accommodations?hostId=${hostUUID}`)
+      const result = await response.json()
+      
+      console.log('API 응답:', result)
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'API 호출 실패')
+      }
+      
+      if (result.success) {
+        setAccommodations(result.data || [])
         return
+      } else {
+        throw new Error(result.error || '데이터 로드 실패')
       }
 
-      // 호스트의 숙소들을 가져옵니다
-      let query = supabase
-        .from('accommodations')
-        .select('*')
-        .eq('host_id', hostData.id)  // hosts 테이블의 UUID 사용
-        .order('created_at', { ascending: false })
-
-      // 필터 적용
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter)
-      }
-
-      if (searchQuery) {
-        query = query.or(`name.ilike.%${searchQuery}%,address.ilike.%${searchQuery}%`)
-      }
-
-      const { data, error } = await query
-
-      if (error) throw error
-
-      setAccommodations(data || [])
     } catch (error) {
       console.error('숙소 목록 로드 실패:', error)
       setAccommodations([])
@@ -91,14 +86,40 @@ export default function HostAccommodationsPage() {
 
   // 검색 및 필터 변경시 재로드
   useEffect(() => {
-    if (hostData) {
+    if (hostData && hostData.id) {
       const timeoutId = setTimeout(() => {
-        loadAccommodations(hostData.host_id || 'host-1')
+        loadAccommodationsWithFilter(hostData.id)
       }, 300)
 
       return () => clearTimeout(timeoutId)
     }
   }, [searchQuery, statusFilter, hostData])
+
+  const loadAccommodationsWithFilter = async (hostUUID: string) => {
+    try {
+      setLoading(true)
+      
+      const params = new URLSearchParams({
+        hostId: hostUUID,
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(searchQuery && { search: searchQuery })
+      })
+      
+      const response = await fetch(`/api/host/accommodations?${params}`)
+      const result = await response.json()
+      
+      if (result.success) {
+        setAccommodations(result.data || [])
+      } else {
+        throw new Error(result.error || '데이터 로드 실패')
+      }
+    } catch (error) {
+      console.error('숙소 목록 로드 실패:', error)
+      setAccommodations([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`'${name}' 숙소를 정말 삭제하시겠습니까?`)) return
@@ -111,8 +132,8 @@ export default function HostAccommodationsPage() {
       if (!response.ok) throw new Error('삭제 실패')
 
       alert('숙소가 삭제되었습니다.')
-      if (hostData) {
-        loadAccommodations(hostData.host_id || 'host-1')
+      if (hostData && hostData.id) {
+        loadAccommodations(hostData.id)  // UUID 사용
       }
     } catch (error) {
       console.error('삭제 실패:', error)

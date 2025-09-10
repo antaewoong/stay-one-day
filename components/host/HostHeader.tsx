@@ -68,42 +68,48 @@ export default function HostHeader() {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
+    <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3">
+      {/* 모바일 헤더 */}
+      <div className="lg:hidden flex items-center justify-between">
+        <div>
+          <div className="text-sm font-medium text-gray-800">{hostData?.business_name || '호스트'}</div>
+          <div className="text-xs text-gray-500">{formatDate(currentDate)}</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" title="알림" className="p-2">
+            <Bell className="w-4 h-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleLogout} 
+            className="text-red-600 border-red-200 hover:bg-red-50"
+          >
+            <LogOut className="w-4 h-4 mr-1" />
+            로그아웃
+          </Button>
+        </div>
+      </div>
+
+      {/* 데스크탑 헤더 */}
+      <div className="hidden lg:flex items-center justify-between">
         {/* Left Side - Date */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-gray-600">
-            <Menu className="w-5 h-5" />
             <span className="font-medium">{formatDate(currentDate)}</span>
           </div>
         </div>
 
-        {/* Center - Today & Stats */}
-        <div className="flex items-center gap-8">
-          <div className="text-center">
-            <div className="text-sm text-gray-500 mb-1">Today</div>
-            <div className="font-bold text-lg">{formatDate(currentDate)}</div>
+        {/* Center - Today's Stats */}
+        <div className="flex items-center gap-6">
+          <div className="bg-gray-50 rounded-lg px-4 py-2 text-center">
+            <div className="text-xs text-gray-500">오늘 체크인</div>
+            <div className="text-sm font-medium text-gray-900">{todayStats.checkins}건</div>
           </div>
           
-          {/* Today's Stats */}
-          <div className="flex gap-6">
-            <div className="bg-gray-50 rounded-lg p-4 min-w-[120px] text-center">
-              <div className="text-sm text-gray-500 mb-1">오늘 체크인</div>
-              <div className="text-sm text-gray-600 mb-2">예약자</div>
-              <div className="text-xs text-gray-400">총 {todayStats.checkins}건</div>
-              <div className="text-gray-500">
-                {todayStats.checkins === 0 ? '오늘 체크인 예약이 없습니다' : `${todayStats.checkins}건의 체크인`}
-              </div>
-            </div>
-            
-            <div className="bg-gray-50 rounded-lg p-4 min-w-[120px] text-center">
-              <div className="text-sm text-gray-500 mb-1">오늘 체크아웃</div>
-              <div className="text-sm text-gray-600 mb-2">예약자</div>
-              <div className="text-xs text-gray-400">총 {todayStats.checkouts}건</div>
-              <div className="text-gray-500">
-                {todayStats.checkouts === 0 ? '오늘 체크아웃 예약이 없습니다' : `${todayStats.checkouts}건의 체크아웃`}
-              </div>
-            </div>
+          <div className="bg-gray-50 rounded-lg px-4 py-2 text-center">
+            <div className="text-xs text-gray-500">오늘 체크아웃</div>
+            <div className="text-sm font-medium text-gray-900">{todayStats.checkouts}건</div>
           </div>
         </div>
 
@@ -126,15 +132,39 @@ export default function HostHeader() {
             <Button variant="ghost" size="sm" title="프로필">
               <User className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} title="로그아웃">
-              <LogOut className="w-4 h-4" />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleLogout} 
+              className="text-red-600 border-red-200 hover:bg-red-50"
+            >
+              <LogOut className="w-4 h-4 mr-1" />
+              로그아웃
             </Button>
           </div>
         </div>
       </div>
       
-      {/* Sub sections - 모바일에서는 간소화 */}
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* 모바일 간단한 통계 */}
+      <div className="lg:hidden mt-3 pt-3 border-t border-gray-100">
+        <div className="flex justify-around text-center">
+          <div>
+            <div className="text-xs text-gray-500">체크인</div>
+            <div className="text-sm font-medium text-gray-900">{todayStats.checkins}건</div>
+          </div>
+          <div>
+            <div className="text-xs text-gray-500">체크아웃</div>
+            <div className="text-sm font-medium text-gray-900">{todayStats.checkouts}건</div>
+          </div>
+          <div>
+            <div className="text-xs text-gray-500">신규예약</div>
+            <div className="text-sm font-medium text-green-600">{todayStats.reservations}건</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 데스크탑 상세 섹션 */}
+      <div className="hidden lg:block mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* 오늘의 현황 */}
         <div className="bg-white border rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">

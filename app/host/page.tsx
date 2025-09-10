@@ -55,10 +55,12 @@ export default function HostPage() {
   useEffect(() => {
     // 호스트 정보 확인
     const userData = sessionStorage.getItem('hostUser')
+    console.log('호스트 페이지 데이터 로드:', userData)
     if (userData) {
       const parsedData = JSON.parse(userData)
+      console.log('파싱된 호스트 데이터:', parsedData)
       setHostData(parsedData)
-      loadDashboardData(parsedData.host_id)
+      loadDashboardData(parsedData.id) // host_id 대신 UUID 사용
     }
   }, [])
 
@@ -105,7 +107,6 @@ export default function HostPage() {
           todayCheckins={dashboardData?.today?.checkins || 0}
           todayCheckouts={dashboardData?.today?.checkouts || 0}
           pendingBookings={dashboardData?.today?.pendingBookings || 0}
-          rooms={dashboardData?.accommodations || []}
           hostId={hostData?.host_id}
         />
       </div>

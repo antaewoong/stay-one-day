@@ -16,15 +16,38 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Host ID required' }, { status: 400 })
     }
 
-    // 호스트 정보 조회
-    const { data: host, error: hostError } = await supabase
-      .from('hosts')
-      .select('*')
-      .eq('host_id', hostId)
-      .single()
+    console.log('Dashboard API - 받은 hostId:', hostId)
+
+    // hostId가 UUID인지 host_id 문자열인지 확인
+    let host
+    let hostError
+
+    // UUID 형식인지 확인 (길이가 36자이고 하이픈이 포함된 경우)
+    if (hostId.length === 36 && hostId.includes('-')) {
+      // UUID로 직접 조회
+      const result = await supabase
+        .from('hosts')
+        .select('*')
+        .eq('id', hostId)
+        .single()
+      host = result.data
+      hostError = result.error
+    } else {
+      // host_id로 조회
+      const result = await supabase
+        .from('hosts')
+        .select('*')
+        .eq('host_id', hostId)
+        .single()
+      host = result.data
+      hostError = result.error
+    }
+
+    console.log('Dashboard API - 찾은 호스트:', host)
+    console.log('Dashboard API - 에러:', hostError)
 
     if (hostError || !host) {
-      return NextResponse.json({ error: 'Host not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Host not found', debug: { hostId, hostError } }, { status: 404 })
     }
 
     // 호스트의 숙소들 조회

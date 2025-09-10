@@ -11,7 +11,8 @@ import {
   X,
   Home,
   Users,
-  TrendingUp
+  TrendingUp,
+  LogOut
 } from 'lucide-react'
 
 interface MenuItem {
@@ -73,6 +74,16 @@ export default function HostSidebar({ isOpen = true, onToggle }: HostSidebarProp
       setHostData(JSON.parse(userData))
     }
   }, [])
+
+  const handleLogout = () => {
+    // 세션 스토리지 삭제
+    sessionStorage.removeItem('hostUser')
+    
+    // 쿠키 삭제 (미들웨어 인증 쿠키)
+    document.cookie = 'host-auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    
+    window.location.href = '/host/login'
+  }
 
   const renderMenuItem = (item: MenuItem) => {
     const isActive = pathname === item.href || (item.href !== '/host' && pathname.startsWith(item.href))
@@ -149,8 +160,17 @@ export default function HostSidebar({ isOpen = true, onToggle }: HostSidebarProp
           {menuItems.map(item => renderMenuItem(item))}
         </nav>
 
-        {/* Copyright */}
+        {/* Logout Button */}
         <div className="p-4 border-t border-slate-700">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors rounded-md mb-4"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>로그아웃</span>
+          </button>
+          
+          {/* Copyright */}
           <div className="text-xs text-white/60">
             Copyright © STAY ONE DAY. All Rights Reserved.
           </div>

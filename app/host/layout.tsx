@@ -14,12 +14,16 @@ export default function HostLayout({
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   
-  // Hook은 항상 같은 순서로 호출되어야 함
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [mounted, setMounted] = useState(false)
+  
   useEffect(() => {
+    setMounted(true)
+    
     // 로그인 페이지에서는 인증 체크를 하지 않음
     if (pathname === '/host/login') {
+      setIsAuthenticated(true)
       return
     }
 
@@ -31,7 +35,7 @@ export default function HostLayout({
       
       if (!hostAuthCookie || !hostAuthCookie.split('=')[1]?.startsWith('host-')) {
         setIsAuthenticated(false)
-        router.push('/host/login')
+        router.replace('/host/login') // push 대신 replace 사용
       } else {
         setIsAuthenticated(true)
       }
@@ -45,18 +49,14 @@ export default function HostLayout({
     return <>{children}</>
   }
 
-  // 인증 상태 확인 중
-  if (isAuthenticated === null) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-      </div>
-    )
+  // SSR/Hydration 호환성을 위해 mounted 상태 확인
+  if (!mounted) {
+    return null // 마운트되기 전까지 아무것도 렌더링하지 않음
   }
 
-  // 인증되지 않은 경우
-  if (!isAuthenticated) {
-    return null
+  // 인증되지 않은 경우 또는 인증 확인 중인 경우
+  if (isAuthenticated === null || isAuthenticated === false) {
+    return null // 빈 화면 표시하여 로딩 없이 바로 리다이렉트
   }
 
   return (
