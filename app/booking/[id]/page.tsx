@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import OptimizedImage from '@/components/optimized-image'
 import Link from 'next/link'
+import { useMediaQuery } from '@/hooks/use-media-query'
 
 interface Accommodation {
   id: string
@@ -61,6 +62,7 @@ export default function BookingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
+  const isDesktop = useMediaQuery('(min-width: 768px)')
 
   // States
   const [accommodation, setAccommodation] = useState<Accommodation | null>(null)
@@ -82,6 +84,10 @@ export default function BookingPage() {
   const [discountCode, setDiscountCode] = useState('')
   const [appliedDiscount, setAppliedDiscount] = useState<any>(null)
   const [discountLoading, setDiscountLoading] = useState(false)
+  
+  // Step management for mobile
+  const [currentStep, setCurrentStep] = useState(1)
+  const totalSteps = 3
 
   useEffect(() => {
     loadData()
@@ -168,6 +174,36 @@ export default function BookingPage() {
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
+  }
+
+  const validateStep = (step: number) => {
+    const newErrors: Record<string, string> = {}
+    
+    if (step === 1) {
+      if (!guestName.trim()) newErrors.guestName = '예약자 이름을 입력해주세요.'
+      if (!guestPhone.trim()) newErrors.guestPhone = '연락처를 입력해주세요.'
+      else if (!/^01[0-9]-?[0-9]{4}-?[0-9]{4}$/.test(guestPhone.replace(/[^0-9]/g, ''))) {
+        newErrors.guestPhone = '올바른 휴대폰 번호를 입력해주세요.'
+      }
+      if (guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
+        newErrors.guestEmail = '올바른 이메일 주소를 입력해주세요.'
+      }
+    } else if (step === 3) {
+      if (!agreedToTerms) newErrors.terms = '이용약관에 동의해주세요.'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, totalSteps))
+    }
+  }
+
+  const prevStep = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1))
   }
 
   const handleOptionToggle = (optionName: string) => {
@@ -388,6 +424,47 @@ export default function BookingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left: Booking Form */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Mobile Step Indicator */}
+            <div className="md:hidden">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                  {[1, 2, 3].map((step) => (
+                    <div key={step} className="flex items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        currentStep === step 
+                          ? 'bg-gray-900 text-white' 
+                          : currentStep > step 
+                            ? 'bg-green-500 text-white' 
+                            : 'bg-gray-200 text-gray-500'
+                      }`}>
+                        {currentStep > step ? '✓' : step}
+                      </div>
+                      {step < 3 && (
+                        <div className={`w-12 h-0.5 mx-2 ${
+                          currentStep > step ? 'bg-green-500' : 'bg-gray-200'
+                        }`} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <span className="text-sm text-gray-500">
+                  {currentStep} / {totalSteps}
+                </span>
+              </div>
+              
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {currentStep === 1 && '예약자 정보'}
+                  {currentStep === 2 && '추가 옵션'}
+                  {currentStep === 3 && '결제 및 약관'}
+                </h2>
+                <p className="text-sm text-gray-600">
+                  {currentStep === 1 && '예약에 필요한 기본 정보를 입력해주세요'}
+                  {currentStep === 2 && '필요한 추가 서비스를 선택해주세요'}
+                  {currentStep === 3 && '결제 정보를 확인하고 약관에 동의해주세요'}
+                </p>
+              </div>
+            </div>
             {/* Accommodation Info */}
             <Card>
               <CardHeader>
@@ -466,7 +543,7 @@ export default function BookingPage() {
             </Card>
 
             {/* Additional Options */}
-            {accommodation.extra_options && accommodation.extra_options.length > 0 && (
+            {accommodation.extra_options && accommodation.extra_options.length > 0 && (currentStep === 2 || isDesktop) && (
               <Card>
                 <CardHeader>
                   <CardTitle>추가 옵션</CardTitle>
@@ -496,7 +573,8 @@ export default function BookingPage() {
             )}
 
             {/* Guest Information */}
-            <Card>
+            {(currentStep === 1 || isDesktop) && (
+              <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="w-5 h-5" />
@@ -560,7 +638,8 @@ export default function BookingPage() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+              </Card>
+            )}
 
             {/* Terms Agreement */}
             <Card>
@@ -692,10 +771,50 @@ export default function BookingPage() {
                     </div>
                   </div>
 
+                  {/* Mobile Step Navigation */}
+                  <div className="md:hidden flex gap-3 mb-4">
+                    {currentStep > 1 && (
+                      <Button 
+                        onClick={prevStep}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        이전
+                      </Button>
+                    )}
+                    {currentStep < totalSteps ? (
+                      <Button 
+                        onClick={nextStep}
+                        className="flex-1 bg-gray-900 hover:bg-gray-800 text-white"
+                      >
+                        다음
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        {submitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            처리중...
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="w-4 h-4 mr-2" />
+                            결제하기
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Desktop Submit Button */}
                   <Button 
                     onClick={handleSubmit}
                     disabled={submitting}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-lg font-semibold"
+                    className="hidden md:block w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-lg font-semibold"
                   >
                     {submitting ? (
                       <>

@@ -859,10 +859,14 @@ export default function HomePage() {
 
             {/* 오른쪽: 공유하기 + 위시리스트 + 마이페이지 */}
             <div className="flex items-center gap-3">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-gray-900 hover:bg-gray-100 rounded-full w-10 h-10 p-0"
+              <div
+                className="rounded-full p-2 cursor-pointer"
+                style={{ 
+                  color: '#111827 !important',
+                  backgroundColor: 'transparent !important',
+                  border: 'none',
+                  outline: 'none'
+                }}
                 onClick={() => {
                   if (navigator.share) {
                     navigator.share({
@@ -876,29 +880,44 @@ export default function HomePage() {
                   }
                 }}
               >
-                <Share2 className="w-5 h-5" />
-              </Button>
+                <Share2 className="w-5 h-5" style={{ 
+                  color: '#111827 !important',
+                  fill: 'none',
+                  stroke: '#111827',
+                  strokeWidth: '2'
+                }} />
+              </div>
               <Link href="/wishlist">
-                <Button variant="ghost" size="sm" className="text-gray-900 hover:bg-gray-100 rounded-full w-10 h-10 p-0">
-                  <Heart className="w-5 h-5" />
-                </Button>
+                <div className="rounded-full p-2 cursor-pointer" style={{ 
+                  color: '#111827 !important',
+                  backgroundColor: 'transparent !important',
+                  border: 'none',
+                  outline: 'none'
+                }}>
+                  <Heart className="w-5 h-5" style={{ 
+                    color: '#111827 !important',
+                    fill: 'none',
+                    stroke: '#111827',
+                    strokeWidth: '2'
+                  }} />
+                </div>
               </Link>
               <div className="relative" data-user-menu>
                 {isUserLoading ? (
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-gray-900 hover:bg-gray-100 rounded-full w-10 h-10 p-0"
+                    className="text-gray-900 hover:bg-gray-100 rounded-full p-2"
                     disabled
                   >
-                    <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
+                    <Users className="w-5 h-5" />
                   </Button>
                 ) : user ? (
                   <>
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-gray-900 hover:bg-gray-100 rounded-full w-10 h-10 p-0"
+                      className="text-gray-900 hover:bg-gray-100 rounded-full p-2"
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     >
                       <Users className="w-5 h-5" />
@@ -992,7 +1011,7 @@ export default function HomePage() {
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-gray-900 hover:bg-gray-100 rounded-full w-10 h-10 p-0"
+                      className="text-gray-900 hover:bg-gray-100 rounded-full p-2"
                     >
                       <Users className="w-5 h-5" />
                     </Button>
@@ -1525,8 +1544,17 @@ export default function HomePage() {
                     placeholder="지역을 입력해주세요"
                     value={searchLocation}
                     onChange={(e) => setSearchLocation(e.target.value)}
-                    className="pl-4 pr-4 py-3 h-12 rounded-2xl border border-gray-200 focus:border-gray-400 focus:ring-0 text-base placeholder:text-gray-400 transition-colors"
+                    className="pl-4 pr-12 py-3 h-12 rounded-2xl border border-gray-200 focus:border-gray-400 focus:ring-0 text-base placeholder:text-gray-400 transition-colors"
                   />
+                  {searchLocation && (
+                    <button
+                      onClick={() => setSearchLocation('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                      aria-label="검색어 지우기"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
                 
                 {/* 추천 태그 - 스테이폴리오 스타일 */}

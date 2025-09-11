@@ -54,6 +54,33 @@ body {
   --font-display: "Plus Jakarta Sans", "Noto Sans KR", system-ui, sans-serif;
   --font-body: "Inter", "Noto Sans KR", system-ui, sans-serif;
   
+  /* Force transparent background for ALL buttons with ghost variant */
+  button[class*="ghost"],
+  .ghost,
+  button:has(svg[class*="Heart"]),
+  button:has(svg[class*="Share2"]) {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Force transparent for specific button elements */
+  button:has(svg.lucide-heart),
+  button:has(svg.lucide-share-2),
+  button:has(svg[data-testid*="heart"]),
+  button:has(svg[data-testid*="share"]) {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+  
+  /* Additional selectors for Lucide icons */
+  button:has(svg[class*="w-5 h-5"]) {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+  
   /* Tailwind UI color variables for consistent styling */
   --background: 0 0% 100%;
   --foreground: 224 71.4% 4.1%;

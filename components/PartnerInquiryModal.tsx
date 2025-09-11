@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { X, CheckCircle } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
+import { ResponsiveModal } from '@/components/ui/responsive-modal'
 
 interface PartnerInquiryModalProps {
   isOpen: boolean
@@ -92,60 +93,44 @@ export default function PartnerInquiryModal({ isOpen, onClose }: PartnerInquiryM
     onClose()
   }
 
-  if (!isOpen) return null
-
   if (isSubmitted) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg max-w-md w-full p-8 relative">
-          <button
-            onClick={handleClose}
-            className="absolute right-4 top-4 p-1 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-400" />
-          </button>
-          
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gray-50 rounded-full mx-auto flex items-center justify-center mb-6">
-              <CheckCircle className="w-8 h-8 text-gray-900" />
-            </div>
-            <h3 className="text-xl font-light text-gray-900 mb-4">문의가 접수되었습니다</h3>
-            <p className="text-gray-600 text-sm leading-relaxed mb-8">
-              입점 문의를 주셔서 감사합니다.<br />
-              담당자가 검토 후 영업일 기준 2-3일 내에<br />
-              연락드리겠습니다.
-            </p>
-            <Button 
-              onClick={handleClose} 
-              className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2 text-sm font-medium rounded-md"
-            >
-              확인
-            </Button>
+      <ResponsiveModal
+        isOpen={isOpen}
+        onOpenChange={(open) => !open && handleClose()}
+        title="문의 접수 완료"
+      >
+        <div className="text-center p-4">
+          <div className="w-16 h-16 bg-gray-50 rounded-full mx-auto flex items-center justify-center mb-6">
+            <CheckCircle className="w-8 h-8 text-gray-900" />
           </div>
+          <h3 className="text-xl font-light text-gray-900 mb-4">문의가 접수되었습니다</h3>
+          <p className="text-gray-600 text-sm leading-relaxed mb-8">
+            입점 문의를 주셔서 감사합니다.<br />
+            담당자가 검토 후 영업일 기준 2-3일 내에<br />
+            연락드리겠습니다.
+          </p>
+          <Button 
+            onClick={handleClose} 
+            className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2 text-sm font-medium rounded-md w-full"
+          >
+            확인
+          </Button>
         </div>
-      </div>
+      </ResponsiveModal>
     )
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden relative">
-        <button
-          onClick={handleClose}
-          className="absolute right-4 top-4 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
-        >
-          <X className="w-5 h-5 text-gray-400" />
-        </button>
-
-        <div className="p-6 border-b border-gray-100">
-          <h2 className="text-2xl font-light text-gray-900 mb-2">입점 문의</h2>
-          <p className="text-gray-600 text-sm">
-            스테이 원데이와 함께할 파트너가 되어주세요
-          </p>
-        </div>
-
-        <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
-          <form onSubmit={handleSubmit} className="p-6 space-y-8">
+    <ResponsiveModal
+      isOpen={isOpen}
+      onOpenChange={(open) => !open && handleClose()}
+      title="입점 문의"
+      description="스테이 원데이와 함께할 파트너가 되어주세요"
+      className="sm:max-w-2xl"
+    >
+      <div className="max-h-[70vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="space-y-6 p-4">
             {/* 필수 정보 */}
             <div>
               <h3 className="text-sm font-medium text-gray-900 mb-4 pb-2 border-b border-gray-100">
@@ -352,10 +337,9 @@ export default function PartnerInquiryModal({ isOpen, onClose }: PartnerInquiryM
               >
                 {isSubmitting ? '접수중...' : '입점문의 보내기'}
               </Button>
-            </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
-    </div>
+    </ResponsiveModal>
   )
 }

@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { 
   CalendarDays, 
   MapPin, 
@@ -157,10 +156,14 @@ const HeroSection = memo(function HeroSection({
             
             {/* 오른쪽: 공유하기 + 위시리스트 + 마이페이지 */}
             <div className="flex items-center gap-3">
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                className="text-white border-white/20 hover:bg-white/10 hover:border-white/30 rounded-full w-10 h-10 p-0"
+              <div
+                className="rounded-full p-2 cursor-pointer hover:bg-white/10 transition-colors"
+                style={{ 
+                  color: 'white !important',
+                  backgroundColor: 'transparent !important',
+                  border: 'none',
+                  outline: 'none'
+                }}
                 onClick={() => {
                   if (navigator.share) {
                     navigator.share({
@@ -174,36 +177,64 @@ const HeroSection = memo(function HeroSection({
                   }
                 }}
               >
-                <Share2 className="w-5 h-5" />
-              </Button>
+                <Share2 className="w-5 h-5" style={{ 
+                  color: 'white !important',
+                  fill: 'none',
+                  stroke: 'white',
+                  strokeWidth: '2'
+                }} />
+              </div>
               <Link href="/wishlist">
-                <Button variant="secondary" size="sm" className="text-white border-white/20 hover:bg-white/10 hover:border-white/30 rounded-full w-10 h-10 p-0">
-                  <Heart className="w-5 h-5" />
-                </Button>
+                <div
+                  className="rounded-full p-2 cursor-pointer hover:bg-white/10 transition-colors"
+                  style={{ 
+                    color: 'white !important',
+                    backgroundColor: 'transparent !important',
+                    border: 'none',
+                    outline: 'none'
+                  }}
+                >
+                  <Heart className="w-5 h-5" style={{ 
+                    color: 'white !important',
+                    fill: 'none',
+                    stroke: 'white',
+                    strokeWidth: '2'
+                  }} />
+                </div>
               </Link>
               <div className="relative" data-user-menu>
                 {isUserLoading ? (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-white hover:bg-white/10 rounded-full w-10 h-10 p-0"
-                    disabled
+                  <div
+                    className="text-white rounded-full w-10 h-10 p-0 flex items-center justify-center cursor-not-allowed"
+                    style={{ 
+                      backgroundColor: 'transparent !important',
+                      border: 'none',
+                      outline: 'none'
+                    }}
                   >
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  </Button>
+                  </div>
                 ) : user ? (
                   <>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-white hover:bg-white/10 rounded-full w-10 h-10 p-0"
+                    <div
+                      className="text-white hover:bg-white/10 rounded-full w-10 h-10 p-0 flex items-center justify-center cursor-pointer transition-colors"
+                      style={{ 
+                        backgroundColor: 'transparent !important',
+                        border: 'none',
+                        outline: 'none'
+                      }}
                       onClick={() => {
                         console.log('마이페이지 버튼 클릭 - 로그인된 사용자:', user.email)
                         setIsUserMenuOpen(!isUserMenuOpen)
                       }}
                     >
-                      <Users className="w-5 h-5" />
-                    </Button>
+                      <Users className="w-5 h-5" style={{ 
+                        color: 'white !important',
+                        fill: 'none',
+                        stroke: 'white',
+                        strokeWidth: '2'
+                      }} />
+                    </div>
                     {isUserMenuOpen && (
                       <>
                         {/* 백드롭 오버레이 */}
@@ -292,14 +323,22 @@ const HeroSection = memo(function HeroSection({
                   </>
                 ) : (
                   <Link href="/auth/login">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-white hover:bg-white/10 rounded-full w-10 h-10 p-0"
+                    <div
+                      className="text-white hover:bg-white/10 rounded-full w-10 h-10 p-0 flex items-center justify-center cursor-pointer transition-colors"
+                      style={{ 
+                        backgroundColor: 'transparent !important',
+                        border: 'none',
+                        outline: 'none'
+                      }}
                       onClick={() => console.log('마이페이지 버튼 클릭 - 로그인 안된 사용자')}
                     >
-                      <Users className="w-5 h-5" />
-                    </Button>
+                      <Users className="w-5 h-5" style={{ 
+                        color: 'white !important',
+                        fill: 'none',
+                        stroke: 'white',
+                        strokeWidth: '2'
+                      }} />
+                    </div>
                   </Link>
                 )}
               </div>

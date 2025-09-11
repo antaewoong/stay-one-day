@@ -361,9 +361,9 @@ export default function Header() {
             </Link>
 
             {/* 공유하기 */}
-            <Button 
-              variant="ghost" 
-              className="text-gray-900 hover:text-gray-700 transition-colors p-2"
+            <div 
+              className="rounded-full p-2 cursor-pointer"
+              style={{ color: '#111827' }}
               onClick={() => {
                 if (navigator.share) {
                   navigator.share({
@@ -377,18 +377,18 @@ export default function Header() {
                 }
               }}
             >
-              <Share2 className="w-5 h-5" />
-            </Button>
+              <Share2 className="w-5 h-5" style={{ color: '#111827' }} />
+            </div>
 
             {/* 숙소 상세 페이지에서만 표시되는 즐겨찾기 버튼 */}
             {isAccommodationDetail && (
-              <Button
-                variant="ghost"
+              <div
+                className="rounded-full p-2 cursor-pointer"
+                style={{ color: isFavorite ? '#ef4444' : '#111827' }}
                 onClick={() => setIsFavorite(!isFavorite)}
-                className="flex items-center text-gray-900 hover:text-red-600 p-2"
               >
-                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-900'}`} />
-              </Button>
+                <Heart className="w-5 h-5" style={{ color: isFavorite ? '#ef4444' : '#111827' }} />
+              </div>
             )}
 
             {/* 위시리스트 (일반 페이지에서만) */}

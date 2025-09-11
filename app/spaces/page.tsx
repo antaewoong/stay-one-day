@@ -130,7 +130,21 @@ export default function SpacesPage() {
         query = query.gte('max_capacity', parseInt(filters.capacity))
       }
 
-      query = query.order('created_at', { ascending: false })
+      // 정렬 적용
+      switch (filters.sortBy) {
+        case 'price_low':
+          query = query.order('base_price', { ascending: true })
+          break
+        case 'price_high':
+          query = query.order('base_price', { ascending: false })
+          break
+        case 'rating':
+          query = query.order('created_at', { ascending: false }) // 임시로 created_at 사용
+          break
+        default: // recommended
+          query = query.order('is_featured', { ascending: false }).order('created_at', { ascending: false })
+          break
+      }
 
       const { data, error } = await query
 
@@ -204,6 +218,10 @@ export default function SpacesPage() {
   ]
 
   useEffect(() => {
+    loadAccommodations(searchData.location)
+  }, [filters.sortBy, filters.capacity, filters.collection])
+
+  useEffect(() => {
     loadAccommodations()
   }, [])
 
@@ -261,12 +279,23 @@ export default function SpacesPage() {
                 <div className="md:col-span-2 border-r border-gray-200 relative">
                   <div className="p-4 hover:bg-gray-100 transition-colors cursor-pointer">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">어디로 가시나요?</label>
-                    <Input 
-                      placeholder="목적지 검색"
-                      className="border-0 bg-transparent p-0 focus:ring-0 font-normal text-sm text-gray-600 placeholder:text-gray-400"
-                      value={searchData.location}
-                      onChange={(e) => setSearchData({...searchData, location: e.target.value})}
-                    />
+                    <div className="relative">
+                      <Input 
+                        placeholder="목적지 검색"
+                        className="border-0 bg-transparent p-0 pr-6 focus:ring-0 font-normal text-sm text-gray-600 placeholder:text-gray-400"
+                        value={searchData.location}
+                        onChange={(e) => setSearchData({...searchData, location: e.target.value})}
+                      />
+                      {searchData.location && (
+                        <button
+                          onClick={() => setSearchData({...searchData, location: ''})}
+                          className="absolute right-0 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors"
+                          aria-label="검색어 지우기"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
@@ -306,6 +335,59 @@ export default function SpacesPage() {
       </section>
 
       <div className="container mx-auto px-4 py-8">
+        {/* 정렬 및 필터 컨트롤 */}
+        <section className="mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-gray-700">정렬:</span>
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                {[
+                  { id: 'recommended', label: '추천순' },
+                  { id: 'price_low', label: '낮은 가격' },
+                  { id: 'price_high', label: '높은 가격' },
+                  { id: 'rating', label: '평점순' }
+                ].map((sort) => (
+                  <button
+                    key={sort.id}
+                    onClick={() => setFilters({...filters, sortBy: sort.id})}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                      filters.sortBy === sort.id
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {sort.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">인원:</span>
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                {[
+                  { id: '', label: '전체' },
+                  { id: '2', label: '2명' },
+                  { id: '4', label: '4명' },
+                  { id: '6', label: '6명+' }
+                ].map((capacity) => (
+                  <button
+                    key={capacity.id}
+                    onClick={() => setFilters({...filters, capacity: capacity.id})}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                      filters.capacity === capacity.id
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {capacity.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* 컬렉션 카테고리 */}
         <section className="mb-12">
           <div className="text-center mb-8">
@@ -416,6 +498,45 @@ export default function SpacesPage() {
 
         {/* 숙소 그리드 */}
         <section>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold text-gray-900">
+                {filteredAccommodations.length}개의 숙소
+              </span>
+              {(filters.collection !== 'all' || filters.capacity || searchData.location) && (
+                <button
+                  onClick={() => {
+                    setFilters({...filters, collection: 'all', capacity: '', sortBy: 'recommended'})
+                    setSearchData({...searchData, location: ''})
+                  }}
+                  className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                  필터 초기화
+                </button>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition-colors ${
+                  viewMode === 'grid' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg transition-colors ${
+                  viewMode === 'list' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredAccommodations.map((accommodation) => (
               <Link 

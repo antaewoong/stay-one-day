@@ -271,4 +271,91 @@ class AnalyticsTracker {
       conversionValue: conversionValue || 0
     }
 
-    try {\n      await fetch('/api/analytics/sessions', {\n        method: 'POST',\n        headers: {\n          'Content-Type': 'application/json'\n        },\n        body: JSON.stringify(payload)\n      })\n    } catch (error) {\n      console.error('세션 데이터 전송 실패:', error)\n    }\n  }\n\n  // 여정 이벤트 전송\n  private async sendJourneyEvent(event: JourneyEvent) {\n    try {\n      await fetch('/api/analytics/journey', {\n        method: 'POST',\n        headers: {\n          'Content-Type': 'application/json'\n        },\n        body: JSON.stringify(event)\n      })\n    } catch (error) {\n      console.error('여정 이벤트 전송 실패:', error)\n    }\n  }\n\n  // 유틸리티 함수들\n  private generateSessionId(): string {\n    return 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)\n  }\n\n  private getCurrentUserId(): string | undefined {\n    // 로그인한 사용자 ID 가져오기 (실제 구현에 따라 수정)\n    const userStr = sessionStorage.getItem('user') || localStorage.getItem('user')\n    if (userStr) {\n      try {\n        const user = JSON.parse(userStr)\n        return user.id\n      } catch {\n        return undefined\n      }\n    }\n    return undefined\n  }\n\n  // 정리\n  destroy() {\n    if (this.heartbeatInterval) {\n      clearInterval(this.heartbeatInterval)\n    }\n  }\n}\n\n// 전역 인스턴스\nlet analyticsTracker: AnalyticsTracker | null = null\n\n// 초기화 함수\nexport function initializeAnalytics() {\n  if (typeof window !== 'undefined' && !analyticsTracker) {\n    analyticsTracker = new AnalyticsTracker()\n  }\n  return analyticsTracker\n}\n\n// 전환 추적 함수 (외부에서 호출용)\nexport function trackConversion(type: string, value?: number) {\n  if (analyticsTracker) {\n    analyticsTracker.trackConversion(type, value)\n  }\n}\n\n// 페이지뷰 추적 함수 (라우터 변경 시 호출)\nexport function trackPageView() {\n  if (analyticsTracker) {\n    analyticsTracker.trackPageView()\n  }\n}\n\nexport default AnalyticsTracker"}, {"old_string": "      await fetch('/api/analytics/sessions', {\n        method: 'POST',\n        headers: {\n          'Content-Type': 'application/json'\n        },\n        body: JSON.stringify(payload)\n      })", "new_string": "      // Navigator.sendBeacon을 우선 사용 (페이지 이탈 시에도 안정적 전송)\n      if (navigator.sendBeacon) {\n        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' })\n        navigator.sendBeacon('/api/analytics/sessions', blob)\n      } else {\n        await fetch('/api/analytics/sessions', {\n          method: 'POST',\n          headers: {\n            'Content-Type': 'application/json'\n          },\n          body: JSON.stringify(payload),\n          keepalive: true\n        })\n      }"}]
+    try {
+      // Navigator.sendBeacon을 우선 사용 (페이지 이탈 시에도 안정적 전송)
+      if (navigator.sendBeacon) {
+        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' })
+        navigator.sendBeacon('/api/analytics/sessions', blob)
+      } else {
+        await fetch('/api/analytics/sessions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload),
+          keepalive: true
+        })
+      }
+    } catch (error) {
+      console.error('세션 데이터 전송 실패:', error)
+    }
+  }
+
+  // 여정 이벤트 전송
+  private async sendJourneyEvent(event: JourneyEvent) {
+    try {
+      await fetch('/api/analytics/journey', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(event)
+      })
+    } catch (error) {
+      console.error('여정 이벤트 전송 실패:', error)
+    }
+  }
+
+  // 유틸리티 함수들
+  private generateSessionId(): string {
+    return 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+  }
+
+  private getCurrentUserId(): string | undefined {
+    // 로그인한 사용자 ID 가져오기 (실제 구현에 따라 수정)
+    const userStr = sessionStorage.getItem('user') || localStorage.getItem('user')
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr)
+        return user.id
+      } catch {
+        return undefined
+      }
+    }
+    return undefined
+  }
+
+  // 정리
+  destroy() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval)
+    }
+  }
+}
+
+// 전역 인스턴스
+let analyticsTracker: AnalyticsTracker | null = null
+
+// 초기화 함수
+export function initializeAnalytics() {
+  if (typeof window !== 'undefined' && !analyticsTracker) {
+    analyticsTracker = new AnalyticsTracker()
+  }
+  return analyticsTracker
+}
+
+// 전환 추적 함수 (외부에서 호출용)
+export function trackConversion(type: string, value?: number) {
+  if (analyticsTracker) {
+    analyticsTracker.trackConversion(type, value)
+  }
+}
+
+// 페이지뷰 추적 함수 (라우터 변경 시 호출)
+export function trackPageView() {
+  if (analyticsTracker) {
+    analyticsTracker.trackPageView()
+  }
+}
+
+export default AnalyticsTracker
