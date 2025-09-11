@@ -5,10 +5,15 @@ import Script from 'next/script'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX'
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-38W0M72LQ3'
 
 // GA4 스크립트 컴포넌트
 export function GoogleAnalytics() {
+  // GA_MEASUREMENT_ID가 유효하지 않으면 렌더링하지 않음
+  if (!GA_MEASUREMENT_ID || GA_MEASUREMENT_ID === 'G-XXXXXXXXXX') {
+    return null
+  }
+
   return (
     <>
       <Script
@@ -20,34 +25,8 @@ export function GoogleAnalytics() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-
           gtag('config', '${GA_MEASUREMENT_ID}', {
-            page_title: document.title,
-            page_location: window.location.href,
-            send_page_view: true,
-            // 향상된 전자상거래 활성화
-            enhanced_ecommerce: true,
-            // 사이트 내 검색 추적
-            site_search_category_parameters: ['category', 'region'],
-            // 개인정보보호 설정
-            anonymize_ip: true,
-            allow_google_signals: true,
-            allow_ad_personalization_signals: true
-          });
-
-          // 스크롤 깊이 추적
-          gtag('config', '${GA_MEASUREMENT_ID}', {
-            custom_map: {
-              'custom_parameter_1': 'scroll_depth'
-            }
-          });
-
-          // Stay One Day 특화 이벤트 설정
-          gtag('event', 'page_view', {
-            page_title: document.title,
-            page_location: window.location.href,
-            content_group1: 'Stay One Day',
-            content_group2: window.location.pathname.split('/')[1] || 'home'
+            anonymize_ip: true
           });
         `}
       </Script>

@@ -64,54 +64,6 @@ export default function RootLayout({
           {children}
         </ClientLayout>
         
-        {/* 성능 모니터링을 위한 스크립트 */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Core Web Vitals 측정 + GA4 연동
-              if ('web-vital' in window) {
-                import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-                  // Core Web Vitals를 GA4로 전송
-                  getCLS((metric) => {
-                    if (window.gtag) {
-                      window.gtag('event', 'web_vitals', {
-                        event_category: 'performance',
-                        event_label: 'CLS',
-                        value: Math.round(metric.value * 1000),
-                        non_interaction: true
-                      });
-                    }
-                    console.log('CLS:', metric);
-                  });
-                  
-                  getFID((metric) => {
-                    if (window.gtag) {
-                      window.gtag('event', 'web_vitals', {
-                        event_category: 'performance',
-                        event_label: 'FID',
-                        value: Math.round(metric.value),
-                        non_interaction: true
-                      });
-                    }
-                    console.log('FID:', metric);
-                  });
-                  
-                  getLCP((metric) => {
-                    if (window.gtag) {
-                      window.gtag('event', 'web_vitals', {
-                        event_category: 'performance',
-                        event_label: 'LCP',
-                        value: Math.round(metric.value),
-                        non_interaction: true
-                      });
-                    }
-                    console.log('LCP:', metric);
-                  });
-                });
-              }
-            `,
-          }}
-        />
       </body>
     </html>
   )

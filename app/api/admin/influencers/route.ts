@@ -96,6 +96,7 @@ export async function POST(request: NextRequest) {
       name,
       email,
       phone,
+      password,
       social_media_links,
       follower_count,
       engagement_rate,
@@ -113,13 +114,59 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 인플루언서 생성
+    // 1. Supabase Auth에 인플루언서 계정 생성
+    let authUser = null
+    const defaultPassword = password || 'influencer123!' // 기본 비밀번호
+
+    try {
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: email.trim(),
+        password: defaultPassword,
+        email_confirm: true,
+        user_metadata: {
+          name: name.trim(),
+          role: 'influencer'
+        }
+      })
+
+      if (authError) {
+        console.error('Supabase Auth 인플루언서 생성 실패:', authError)
+        return NextResponse.json(
+          { error: `인증 시스템 오류: ${authError.message}` },
+          { status: 400 }
+        )
+      }
+
+      authUser = authData.user
+      console.log('✅ Supabase Auth 인플루언서 생성 성공:', authUser.id)
+
+      // user_roles 테이블에 역할 추가
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: authUser.id,
+          role: 'influencer'
+        })
+
+      if (roleError && !roleError.message.includes('duplicate')) {
+        console.error('인플루언서 역할 설정 실패:', roleError.message)
+      }
+    } catch (authCreateError) {
+      console.error('Auth 생성 중 오류:', authCreateError)
+      return NextResponse.json(
+        { error: '인증 계정 생성에 실패했습니다.' },
+        { status: 400 }
+      )
+    }
+
+    // 2. 인플루언서 테이블에 정보 저장
     const { data: influencer, error } = await supabase
       .from('influencers')
       .insert({
         name: name.trim(),
         email: email.trim(),
         phone: phone || null,
+        password_hash: defaultPassword, // 임시로 저장
         social_media_links: social_media_links || [],
         follower_count: follower_count || 0,
         engagement_rate: engagement_rate || 0,
@@ -135,6 +182,17 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('인플루언서 생성 에러:', error)
+      
+      // 인플루언서 테이블 생성 실패 시 Auth 사용자도 삭제
+      if (authUser) {
+        try {
+          await supabase.auth.admin.deleteUser(authUser.id)
+          console.log('❌ Auth 인플루언서 롤백 완료')
+        } catch (deleteError) {
+          console.error('Auth 인플루언서 삭제 실패:', deleteError)
+        }
+      }
+      
       return NextResponse.json(
         { error: '인플루언서 추가에 실패했습니다' },
         { status: 500 }

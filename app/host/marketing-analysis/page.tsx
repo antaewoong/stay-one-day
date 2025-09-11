@@ -72,7 +72,32 @@ export default function MarketingAnalysisPage() {
         return
       }
 
-      // 호스트의 숙소 목록 조회
+      // 🔐 RLS 준수: 호스트 역할 확인
+      const { data: userRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .single()
+
+      if (!userRole || userRole.role !== 'host') {
+        router.push('/auth/signin')
+        return
+      }
+
+      // 1단계: 현재 사용자의 호스트 정보 조회
+      const { data: hostData, error: hostError } = await supabase
+        .from('hosts')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .single()
+
+      if (hostError) {
+        console.error('호스트 정보 조회 실패:', hostError)
+        setError('호스트 정보를 찾을 수 없습니다')
+        return
+      }
+
+      // 2단계: RLS 정책에 의해 자동으로 본인 숙소만 조회됨
       const { data, error } = await supabase
         .from('accommodations')
         .select(`
@@ -83,7 +108,7 @@ export default function MarketingAnalysisPage() {
           base_price,
           max_capacity
         `)
-        .eq('host_id', session.user.id)
+        .eq('host_id', hostData.id)
         .eq('status', 'active')
 
       if (error) throw error
