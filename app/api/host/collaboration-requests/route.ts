@@ -4,30 +4,48 @@ import { NextRequest, NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
 // GET: 호스트의 협업 요청 목록 조회
 export async function GET(request: NextRequest) {
   try {
+    // 세션 쿠키에서 호스트 인증 토큰 확인
+    const cookies = request.cookies
+    const hostAuth = cookies.get('hostAuth')?.value === 'true'
+    const sessionHostId = cookies.get('hostId')?.value
+
+    if (!hostAuth || !sessionHostId) {
+      return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 })
+    }
     
     // 호스트 인증 확인 (세션 또는 쿼리 파라미터로 host_id 전달)
     const { searchParams } = new URL(request.url)
-    const hostId = searchParams.get('host_id')
+    const requestedHostId = searchParams.get('host_id')
     const status = searchParams.get('status') || 'all'
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
     const offset = (page - 1) * limit
 
-    if (!hostId) {
-      return NextResponse.json(
-        { error: 'Host ID가 필요합니다' },
-        { status: 400 }
-      )
+    // URL 파라미터의 hostId와 세션의 hostId가 일치하는지 확인
+    if (requestedHostId && requestedHostId !== sessionHostId) {
+      return NextResponse.json({ error: '권한이 없습니다' }, { status: 403 })
+    }
+
+    // 호스트 존재 여부 및 auth_user_id 확인
+    const { data: host, error: hostError } = await supabaseAdmin
+      .from('hosts')
+      .select('id, auth_user_id')
+      .eq('id', sessionHostId)
+      .single()
+
+    if (hostError || !host || !host.auth_user_id) {
+      return NextResponse.json({ error: '호스트를 찾을 수 없습니다' }, { status: 404 })
     }
 
     // 협업 요청 조회 (인플루언서 및 숙소 정보 포함)
-    let query = supabase
+    let query = supabaseAdmin
       .from('influencer_collaboration_requests')
       .select(`
         *,
@@ -53,7 +71,7 @@ export async function GET(request: NextRequest) {
           images
         )
       `)
-      .eq('host_id', hostId)
+      .eq('host_id', host.id)
       .order('created_at', { ascending: false })
 
     // 상태 필터링
@@ -94,15 +112,40 @@ export async function GET(request: NextRequest) {
 // PUT: 협업 요청 상태 업데이트 (승인/거부)
 export async function PUT(request: NextRequest) {
   try {
+    // 세션 쿠키에서 호스트 인증 토큰 확인
+    const cookies = request.cookies
+    const hostAuth = cookies.get('hostAuth')?.value === 'true'
+    const sessionHostId = cookies.get('hostId')?.value
+
+    if (!hostAuth || !sessionHostId) {
+      return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { request_id, status, host_notes, host_id } = body
 
     // 입력값 검증
-    if (!request_id || !status || !host_id) {
+    if (!request_id || !status) {
       return NextResponse.json(
         { error: '필수 파라미터가 누락되었습니다' },
         { status: 400 }
       )
+    }
+
+    // 세션 hostId와 요청 hostId 일치 확인
+    if (host_id && host_id !== sessionHostId) {
+      return NextResponse.json({ error: '권한이 없습니다' }, { status: 403 })
+    }
+
+    // 호스트 존재 여부 및 auth_user_id 확인
+    const { data: host, error: hostError } = await supabaseAdmin
+      .from('hosts')
+      .select('id, auth_user_id')
+      .eq('id', sessionHostId)
+      .single()
+
+    if (hostError || !host || !host.auth_user_id) {
+      return NextResponse.json({ error: '호스트를 찾을 수 없습니다' }, { status: 404 })
     }
 
     if (!['accepted', 'rejected'].includes(status)) {
@@ -113,7 +156,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // 협업 요청 존재 및 권한 확인
-    const { data: existingRequest, error: fetchError } = await supabase
+    const { data: existingRequest, error: fetchError } = await supabaseAdmin
       .from('influencer_collaboration_requests')
       .select('*, accommodation:accommodations!inner(host_id)')
       .eq('id', request_id)
@@ -128,7 +171,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // 호스트 권한 확인
-    if (existingRequest.accommodation.host_id !== host_id) {
+    if (existingRequest.accommodation.host_id !== host.id) {
       return NextResponse.json(
         { error: '권한이 없습니다' },
         { status: 403 }
@@ -136,7 +179,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // 상태 업데이트
-    const { data: updatedRequest, error: updateError } = await supabase
+    const { data: updatedRequest, error: updateError } = await supabaseAdmin
       .from('influencer_collaboration_requests')
       .update({
         status,
@@ -158,10 +201,10 @@ export async function PUT(request: NextRequest) {
     // 승인된 경우 자동 예약 생성
     if (status === 'accepted') {
       try {
-        const { error: bookingError } = await supabase
+        const { error: bookingError } = await supabaseAdmin
           .from('bookings')
           .insert({
-            host_id: host_id,
+            host_id: host.id,
             accommodation_id: existingRequest.accommodation_id,
             guest_name: `[인플루언서] ${existingRequest.influencer?.name || ''}`,
             guest_email: existingRequest.influencer?.email || '',

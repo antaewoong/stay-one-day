@@ -7,13 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createClient } from '@/lib/supabase/client'
-import { Lock, User, Shield, AlertTriangle } from 'lucide-react'
+import { Lock, User, Shield, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loginForm, setLoginForm] = useState({
     username: '',
     password: ''
@@ -25,61 +26,78 @@ export default function AdminLoginPage() {
     setError('')
 
     try {
-      // API를 통한 데이터베이스 인증
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: loginForm.username,
-          password: loginForm.password
-        })
+      if (!loginForm.username || !loginForm.password) {
+        setError('이메일과 비밀번호를 모두 입력해주세요.')
+        return
+      }
+
+      console.log('🔐 관리자 로그인 시도:', loginForm.username)
+
+      // Supabase Auth를 통한 인증
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginForm.username, // username을 email로 사용
+        password: loginForm.password
       })
 
-      const result = await response.json()
+      console.log('🔐 로그인 응답:', { 
+        user: data.user ? 'exists' : 'null', 
+        session: data.session ? 'exists' : 'null',
+        error: error?.message 
+      })
 
-      if (response.ok && result.success) {
-        // 세션에 관리자 정보 저장
-        sessionStorage.setItem('adminUser', JSON.stringify({
-          id: result.admin.id,
-          username: result.admin.username,
-          name: result.admin.name,
-          email: result.admin.email,
-          role: result.admin.role,
-          loginTime: new Date().toISOString()
-        }))
-
-        // 쿠키 설정 (미들웨어에서 확인)
-        if (result.admin.role === 'super_admin' && result.admin.id === 'env-admin') {
-          // 환경변수 슈퍼 관리자
-          const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD
-          document.cookie = `admin-auth=${adminPassword}; path=/; max-age=86400; samesite=lax`
-        } else {
-          // 데이터베이스 관리자들을 위한 토큰
-          document.cookie = `admin-auth=db-admin-${result.admin.id}; path=/; max-age=86400; samesite=lax`
-        }
-
-        // 호스트와 같은 방식으로 리다이렉트 처리
-        console.log('관리자 로그인 성공, 대시보드로 이동 준비...')
-        
-        // 리다이렉트 처리 (호스트 방식과 동일)
-        setTimeout(() => {
-          console.log('대시보드로 이동 중...')
-          // 1차: Next.js router 시도
-          router.push('/admin')
-          
-          // 2차: 1초 후 강제 window.location 시도
-          setTimeout(() => {
-            console.log('강제 페이지 이동 시도...')
-            window.location.replace('/admin')
-          }, 1000)
-        }, 1000)
-      } else {
-        setError(result.error || '로그인에 실패했습니다.')
+      if (error) {
+        console.error('로그인 에러:', error)
+        setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.')
+        return
       }
+
+      if (!data.user || !data.session) {
+        console.error('사용자 또는 세션 데이터 없음')
+        setError('로그인 처리 중 문제가 발생했습니다.')
+        return
+      }
+
+      console.log('✅ 사용자 인증 성공:', data.user.id)
+
+      // admin_accounts 테이블에서 관리자 확인 (RLS 정책에 의해 자동으로 본인만 조회됨)
+      const { data: admin, error: adminError } = await supabase
+        .from('admin_accounts')
+        .select('*')
+        .eq('email', data.user.email)
+        .eq('is_active', true)
+        .single()
+
+      console.log('👤 관리자 정보 조회 결과:', { admin: admin?.name || 'null', error: adminError?.message })
+
+      if (adminError || !admin) {
+        console.error('관리자 정보 조회 실패')
+        setError('관리자 권한이 없습니다.')
+        await supabase.auth.signOut()
+        return
+      }
+
+      console.log('✅ 관리자 정보 조회 성공:', admin.name)
+
+      // 세션에 관리자 정보 저장
+      sessionStorage.setItem('adminUser', JSON.stringify({
+        id: admin.id,
+        username: admin.username,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+        loginTime: new Date().toISOString()
+      }))
+
+      console.log('✅ 로그인 성공, 대시보드로 이동...')
+      
+      // 세션이 완전히 저장될 때까지 잠시 대기 후 페이지 이동
+      setTimeout(() => {
+        console.log('대시보드로 이동 중...')
+        router.push('/admin')
+      }, 1000)
+
     } catch (error) {
-      console.error('로그인 오류:', error)
+      console.error('💥 로그인 처리 중 예외:', error)
       setError('로그인 처리 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
@@ -117,15 +135,15 @@ export default function AdminLoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="username">관리자 아이디</Label>
+                <Label htmlFor="username">이메일</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
                     id="username"
-                    type="text"
+                    type="email"
                     value={loginForm.username}
                     onChange={(e) => setLoginForm(prev => ({ ...prev, username: e.target.value }))}
-                    placeholder="아이디를 입력하세요"
+                    placeholder="관리자 이메일을 입력하세요"
                     className="pl-10"
                     required
                   />
@@ -138,13 +156,20 @@ export default function AdminLoginPage() {
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
                     id="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={loginForm.password}
                     onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
                     placeholder="비밀번호를 입력하세요"
-                    className="pl-10"
+                    className="pl-10 pr-10"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 

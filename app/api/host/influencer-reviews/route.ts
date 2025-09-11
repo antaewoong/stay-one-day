@@ -6,16 +6,23 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    // 세션 쿠키에서 호스트 인증 토큰 확인
+    const cookieStore = cookies()
+    const hostAuth = cookieStore.get('hostAuth')?.value === 'true'
+    const sessionHostId = cookieStore.get('hostId')?.value
+
+    if (!hostAuth || !sessionHostId) {
+      return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 })
+    }
+
     const supabase = createRouteHandlerClient({ cookies })
     
     const { searchParams } = new URL(request.url)
-    const hostId = searchParams.get('hostId')
+    const requestedHostId = searchParams.get('hostId')
 
-    if (!hostId) {
-      return NextResponse.json(
-        { error: '호스트 ID가 필요합니다' },
-        { status: 400 }
-      )
+    // URL 파라미터의 hostId와 세션의 hostId가 일치하는지 확인
+    if (requestedHostId && requestedHostId !== sessionHostId) {
+      return NextResponse.json({ error: '권한이 없습니다' }, { status: 403 })
     }
 
     // 호스트의 숙소에 대한 인플루언서 리뷰 조회

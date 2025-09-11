@@ -494,9 +494,10 @@ export default function ReservationCalendarPage() {
 
       {/* 달력 */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <CardHeader className="pb-2 sm:pb-4">
+          {/* 첫 번째 줄: 월 네비게이션 (가운데 정렬) */}
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -504,7 +505,7 @@ export default function ReservationCalendarPage() {
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <h2 className="text-xl font-bold">
+              <h2 className="text-lg sm:text-xl font-bold min-w-[140px] sm:min-w-[160px] text-center">
                 {currentDate.getFullYear()}년 {monthNames[currentDate.getMonth()]}
               </h2>
               <Button
@@ -515,21 +516,24 @@ export default function ReservationCalendarPage() {
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+          </div>
+          {/* 두 번째 줄: 범례 (반응형 정렬) */}
+          <div className="flex justify-center sm:justify-end mt-2">
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-yellow-200 rounded"></div>
+                <div className="w-2 sm:w-3 h-2 sm:h-3 bg-yellow-200 rounded"></div>
                 <span>대기</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-blue-200 rounded"></div>
+                <div className="w-2 sm:w-3 h-2 sm:h-3 bg-blue-200 rounded"></div>
                 <span>확정</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-green-200 rounded"></div>
+                <div className="w-2 sm:w-3 h-2 sm:h-3 bg-green-200 rounded"></div>
                 <span>이용중</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-red-200 rounded"></div>
+                <div className="w-2 sm:w-3 h-2 sm:h-3 bg-red-200 rounded"></div>
                 <span>취소</span>
               </div>
             </div>
@@ -544,8 +548,12 @@ export default function ReservationCalendarPage() {
           ) : (
             <div className="grid grid-cols-7 gap-1">
               {/* 요일 헤더 */}
-              {dayNames.map(day => (
-                <div key={day} className="p-2 text-center font-medium text-gray-600 text-sm">
+              {dayNames.map((day, index) => (
+                <div key={day} className={`p-1 sm:p-2 text-center font-medium text-xs sm:text-sm ${
+                  index === 0 ? 'text-red-800' : // 일요일: 짙은 빨간색
+                  index === 6 ? 'text-blue-800' : // 토요일: 짙은 파란색
+                  'text-gray-600' // 평일
+                }`}>
                   {day}
                 </div>
               ))}

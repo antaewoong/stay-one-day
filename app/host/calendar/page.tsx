@@ -84,6 +84,14 @@ export default function HostCalendarPage() {
     isMaintenanceMode: false
   })
 
+  // 인라인 가격 편집 상태
+  const [editingPrice, setEditingPrice] = useState<string | null>(null)
+  const [tempPrice, setTempPrice] = useState<number>(0)
+
+  // 인라인 메모 편집 상태
+  const [editingNote, setEditingNote] = useState<string | null>(null)
+  const [tempNote, setTempNote] = useState<string>('')
+
   const [accommodations, setAccommodations] = useState<any[]>([])
   const [rooms, setRooms] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -377,15 +385,32 @@ export default function HostCalendarPage() {
 
 
   const getDayClassNames = (day: CalendarDay) => {
-    const base = "relative p-2 min-h-[80px] border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+    const base = "relative p-1 sm:p-2 min-h-[80px] sm:min-h-[120px] border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
     const selected = selectedDates.includes(day.date) ? "ring-2 ring-blue-500" : ""
-    const currentMonth = day.isCurrentMonth ? "" : "bg-gray-100 text-gray-400"
     const today = day.isToday ? "bg-blue-50 border-blue-300" : ""
+    
+    // 지난달/다음달 날짜는 회색 배경으로 색채움 (참조 이미지와 동일)
+    if (!day.isCurrentMonth) {
+      return `${base} ${selected} bg-gray-100 text-transparent`
+    }
+    
+    // 지난 날짜 스타일링 - 회색 음영으로 색칠 (참조 이미지와 동일)
+    const isPastDate = day.isCurrentMonth && !day.isToday && new Date(day.date) < new Date(new Date().toDateString())
+    if (isPastDate) {
+      return `${base} ${selected} ${today} bg-gray-100 opacity-70`
+    }
+    
+    // 주말 스타일링 (토요일: 보라색, 일요일: 자주색) - 지난 날짜가 아닌 경우만
+    const weekendStyle = day.isWeekend && !isPastDate
+      ? new Date(day.date).getDay() === 0 
+        ? "bg-purple-50 border-purple-200" // 일요일
+        : "bg-violet-50 border-violet-200" // 토요일
+      : ""
     
     let status = ""
     switch (day.status) {
       case 'reserved':
-        status = "bg-red-100 border-red-300"
+        status = "bg-purple-100 border-purple-300"
         break
       case 'blocked':
         status = "bg-gray-300 border-gray-400"
@@ -394,24 +419,43 @@ export default function HostCalendarPage() {
         status = "bg-orange-100 border-orange-300"
         break
       case 'payment_pending':
-        status = "bg-amber-100 border-amber-300 animate-pulse"
+        status = "bg-violet-100 border-violet-300 animate-pulse"
         break
       case 'hold_expired':
         status = "bg-gray-300 border-gray-500 opacity-60"
         break
       case 'available':
-        status = day.isCustomPrice ? "bg-green-100 border-green-300" : ""
+        status = day.isCustomPrice ? "bg-indigo-100 border-indigo-300" : ""
         break
     }
     
-    return `${base} ${selected} ${currentMonth} ${today} ${status}`
+    // 우선순위: status > weekendStyle
+    const finalStyle = status || weekendStyle
+    
+    return `${base} ${selected} ${today} ${finalStyle}`
+  }
+
+  const getDayTextColor = (day: CalendarDay) => {
+    if (!day.isCurrentMonth) return "text-transparent"
+    
+    // 지난 날짜는 회색으로 표시 (오늘은 제외)
+    const isPastDate = day.isCurrentMonth && !day.isToday && new Date(day.date) < new Date(new Date().toDateString())
+    if (isPastDate) return "text-gray-500"
+    
+    // 주말 및 공휴일 텍스트 색상 (지난 날짜가 아닌 경우만) - 요일 헤더와 동일한 색상
+    if (day.isWeekend && !isPastDate) {
+      const dayOfWeek = new Date(day.date).getDay()
+      return dayOfWeek === 0 ? "text-red-800 font-semibold" : "text-blue-800 font-semibold" // 일요일: 짙은 빨간색, 토요일: 짙은 파란색
+    }
+    
+    return "text-gray-900"
   }
 
   const getStatusText = (status: string) => {
     const statusMap = {
       'available': '예약가능',
       'reserved': '예약됨',
-      'blocked': '예약차단',
+      'blocked': '예약마감',
       'maintenance': '정비중',
       'payment_pending': '결제대기',
       'hold_expired': '홀드만료'
@@ -422,7 +466,7 @@ export default function HostCalendarPage() {
   const getStatusColor = (status: string) => {
     const colorMap = {
       'available': 'bg-green-100 text-green-800',
-      'reserved': 'bg-red-100 text-red-800',
+      'reserved': 'bg-purple-100 text-purple-800',
       'blocked': 'bg-gray-100 text-gray-800',
       'maintenance': 'bg-orange-100 text-orange-800',
       'payment_pending': 'bg-amber-100 text-amber-800',
@@ -447,6 +491,73 @@ export default function HostCalendarPage() {
         notes: day.notes || ''
       })
     }
+  }
+
+  const handleToggleRoomStatus = (day: CalendarDay, e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    if (!day.isCurrentMonth || day.status === 'reserved') return
+    
+    const currentStatus = day.status
+    const newStatus = (currentStatus === 'blocked' || currentStatus === 'maintenance') 
+      ? 'available' 
+      : 'blocked'
+    
+    setCalendarData(prev => prev.map(d => 
+      d.date === day.date 
+        ? { ...d, status: newStatus }
+        : d
+    ))
+    
+    console.log(`방 상태 변경: ${day.date} - ${currentStatus} → ${newStatus}`)
+  }
+
+  const handlePriceEdit = (day: CalendarDay, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!day.isCurrentMonth || day.status !== 'available') return
+    
+    setEditingPrice(day.date)
+    setTempPrice(day.price)
+  }
+
+  const handlePriceSaveInline = (day: CalendarDay) => {
+    setCalendarData(prev => prev.map(d => 
+      d.date === day.date 
+        ? { ...d, price: tempPrice, isCustomPrice: tempPrice !== d.basePrice }
+        : d
+    ))
+    
+    setEditingPrice(null)
+    console.log(`가격 변경: ${day.date} - ₩${tempPrice.toLocaleString()}`)
+  }
+
+  const handlePriceCancel = () => {
+    setEditingPrice(null)
+    setTempPrice(0)
+  }
+
+  const handleNoteEdit = (day: CalendarDay) => {
+    if (!day.isCurrentMonth) return
+    
+    setEditingNote(day.date)
+    setTempNote(day.notes || '')
+  }
+
+  const handleNoteSave = (day: CalendarDay) => {
+    setCalendarData(prev => prev.map(d => 
+      d.date === day.date 
+        ? { ...d, notes: tempNote }
+        : d
+    ))
+    
+    setEditingNote(null)
+    setTempNote('')
+    console.log(`메모 저장: ${day.date} - ${tempNote}`)
+  }
+
+  const handleNoteCancel = () => {
+    setEditingNote(null)
+    setTempNote('')
   }
 
   const handleDateSelect = (day: CalendarDay) => {
@@ -527,8 +638,22 @@ export default function HostCalendarPage() {
   const selectedCount = selectedDates.length
   const monthYear = currentDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' })
   
+  const today = new Date()
+  const todayString = today.toDateString()
+  
+  // 오늘 날짜와 비교해서 지나간 날짜인지 확인 (오늘은 포함)
+  const isPastDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date < new Date(todayString)
+  }
+  
   const totalDaysInMonth = calendarData.filter(d => d.isCurrentMonth).length
-  const availableDays = calendarData.filter(d => d.isCurrentMonth && d.status === 'available').length
+  // 예약가능은 지난 날짜 제외하고 계산
+  const availableDays = calendarData.filter(d => 
+    d.isCurrentMonth && 
+    d.status === 'available' && 
+    !isPastDate(d.date)
+  ).length
   const reservedDays = calendarData.filter(d => d.isCurrentMonth && d.status === 'reserved').length
   const blockedDays = calendarData.filter(d => d.isCurrentMonth && (d.status === 'blocked' || d.status === 'maintenance')).length
 
@@ -580,15 +705,15 @@ export default function HostCalendarPage() {
                 <div className="text-sm text-gray-600">예약가능</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{reservedDays}</div>
+                <div className="text-2xl font-bold text-purple-600">{reservedDays}</div>
                 <div className="text-sm text-gray-600">예약됨</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-600">{blockedDays}</div>
-                <div className="text-sm text-gray-600">차단됨</div>
+                <div className="text-sm text-gray-600">예약마감</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-2xl font-bold text-violet-600">
                   {((reservedDays / totalDaysInMonth) * 100).toFixed(0)}%
                 </div>
                 <div className="text-sm text-gray-600">예약률</div>
@@ -608,12 +733,12 @@ export default function HostCalendarPage() {
                 <span className="text-sm">예약가능 (커스텀 가격)</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
+                <div className="w-4 h-4 bg-purple-100 border border-purple-300 rounded"></div>
                 <span className="text-sm">예약됨</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 bg-gray-300 border border-gray-400 rounded"></div>
-                <span className="text-sm">예약차단</span>
+                <span className="text-sm">예약마감</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 bg-orange-100 border border-orange-300 rounded"></div>
@@ -681,30 +806,54 @@ export default function HostCalendarPage() {
 
       {/* 달력 */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={() => navigateMonth('prev')}>
+        <CardHeader className="pb-2 sm:pb-4">
+          {/* 첫 번째 줄: 월 네비게이션 (가운데 정렬) */}
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <h2 className="text-xl font-semibold">{monthYear}</h2>
-              <Button variant="outline" onClick={() => navigateMonth('next')}>
+              <h2 className="text-lg sm:text-xl font-semibold min-w-[120px] sm:min-w-[140px] text-center">{monthYear}</h2>
+              <Button variant="outline" size="sm" onClick={() => navigateMonth('next')}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
-              <Button variant="outline" onClick={resetToToday}>
+              <Button variant="outline" size="sm" onClick={resetToToday} className="hidden sm:flex">
                 <CalendarIcon className="w-4 h-4 mr-2" />
                 오늘
               </Button>
+              {/* 모바일용 오늘 버튼 */}
+              <Button variant="outline" size="sm" onClick={resetToToday} className="sm:hidden">
+                <CalendarIcon className="w-4 h-4" />
+              </Button>
             </div>
-            <div className="text-sm text-gray-600">
-              클릭: 가격/상태 수정 | Shift+클릭: 다중 선택
+          </div>
+          {/* 두 번째 줄: 설명 문구 (반응형 정렬) */}
+          <div className="flex justify-center sm:justify-end mt-3">
+            <div className="bg-gray-50 rounded-lg px-3 py-2 border">
+              <div className="text-xs sm:text-sm text-gray-700 font-medium text-center sm:text-right">
+                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    열기/막기: 배지 클릭
+                  </span>
+                  <span className="hidden sm:block text-gray-400">•</span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                    가격 수정: 금액 클릭
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-7 gap-0 mb-2">
-            {['일', '월', '화', '수', '목', '금', '토'].map(day => (
-              <div key={day} className="p-3 text-center text-sm font-medium text-gray-600 bg-gray-50 border">
+            {['일', '월', '화', '수', '목', '금', '토'].map((day, index) => (
+              <div key={day} className={`p-2 sm:p-3 text-center text-xs sm:text-sm font-medium bg-gray-50 border ${
+                index === 0 ? 'text-red-800' : // 일요일: 짙은 빨간색
+                index === 6 ? 'text-blue-800' : // 토요일: 짙은 파란색
+                'text-gray-600' // 평일
+              }`}>
                 {day}
               </div>
             ))}
@@ -723,41 +872,48 @@ export default function HostCalendarPage() {
                   }
                 }}
               >
-                <div className="flex flex-col h-full">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className={`text-sm ${day.isToday ? 'font-bold text-blue-600' : ''}`}>
-                      {day.day}
-                    </span>
-                    {day.isCustomPrice && (
-                      <Badge className="text-xs bg-yellow-100 text-yellow-800 px-1 py-0">
-                        커스텀
-                      </Badge>
-                    )}
+                {/* 지난달/다음달 날짜는 단순 회색 상자만 표시 */}
+                {!day.isCurrentMonth ? (
+                  <div className="flex items-center justify-center h-full">
+                    <span className="text-sm text-transparent">{day.day}</span>
                   </div>
+                ) : (
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-xs sm:text-sm ${day.isToday ? 'font-bold ' + getDayTextColor(day) : getDayTextColor(day)}`}>
+                        {day.day}
+                      </span>
+                      <div className="flex gap-1">
+                        {/* 방막기/방열기 배지 - 우측 상단 배치 (클릭 가능, 터치 친화적) */}
+                        {day.status === 'blocked' || day.status === 'maintenance' ? (
+                          <Badge 
+                            className="text-xs sm:text-sm bg-red-500 hover:bg-red-600 active:bg-red-700 text-white cursor-pointer transition-all duration-150 px-2 sm:px-3 py-1 sm:py-1.5 font-medium shadow-sm hover:shadow-md min-w-[44px] min-h-[32px] flex items-center justify-center"
+                            onClick={(e) => handleToggleRoomStatus(day, e)}
+                          >
+                            막기
+                          </Badge>
+                        ) : (
+                          <Badge 
+                            className="text-xs sm:text-sm bg-green-500 hover:bg-green-600 active:bg-green-700 text-white cursor-pointer transition-all duration-150 px-2 sm:px-3 py-1 sm:py-1.5 font-medium shadow-sm hover:shadow-md min-w-[44px] min-h-[32px] flex items-center justify-center"
+                            onClick={(e) => handleToggleRoomStatus(day, e)}
+                          >
+                            열기
+                          </Badge>
+                        )}
+                        {day.isCustomPrice && (
+                          <Badge className="text-[10px] sm:text-xs bg-yellow-100 text-yellow-800 px-0.5 sm:px-1 py-0">
+                            커스텀
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
-                      {/* 방막기/방열기 배지 */}
-                      {day.status === 'blocked' && (
-                        <Badge className="text-xs bg-red-500 text-white mb-1">
-                          방막기
-                        </Badge>
-                      )}
-                      {day.status === 'available' && day.isWeekend && (
-                        <Badge className="text-xs bg-blue-500 text-white mb-1">
-                          방열기
-                        </Badge>
-                      )}
                       
-                      {/* 한국 공휴일 표시 */}
-                      {day.isWeekend && new Date(day.date).getDay() === 0 && (
-                        <Badge className="text-xs bg-red-100 text-red-800 mb-1">
-                          일요일
-                        </Badge>
-                      )}
                       
                       {day.status === 'reserved' && (
-                        <div className="text-xs text-red-700 font-medium mb-1">
+                        <div className="text-[10px] sm:text-xs text-red-700 font-medium mb-1">
                           {day.guestName}
                           {day.checkInOut === 'checkin' && ' 체크인'}
                           {day.checkInOut === 'checkout' && ' 체크아웃'}
@@ -765,36 +921,80 @@ export default function HostCalendarPage() {
                       )}
                       
                       {day.notes && (
-                        <div className="text-xs text-gray-600 truncate">
+                        <div className="text-[10px] sm:text-xs text-gray-600 truncate">
                           📝 {day.notes}
                         </div>
                       )}
                     </div>
                     
-                    <div className="mt-1">
+                    <div className="mt-1 flex justify-center">
                       {day.status === 'available' ? (
-                        <div className="text-xs font-medium text-green-700">
-                          ₩{day.price.toLocaleString()}
-                        </div>
+                        editingPrice === day.date ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <input
+                              type="number"
+                              value={tempPrice}
+                              onChange={(e) => setTempPrice(parseInt(e.target.value) || 0)}
+                              onBlur={() => handlePriceSaveInline(day)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handlePriceSaveInline(day)
+                                if (e.key === 'Escape') handlePriceCancel()
+                              }}
+                              className="w-16 sm:w-24 text-xs sm:text-sm text-center border rounded px-1 sm:px-2 py-0.5 sm:py-1 bg-white appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+                              autoFocus
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        ) : (
+                          <div 
+                            className="text-sm sm:text-lg font-bold text-green-700 hover:bg-green-50 px-1 sm:px-2 py-0.5 sm:py-1 rounded cursor-pointer transition-colors text-center"
+                            onClick={(e) => handlePriceEdit(day, e)}
+                          >
+                            ₩{day.price.toLocaleString()}
+                          </div>
+                        )
                       ) : day.status === 'blocked' ? (
-                        <div className="text-xs font-medium text-red-600">
-                          차단됨
+                        <div className="text-xs sm:text-sm font-medium text-red-600 text-center">
+                          예약마감
                         </div>
                       ) : (
-                        <Badge className={`text-xs ${getStatusColor(day.status)}`}>
+                        <Badge className={`text-[10px] sm:text-xs ${getStatusColor(day.status)}`}>
                           {getStatusText(day.status)}
                         </Badge>
                       )}
                       
-                      {day.guestCount && (
-                        <div className="flex items-center text-xs text-gray-600 mt-1">
-                          <Users className="w-3 h-3 mr-1" />
-                          {day.guestCount}명
-                        </div>
-                      )}
+                    </div>
+                    
+                    {day.guestCount && (
+                      <div className="flex items-center justify-center text-xs text-gray-600 mt-1">
+                        <Users className="w-3 h-3 mr-1" />
+                        {day.guestCount}명
+                      </div>
+                    )}
+                    
+                    {/* 메모 입력 영역 - 하단에 배치 (항상 보이기) */}
+                    <div className="mt-2 border-t border-gray-200 pt-1">
+                      <input
+                        type="text"
+                        value={day.notes || ''}
+                        onChange={(e) => {
+                          const newNotes = e.target.value
+                          setCalendarData(prev => prev.map(d => 
+                            d.date === day.date 
+                              ? { ...d, notes: newNotes }
+                              : d
+                          ))
+                        }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={(e) => e.stopPropagation()}
+                        className="w-full text-xs border-0 bg-transparent placeholder-gray-400 focus:outline-none focus:bg-gray-50 rounded px-1 py-1"
+                        placeholder="예약메모"
+                      />
                     </div>
                   </div>
-                </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

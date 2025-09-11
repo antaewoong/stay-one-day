@@ -47,7 +47,8 @@ const menuItems: MenuItem[] = [
     children: [
       { title: '숙소 목록', href: '/admin/accommodations', icon: <></> },
       { title: '새 숙소 등록', href: '/admin/accommodations/add', icon: <></> },
-      { title: '숙소할인관리', href: '/admin/accommodations/discount-management', icon: <></> }
+      { title: '숙소할인관리', href: '/admin/accommodations/discount-management', icon: <></> },
+      { title: '협찬 신청 숙소관리', href: '/admin/accommodations/collaboration', icon: <></> }
     ]
   },
   {
@@ -90,7 +91,7 @@ const menuItems: MenuItem[] = [
     icon: <Bell className="w-4 h-4" />
   },
   {
-    title: '관리자 문의사항', 
+    title: '통합 문의 관리', 
     href: '/admin/inquiries',
     icon: <MessageCircle className="w-4 h-4" />
   },

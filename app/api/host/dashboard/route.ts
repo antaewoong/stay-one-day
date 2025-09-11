@@ -4,54 +4,47 @@ import { createClient } from '@supabase/supabase-js'
 export const dynamic = 'force-dynamic'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
 export async function GET(request: NextRequest) {
   try {
+    // 세션 쿠키에서 호스트 인증 토큰 확인
+    const cookies = request.cookies
+    const hostAuth = cookies.get('hostAuth')?.value === 'true'
+    const sessionHostId = cookies.get('hostId')?.value
+
+    if (!hostAuth || !sessionHostId) {
+      return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
-    const hostId = searchParams.get('hostId')
+    const requestedHostId = searchParams.get('hostId')
 
-    if (!hostId) {
-      return NextResponse.json({ error: 'Host ID required' }, { status: 400 })
+    // URL 파라미터의 hostId와 세션의 hostId가 일치하는지 확인
+    if (requestedHostId && requestedHostId !== sessionHostId) {
+      return NextResponse.json({ error: '권한이 없습니다' }, { status: 403 })
     }
 
-    console.log('Dashboard API - 받은 hostId:', hostId)
+    console.log('Dashboard API - 받은 sessionHostId:', sessionHostId)
 
-    // hostId가 UUID인지 host_id 문자열인지 확인
-    let host
-    let hostError
-
-    // UUID 형식인지 확인 (길이가 36자이고 하이픈이 포함된 경우)
-    if (hostId.length === 36 && hostId.includes('-')) {
-      // UUID로 직접 조회
-      const result = await supabase
-        .from('hosts')
-        .select('*')
-        .eq('id', hostId)
-        .single()
-      host = result.data
-      hostError = result.error
-    } else {
-      // host_id로 조회
-      const result = await supabase
-        .from('hosts')
-        .select('*')
-        .eq('host_id', hostId)
-        .single()
-      host = result.data
-      hostError = result.error
-    }
+    // 호스트 정보 가져오기 (인증된 세션 hostId로)
+    const { data: host, error: hostError } = await supabaseAdmin
+      .from('hosts')
+      .select('*')
+      .eq('id', sessionHostId)
+      .single()
 
     console.log('Dashboard API - 찾은 호스트:', host)
     console.log('Dashboard API - 에러:', hostError)
 
     if (hostError || !host) {
-      return NextResponse.json({ error: 'Host not found', debug: { hostId, hostError } }, { status: 404 })
+      return NextResponse.json({ error: 'Host not found', debug: { sessionHostId, hostError } }, { status: 404 })
     }
 
     // 호스트의 숙소들 조회
-    const { data: accommodations } = await supabase
+    const { data: accommodations } = await supabaseAdmin
       .from('accommodations')
       .select('*')
       .eq('host_id', host.id)
@@ -62,7 +55,7 @@ export async function GET(request: NextRequest) {
     const threeMonthsAgo = new Date()
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
 
-    const { data: reservations } = await supabase
+    const { data: reservations } = await supabaseAdmin
       .from('reservations')
       .select(`
         *,
@@ -73,7 +66,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     // 리뷰 데이터 조회
-    const { data: reviews } = await supabase
+    const { data: reviews } = await supabaseAdmin
       .from('reviews')
       .select(`
         *,

@@ -261,10 +261,12 @@ export default function HostPage() {
                 <p className="text-3xl font-bold mt-2 text-emerald-900">
                   ₩{stats.monthlyEarnings.toLocaleString()}
                 </p>
-                <p className="text-sm mt-3 flex items-center text-emerald-700 bg-white/60 rounded-full px-3 py-1">
-                  <TrendingUp className="w-4 h-4 mr-1" />
-                  +18% 전월 대비
-                </p>
+                {stats.monthlyEarnings > 0 && (
+                  <p className="text-sm mt-3 flex items-center text-emerald-700 bg-white/60 rounded-full px-3 py-1">
+                    <DollarSign className="w-4 h-4 mr-1" />
+                    이번 달 수익
+                  </p>
+                )}
               </div>
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br from-emerald-400 to-green-500 shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <DollarSign className="w-8 h-8 text-white" />
@@ -282,10 +284,12 @@ export default function HostPage() {
                 <p className="text-3xl font-bold mt-2 text-blue-900">
                   {stats.monthlyBookings}건
                 </p>
-                <p className="text-sm mt-3 flex items-center text-blue-700 bg-white/60 rounded-full px-3 py-1">
-                  <TrendingUp className="w-4 h-4 mr-1" />
-                  +22% 전월 대비
-                </p>
+                {stats.monthlyBookings > 0 && (
+                  <p className="text-sm mt-3 flex items-center text-blue-700 bg-white/60 rounded-full px-3 py-1">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    이번 달 예약
+                  </p>
+                )}
               </div>
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Calendar className="w-8 h-8 text-white" />
@@ -303,9 +307,11 @@ export default function HostPage() {
                 <p className="text-3xl font-bold mt-2 text-amber-900">
                   {stats.averageRating}
                 </p>
-                <p className="text-sm mt-3 text-amber-700 bg-white/60 rounded-full px-3 py-1 inline-block">
-                  총 {stats.totalBookings}개 리뷰
-                </p>
+                {recentReviews.length > 0 && (
+                  <p className="text-sm mt-3 text-amber-700 bg-white/60 rounded-full px-3 py-1 inline-block">
+                    총 {recentReviews.length}개 리뷰
+                  </p>
+                )}
               </div>
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Star className="w-8 h-8 text-white" />

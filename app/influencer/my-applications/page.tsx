@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { 
   ArrowLeft,
   Search,
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
+import { createClient } from '@/lib/supabase/client'
 
 interface Application {
   id: string
@@ -45,25 +47,53 @@ interface Application {
 
 export default function MyApplicationsPage() {
   const router = useRouter()
+  const supabase = createClient()
   const [influencer, setInfluencer] = useState<any>(null)
   const [applications, setApplications] = useState<Application[]>([])
   const [filteredApplications, setFilteredApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null)
+  const [showDetailModal, setShowDetailModal] = useState(false)
 
   useEffect(() => {
-    // 인플루언서 로그인 체크
-    const userData = sessionStorage.getItem('influencerUser')
-    if (!userData) {
-      router.push('/influencer/login')
-      return
-    }
-
-    const influencerData = JSON.parse(userData)
-    setInfluencer(influencerData)
-    loadApplications(influencerData.id)
+    checkAuthAndLoadData()
   }, [router])
+
+  const checkAuthAndLoadData = async () => {
+    try {
+      // Supabase Auth에서 현재 사용자 확인
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !user) {
+        console.log('❌ 인증되지 않은 사용자, 로그인 페이지로 이동')
+        router.push('/influencer/login')
+        return
+      }
+
+      // influencers 테이블에서 인플루언서 정보 조회 (RLS 정책 적용)
+      const { data: influencerData, error: influencerError } = await supabase
+        .from('influencers')
+        .select('*')
+        .eq('auth_user_id', user.id)
+        .eq('status', 'active')
+        .single()
+
+      if (influencerError || !influencerData) {
+        console.error('❌ 인플루언서 정보 조회 실패:', influencerError?.message)
+        router.push('/influencer/login')
+        return
+      }
+
+      console.log('✅ 인플루언서 정보 조회 성공:', influencerData.name)
+      setInfluencer(influencerData)
+      loadApplications(influencerData.id)
+    } catch (error) {
+      console.error('💥 인플루언서 데이터 로드 에러:', error)
+      router.push('/influencer/login')
+    }
+  }
 
   useEffect(() => {
     // 필터 적용
@@ -87,13 +117,25 @@ export default function MyApplicationsPage() {
 
   const loadApplications = async (influencerId: string) => {
     try {
-      const response = await fetch(`/api/influencer/my-applications?influencer_id=${influencerId}`)
-      const result = await response.json()
-      
-      if (result.success) {
-        setApplications(result.data)
+      const { data: applications, error } = await supabase
+        .from('influencer_collaboration_requests')
+        .select(`
+          *,
+          accommodation:accommodations(
+            id,
+            name,
+            address,
+            max_capacity,
+            images
+          )
+        `)
+        .eq('influencer_id', influencerId)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('신청 내역 로드 실패:', error)
       } else {
-        console.error('신청 내역 로드 실패:', result.error)
+        setApplications(applications || [])
       }
     } catch (error) {
       console.error('신청 내역 로드 에러:', error)
@@ -280,7 +322,14 @@ export default function MyApplicationsPage() {
         ) : (
           <div className="space-y-4">
             {filteredApplications.map((application) => (
-              <Card key={application.id} className="hover:shadow-md transition-shadow">
+              <Card 
+                key={application.id} 
+                className="hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => {
+                  setSelectedApplication(application)
+                  setShowDetailModal(true)
+                }}
+              >
                 <CardContent className="pt-6">
                   <div className="flex flex-col lg:flex-row lg:items-start gap-6">
                     {/* 숙소 정보 */}
@@ -346,6 +395,82 @@ export default function MyApplicationsPage() {
           </div>
         )}
       </div>
+
+      {/* 신청 내역 상세 모달 */}
+      <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>협업 신청 상세 내역</DialogTitle>
+          </DialogHeader>
+          
+          {selectedApplication && (
+            <div className="space-y-6">
+              {/* 기본 정보 */}
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">{selectedApplication.accommodation.name}</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-700">위치:</span>
+                      <div className="text-gray-600">{selectedApplication.accommodation.address}</div>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">상태:</span>
+                      <div className="mt-1">{getStatusBadge(selectedApplication.status, selectedApplication.final_status)}</div>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">협업 유형:</span>
+                      <div className="mt-1">{getRequestTypeBadge(selectedApplication.request_type)}</div>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">신청일:</span>
+                      <div className="text-gray-600">{format(new Date(selectedApplication.created_at), 'PPP', { locale: ko })}</div>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">이용 날짜:</span>
+                      <div className="text-gray-600">{format(new Date(selectedApplication.check_in_date), 'PPP', { locale: ko })}</div>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">인원:</span>
+                      <div className="text-gray-600">{selectedApplication.guest_count}명</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* 제안 금액 */}
+                {selectedApplication.proposed_rate && (
+                  <div>
+                    <span className="font-medium text-gray-700">제안 금액:</span>
+                    <div className="text-lg font-semibold text-blue-600">
+                      {selectedApplication.proposed_rate.toLocaleString()}원
+                    </div>
+                  </div>
+                )}
+                
+                {/* 신청 메시지 */}
+                {selectedApplication.message && (
+                  <div>
+                    <span className="font-medium text-gray-700">신청 메시지:</span>
+                    <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm whitespace-pre-wrap">
+                      {selectedApplication.message}
+                    </div>
+                  </div>
+                )}
+                
+                {/* 호스트 응답 */}
+                {selectedApplication.host_response && (
+                  <div>
+                    <span className="font-medium text-gray-700">호스트 응답:</span>
+                    <div className="mt-2 p-3 bg-blue-50 rounded-lg text-sm whitespace-pre-wrap">
+                      {selectedApplication.host_response}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

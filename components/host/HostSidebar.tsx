@@ -13,7 +13,9 @@ import {
   Users,
   TrendingUp,
   LogOut,
-  Settings
+  Settings,
+  MessageCircleQuestion,
+  HelpCircle
 } from 'lucide-react'
 
 interface MenuItem {
@@ -57,6 +59,11 @@ const menuItems: MenuItem[] = [
     title: '마케팅 분석',
     href: '/host/marketing',
     icon: <TrendingUp className="w-4 h-4" />
+  },
+  {
+    title: '고객센터',
+    href: '/host/support',
+    icon: <MessageCircleQuestion className="w-4 h-4" />
   },
   {
     title: '계정 설정',

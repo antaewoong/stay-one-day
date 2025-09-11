@@ -8,10 +8,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { createClient } from '@/lib/supabase/client'
 import { 
   CalendarIcon, 
   Loader2, 
@@ -20,17 +19,25 @@ import {
   Users,
   MapPin,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  ArrowLeft,
+  Building2,
+  Plus,
+  Minus
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { toast } from 'react-hot-toast'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 interface Accommodation {
   id: string
   name: string
-  location: string
-  price_per_night: number
+  address: string
+  region: string
+  base_price: number
+  max_capacity: number
   images: string[]
   description: string
 }
@@ -51,60 +58,105 @@ interface CollaborationPeriod {
 
 export default function InfluencerApplyPage() {
   const router = useRouter()
+  const supabase = createClient()
   const [influencer, setInfluencer] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [currentPeriod, setCurrentPeriod] = useState<CollaborationPeriod | null>(null)
   const [accommodations, setAccommodations] = useState<Accommodation[]>([])
   const [useDate, setUseDate] = useState<Date>()
+  const [calendarOpen, setCalendarOpen] = useState(false)
   
   const [formData, setFormData] = useState({
     accommodation_id: '',
     guest_count: 2,
-    request_type: 'free' as 'free' | 'paid',
+    request_type: 'barter' as 'barter' | 'paid',
     message: ''
   })
 
   useEffect(() => {
-    // 인플루언서 로그인 체크
-    const userData = sessionStorage.getItem('influencerUser')
-    if (!userData) {
-      router.push('/influencer/login')
-      return
-    }
-
-    const influencerData = JSON.parse(userData)
-    setInfluencer(influencerData)
-    
-    loadPageData()
+    checkAuthAndLoadData()
   }, [router])
+
+  const checkAuthAndLoadData = async () => {
+    try {
+      setLoading(true)
+      
+      // Supabase Auth 세션 체크
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !user) {
+        console.log('인증되지 않은 사용자, 로그인 페이지로 이동')
+        router.push('/influencer/login')
+        return
+      }
+
+      console.log('✅ 인증된 사용자:', user.id)
+
+      // influencers 테이블에서 인플루언서 정보 조회
+      const { data: influencerData, error: influencerError } = await supabase
+        .from('influencers')
+        .select('*')
+        .eq('email', user.email)
+        .eq('status', 'active')
+        .single()
+
+      if (influencerError || !influencerData) {
+        console.error('인플루언서 정보 조회 실패:', influencerError)
+        toast.error('인플루언서 정보를 찾을 수 없습니다.')
+        router.push('/influencer/login')
+        return
+      }
+
+      console.log('✅ 인플루언서 정보 조회 성공:', influencerData.name)
+      setInfluencer(influencerData)
+      
+      await loadPageData()
+    } catch (error) {
+      console.error('인증 체크 중 오류:', error)
+      router.push('/influencer/login')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const loadPageData = async () => {
     try {
-      setLoading(true)
+      console.log('📊 페이지 데이터 로드 중...')
       
       // 현재 협업 기간 정보 로드
       const periodResponse = await fetch('/api/influencer/current-period')
       const periodResult = await periodResponse.json()
+      
+      console.log('📅 협업 기간 조회 결과:', periodResult)
       
       if (periodResult.success && periodResult.period) {
         setCurrentPeriod(periodResult.period)
         
         // 협업 신청이 오픈된 경우에만 숙소 목록 로드
         if (periodResult.period.is_open) {
-          const accoResponse = await fetch('/api/accommodations?status=active&limit=50')
+          console.log('🏠 협업 숙소 목록 로드 중...')
+          const accoResponse = await fetch('/api/accommodations?status=active&collaboration_only=true&limit=50')
           const accoResult = await accoResponse.json()
           
-          if (accoResult.success) {
+          console.log('🏠 협업 숙소 조회 결과:', accoResult)
+          
+          if (accoResult.data && Array.isArray(accoResult.data)) {
             setAccommodations(accoResult.data)
+            console.log('✅ 협업 숙소 로드 완료:', accoResult.data.length, '개')
+          } else {
+            console.error('❌ 협업 숙소 조회 실패:', accoResult.error || '데이터 형식 오류')
+            toast.error('협업 가능한 숙소를 불러오는데 실패했습니다.')
           }
+        } else {
+          console.log('📋 협업 신청이 오픈되지 않음, 숙소 목록 로드 생략')
         }
+      } else {
+        console.error('❌ 협업 기간 조회 실패:', periodResult.message)
       }
     } catch (error) {
-      console.error('페이지 데이터 로드 실패:', error)
+      console.error('💥 페이지 데이터 로드 실패:', error)
       toast.error('페이지를 불러올 수 없습니다.')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -138,29 +190,71 @@ export default function InfluencerApplyPage() {
     setSubmitting(true)
     
     try {
-      const response = await fetch('/api/influencer/submit-application', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // 선택된 숙소 정보 조회
+      const selectedAccommodation = accommodations.find(acc => acc.id === formData.accommodation_id)
+      if (!selectedAccommodation) {
+        toast.error('숙소 정보를 찾을 수 없습니다.')
+        return
+      }
+
+      // 중복 신청 확인
+      const applicationStart = new Date(currentPeriod.application_start_date)
+      const applicationEnd = new Date(currentPeriod.application_end_date)
+      
+      const { data: existingRequest } = await supabase
+        .from('influencer_collaboration_requests')
+        .select('id')
+        .eq('influencer_id', influencer.id)
+        .eq('accommodation_id', formData.accommodation_id)
+        .gte('created_at', applicationStart.toISOString())
+        .lte('created_at', applicationEnd.toISOString())
+        .maybeSingle()
+
+      if (existingRequest) {
+        toast.error('이미 이 숙소에 협업 신청을 하셨습니다.')
+        return
+      }
+
+      // 협업 요청 생성
+      const { data: collaborationRequest, error: createError } = await supabase
+        .from('influencer_collaboration_requests')
+        .insert({
           influencer_id: influencer.id,
           accommodation_id: formData.accommodation_id,
+          host_id: selectedAccommodation.host_id,
           request_type: formData.request_type,
-          message: formData.message,
-          use_date: format(useDate, 'yyyy-MM-dd'),
-          guest_count: formData.guest_count
+          proposed_rate: formData.request_type === 'paid' ? totalCost : null,
+          message: formData.message || '',
+          check_in_date: format(useDate, 'yyyy-MM-dd'),
+          check_out_date: format(useDate, 'yyyy-MM-dd'),
+          guest_count: formData.guest_count,
+          status: 'pending',
+          final_status: 'pending'
         })
-      })
+        .select()
+        .single()
 
-      const result = await response.json()
-      
-      if (result.success) {
-        toast.success('협업 신청이 완료되었습니다!')
-        router.push('/influencer/my-applications')
-      } else {
-        toast.error(result.message || '협업 신청에 실패했습니다.')
+      if (createError) {
+        console.error('협업 요청 생성 에러:', createError)
+        toast.error('협업 신청에 실패했습니다.')
+        return
       }
+
+      // 현재 신청 수 증가
+      const { error: updateError } = await supabase
+        .from('collaboration_periods')
+        .update({ 
+          current_applications: currentPeriod.current_applications + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', currentPeriod.id)
+
+      if (updateError) {
+        console.error('신청 수 업데이트 에러:', updateError)
+      }
+
+      toast.success(`협업 신청이 완료되었습니다. ${selectedAccommodation.name} 호스트의 승인을 기다려주세요.`)
+      router.push('/influencer/my-applications')
     } catch (error) {
       console.error('협업 신청 실패:', error)
       toast.error('서버 오류가 발생했습니다.')
@@ -244,6 +338,19 @@ export default function InfluencerApplyPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
+        {/* 상단 네비게이션 */}
+        <div className="flex items-center gap-4 mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => router.push('/influencer/dashboard')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            대시보드
+          </Button>
+          <h1 className="text-xl font-semibold text-gray-900">협업 신청</h1>
+        </div>
+
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-center">
@@ -281,16 +388,38 @@ export default function InfluencerApplyPage() {
                   <SelectContent className="bg-white">
                     {accommodations.map(accommodation => (
                       <SelectItem key={accommodation.id} value={accommodation.id}>
-                        <div className="flex items-center justify-between w-full">
-                          <div>
-                            <div className="font-medium">{accommodation.name}</div>
+                        <div className="flex items-center gap-3 w-full">
+                          {/* 숙소 이미지 */}
+                          <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                            {accommodation.images && accommodation.images.length > 0 ? (
+                              <img
+                                src={accommodation.images[0]}
+                                alt={accommodation.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Building2 className="w-6 h-6 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* 숙소 정보 */}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium truncate">{accommodation.name}</div>
                             <div className="text-xs text-gray-500 flex items-center gap-1">
                               <MapPin className="w-3 h-3" />
-                              {accommodation.location}
+                              {accommodation.region}
                             </div>
                           </div>
-                          <div className="text-xs text-gray-500">
-                            ₩{accommodation.price_per_night?.toLocaleString()}/당일이용
+                          
+                          {/* 인원 및 가격 정보 */}
+                          <div className="text-xs text-gray-500 flex-shrink-0 text-right">
+                            <div className="flex items-center gap-1 mb-1">
+                              <Users className="w-3 h-3" />
+                              최대 {accommodation.max_capacity}명
+                            </div>
+                            <div>₩{accommodation.base_price?.toLocaleString()}</div>
                           </div>
                         </div>
                       </SelectItem>
@@ -302,9 +431,10 @@ export default function InfluencerApplyPage() {
               {/* 이용 날짜 */}
               <div>
                 <Label>이용 날짜 *</Label>
-                <Popover>
+                
+                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <Button variant="outline" className="w-full justify-start text-left font-normal h-12">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {useDate ? format(useDate, 'PPP', { locale: ko }) : '날짜를 선택해주세요'}
                     </Button>
@@ -313,39 +443,81 @@ export default function InfluencerApplyPage() {
                     <Calendar
                       mode="single"
                       selected={useDate}
-                      onSelect={setUseDate}
-                      disabled={(date) => 
-                        date < new Date(currentPeriod.collaboration_start_date) || 
-                        date > new Date(currentPeriod.collaboration_end_date) ||
-                        date < new Date()
-                      }
+                      onSelect={(date) => {
+                        setUseDate(date)
+                        setCalendarOpen(false)
+                      }}
+                      disabled={(date) => {
+                        if (!currentPeriod) return true
+                        const today = new Date()
+                        today.setHours(0, 0, 0, 0)
+                        const startDate = new Date(currentPeriod.collaboration_start_date)
+                        const endDate = new Date(currentPeriod.collaboration_end_date)
+                        
+                        return date < today || date < startDate || date > endDate
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
-                <div className="text-xs text-gray-500 mt-1">
-                  당일 이용 서비스입니다. 원하는 이용 날짜를 선택해주세요.
+                
+                <div className="text-xs text-gray-500 mt-2">
+                  협업 기간: {format(new Date(currentPeriod.collaboration_start_date), 'MM월 dd일', { locale: ko })} ~ {format(new Date(currentPeriod.collaboration_end_date), 'MM월 dd일', { locale: ko })}
                 </div>
               </div>
 
               {/* 인원 */}
               <div>
                 <Label htmlFor="guest_count">예정 인원 *</Label>
-                <Select value={formData.guest_count.toString()} onValueChange={(value) => setFormData(prev => ({ ...prev, guest_count: parseInt(value) }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
-                      <SelectItem key={num} value={num.toString()}>
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {num}명
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center justify-center gap-3 p-4 border rounded-lg bg-gray-50">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 w-9 p-0"
+                    disabled={formData.guest_count <= 1}
+                    onClick={() => setFormData(prev => ({ 
+                      ...prev, 
+                      guest_count: Math.max(1, prev.guest_count - 1) 
+                    }))}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  
+                  <div className="flex items-center gap-2 min-w-0 px-6">
+                    <Users className="h-4 w-4 text-gray-600" />
+                    <span className="text-lg font-medium">{formData.guest_count}명</span>
+                  </div>
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 w-9 p-0"
+                    disabled={formData.guest_count >= 20}
+                    onClick={() => setFormData(prev => ({ 
+                      ...prev, 
+                      guest_count: Math.min(20, prev.guest_count + 1) 
+                    }))}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="text-sm text-gray-600 mt-2">
+                  <div className="flex items-center gap-1">
+                    <span>• 무상협업 기준: 최대 4명</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-orange-600">
+                    <span>• 기준인원 초과 시 추가 비용이 발생합니다</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-blue-600">
+                    <span>• 유상협업: 기본료의 30% + 초과인원 추가비</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span>• 최대 수용인원: 20명</span>
+                  </div>
+                </div>
               </div>
 
               {/* 협업 유형 선택 */}
@@ -355,11 +527,11 @@ export default function InfluencerApplyPage() {
                 {/* 무상 협업 옵션 */}
                 <div 
                   className={`border-2 rounded-lg p-4 cursor-pointer transition-all mb-3 ${
-                    formData.request_type === 'free' 
+                    formData.request_type === 'barter' 
                       ? 'border-blue-500 bg-blue-50' 
                       : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
-                  onClick={() => setFormData(prev => ({ ...prev, request_type: 'free' }))}
+                  onClick={() => setFormData(prev => ({ ...prev, request_type: 'barter' }))}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -367,9 +539,9 @@ export default function InfluencerApplyPage() {
                         <input
                           type="radio"
                           name="request_type"
-                          value="free"
-                          checked={formData.request_type === 'free'}
-                          onChange={() => setFormData(prev => ({ ...prev, request_type: 'free' }))}
+                          value="barter"
+                          checked={formData.request_type === 'barter'}
+                          onChange={() => setFormData(prev => ({ ...prev, request_type: 'barter' }))}
                           className="text-blue-600"
                         />
                         <span className="font-semibold text-lg">무상 협업</span>
@@ -433,36 +605,60 @@ export default function InfluencerApplyPage() {
                     const selectedAccommodation = accommodations.find(acc => acc.id === formData.accommodation_id)
                     if (!selectedAccommodation) return null
                     
-                    const dayUsePrice = selectedAccommodation.price_per_night // 당일 이용 가격 (1일 가격과 동일)
+                    const dayUsePrice = selectedAccommodation.base_price // 당일 이용 가격
+                    const basePersons = 4 // 기준 인원
+                    const extraPersons = Math.max(0, formData.guest_count - basePersons)
+                    const extraPersonFee = extraPersons * 30000 // 초과 인원당 3만원
+                    
                     const discountedPrice = Math.round(dayUsePrice * 0.3)
+                    const totalExtraFee = extraPersonFee
+                    const finalPrice = discountedPrice + totalExtraFee
                     
                     return (
                       <div className="space-y-2">
                         <div className="flex justify-between items-center text-sm">
-                          <span>{selectedAccommodation.name} (당일 이용)</span>
+                          <span>{selectedAccommodation.name}</span>
                           <span className="text-gray-600">₩{dayUsePrice.toLocaleString()}</span>
                         </div>
                         <div className="text-xs text-gray-500">
-                          {format(useDate, 'PPP', { locale: ko })} 이용 예정
+                          {format(useDate, 'PPP', { locale: ko })} 이용 예정 • {formData.guest_count}명
                         </div>
                         
-                        {formData.request_type === 'free' ? (
-                          <div className="flex justify-between items-center font-semibold text-green-600 border-t pt-2">
-                            <span>최종 금액 (무상 협업)</span>
-                            <span className="text-xl">무료</span>
-                          </div>
+                        {formData.request_type === 'barter' ? (
+                          <>
+                            {extraPersons > 0 && (
+                              <div className="bg-orange-50 border border-orange-200 rounded p-2 text-sm">
+                                <div className="text-orange-700 font-medium">⚠️ 기준인원 초과</div>
+                                <div className="text-orange-600 text-xs">
+                                  기준 {basePersons}명 초과 {extraPersons}명 • 추가비용 ₩{totalExtraFee.toLocaleString()}
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center font-semibold text-green-600 border-t pt-2">
+                              <span>최종 금액 (무상 협업)</span>
+                              <span className="text-xl">
+                                {extraPersons > 0 ? `₩${totalExtraFee.toLocaleString()}` : '무료'}
+                              </span>
+                            </div>
+                          </>
                         ) : (
                           <>
                             <div className="flex justify-between items-center text-sm text-red-600">
                               <span>할인 금액 (70% 할인)</span>
                               <span>-₩{(dayUsePrice - discountedPrice).toLocaleString()}</span>
                             </div>
+                            {extraPersons > 0 && (
+                              <div className="flex justify-between items-center text-sm text-orange-600">
+                                <span>초과인원 비용 ({extraPersons}명 × ₩30,000)</span>
+                                <span>+₩{totalExtraFee.toLocaleString()}</span>
+                              </div>
+                            )}
                             <div className="flex justify-between items-center font-semibold text-purple-600 border-t pt-2">
-                              <span>최종 금액 (30% 지급)</span>
-                              <span className="text-xl">₩{discountedPrice.toLocaleString()}</span>
+                              <span>최종 금액 (30% 지급 + 추가비)</span>
+                              <span className="text-xl">₩{finalPrice.toLocaleString()}</span>
                             </div>
                             <div className="text-xs text-gray-500 text-center">
-                              일반 당일 이용 대비 70% 절약!
+                              일반 이용 대비 70% 절약!
                             </div>
                           </>
                         )}

@@ -35,6 +35,21 @@ export async function GET(request: NextRequest) {
         )
       `)
       .order('created_at', { ascending: false })
+    
+    // 기본적으로 활성화된 숙소만 조회
+    const status = searchParams.get('status')
+    if (status) {
+      query = query.eq('status', status)
+    } else {
+      // status가 명시되지 않은 경우 기본값으로 active 상태만 조회
+      query = query.eq('status', 'active')
+    }
+    
+    // 협찬 가능 숙소만 조회 (influencer용)
+    const collaborationOnly = searchParams.get('collaboration_only')
+    if (collaborationOnly === 'true') {
+      query = query.eq('is_collaboration_available', true)
+    }
 
     // 필터 적용
     if (location) {

@@ -1,25 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
 
 export const dynamic = 'force-dynamic'
 
-// POST: 인플루언서 로그인
+// POST: 인플루언서 로그인 (Supabase Auth 기반)
 export async function POST(request: NextRequest) {
   try {
-    // Service role key로 RLS 우회
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Supabase configuration missing')
-      return NextResponse.json(
-        { success: false, message: '서버 설정 오류입니다.' },
-        { status: 500 }
-      )
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const supabase = await createClient()
     const body = await request.json()
     const { username, password } = body
 
@@ -31,32 +18,81 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 인플루언서 조회 (email 또는 이름으로 조회)
-    const { data: influencer, error } = await supabase
-      .from('influencers')
-      .select('*')
-      .or(`email.eq.${username.trim()},name.eq.${username.trim()}`)
-      .eq('status', 'active')
+    // 사용자가 입력한 username이 이메일인지 확인
+    let email = username.includes('@') ? username.trim() : null
+    
+    if (!email) {
+      // username이 이메일이 아니면 influencers 테이블에서 이메일 찾기
+      const { data: influencerData, error: findError } = await supabase
+        .from('influencers')
+        .select('email')
+        .eq('name', username.trim())
+        .eq('status', 'active')
+        .single()
+      
+      if (findError || !influencerData) {
+        return NextResponse.json(
+          { success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' },
+          { status: 401 }
+        )
+      }
+      
+      email = influencerData.email
+    }
+    
+    console.log('🔐 인플루언서 로그인 시도:', { username: username.trim(), email })
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
+
+    if (error || !data.user) {
+      console.log('❌ Auth 로그인 실패:', error?.message)
+      return NextResponse.json(
+        { success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' },
+        { status: 401 }
+      )
+    }
+
+    console.log('✅ Auth 로그인 성공:', data.user.id)
+
+    // user_roles에서 인플루언서 역할 확인
+    const { data: userRole, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', data.user.id)
       .single()
 
-    if (error || !influencer) {
+    if (roleError || !userRole || userRole.role !== 'influencer') {
+      console.log('❌ 인플루언서 권한 없음:', roleError?.message)
+      await supabase.auth.signOut()
       return NextResponse.json(
-        { success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' },
+        { success: false, message: '인플루언서 권한이 없습니다.' },
         { status: 401 }
       )
     }
 
-    // 비밀번호 검증 (임시로 간단히 처리)
-    // 실제로는 bcrypt.compare를 사용해야 함
-    const isValidPassword = password === 'password123' || 
-                           await bcrypt.compare(password, influencer.password_hash || '')
+    console.log('✅ 인플루언서 권한 확인 완료')
 
-    if (!isValidPassword) {
+    // influencers 테이블에서 인플루언서 정보 조회
+    const { data: influencer, error: influencerError } = await supabase
+      .from('influencers')
+      .select('*')
+      .or(`name.eq.${username.trim()},email.eq.${username.trim()}`)
+      .eq('status', 'active')
+      .maybeSingle()
+
+    if (influencerError || !influencer) {
+      console.log('❌ 인플루언서 정보 조회 실패:', influencerError?.message)
+      await supabase.auth.signOut()
       return NextResponse.json(
-        { success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' },
+        { success: false, message: '인플루언서 정보를 찾을 수 없습니다.' },
         { status: 401 }
       )
     }
+
+    console.log('✅ 인플루언서 정보 조회 성공:', influencer.name)
 
     // 로그인 시간 업데이트
     await supabase
@@ -70,7 +106,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: '로그인 성공',
-      influencer: safeInfluencer
+      influencer: {
+        ...safeInfluencer,
+        auth_user_id: data.user.id
+      }
     })
   } catch (error) {
     console.error('인플루언서 로그인 API 에러:', error)

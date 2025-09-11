@@ -6,16 +6,30 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    // 세션 쿠키에서 호스트 인증 토큰 확인
+    const cookieStore = cookies()
+    const hostAuth = cookieStore.get('hostAuth')?.value === 'true'
+    const sessionHostId = cookieStore.get('hostId')?.value
+
+    if (!hostAuth || !sessionHostId) {
+      return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 })
+    }
+
     const supabase = createRouteHandlerClient({ cookies })
     
     const body = await request.json()
     const { reviewId, hostId, reply } = body
 
-    if (!reviewId || !hostId || !reply?.trim()) {
+    if (!reviewId || !reply?.trim()) {
       return NextResponse.json(
         { error: '필수 정보가 누락되었습니다' },
         { status: 400 }
       )
+    }
+
+    // 세션 hostId와 요청 hostId 일치 확인
+    if (hostId && hostId !== sessionHostId) {
+      return NextResponse.json({ error: '권한이 없습니다' }, { status: 403 })
     }
 
     // 실제 데이터베이스 업데이트 로직이 필요하지만,
