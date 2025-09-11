@@ -334,6 +334,7 @@ export default function HomePage() {
   const [dragState, setDragState] = useState({
     isDown: false,
     startX: 0,
+    startY: 0, // 세로 시작 좌표
     scrollLeft: 0,
     currentContainer: null as HTMLDivElement | null,
     isDragging: false,
@@ -341,7 +342,8 @@ export default function HomePage() {
     lastX: 0,
     velocityX: 0,
     lastTime: 0,
-    isTouching: false
+    isTouching: false,
+    touchDirection: null as 'horizontal' | 'vertical' | null // 터치 방향
   })
 
   // 가로 스크롤 핸들러 (스테이폴리오 스타일)
@@ -479,10 +481,12 @@ export default function HomePage() {
     const currentTime = Date.now()
     const touch = e.touches[0]
     const x = touch.clientX - container.offsetLeft
+    const y = touch.clientY
     
     setDragState({
       isDown: true,
       startX: x,
+      startY: y, // 세로 좌표 추가
       scrollLeft: container.scrollLeft,
       currentContainer: container,
       isDragging: false,
@@ -490,7 +494,8 @@ export default function HomePage() {
       lastX: x,
       velocityX: 0,
       lastTime: currentTime,
-      isTouching: true
+      isTouching: true,
+      touchDirection: null // 터치 방향 추가
     })
     
     container.style.scrollBehavior = 'auto'
@@ -502,12 +507,21 @@ export default function HomePage() {
     const currentTime = Date.now()
     const touch = e.touches[0]
     const x = touch.clientX - dragState.currentContainer.offsetLeft
-    const distance = Math.abs(x - dragState.startX)
+    const y = touch.clientY
+    const distanceX = Math.abs(x - dragState.startX)
+    const distanceY = Math.abs(y - dragState.startY)
     
-    // 5px 이상 움직이면 드래그로 간주 (터치에서 더 민감하게)
-    if (distance > 5) {
+    // 터치 방향이 결정되지 않았고 움직임이 있으면 방향 결정
+    if (!dragState.touchDirection && (distanceX > 5 || distanceY > 5)) {
+      // 가로 방향으로 더 많이 움직여야만 가로 스크롤로 인식 (더 관대한 세로 스크롤)
+      const direction = (distanceX > distanceY * 1.5) ? 'horizontal' : 'vertical'
+      setDragState(prev => ({ ...prev, touchDirection: direction }))
+    }
+    
+    // 가로 방향 터치이고 15px 이상 움직이면 드래그로 간주 (더 명확한 의도가 필요)
+    if (dragState.touchDirection === 'horizontal' && distanceX > 15) {
       setDragState(prev => ({ ...prev, isDragging: true }))
-      e.preventDefault()
+      e.preventDefault() // 가로 터치일 때만 preventDefault
       
       // 부드러운 터치 드래그 (감도 1.0으로 자연스럽게)
       const walk = (x - dragState.startX) * 1.0
@@ -525,6 +539,7 @@ export default function HomePage() {
         }))
       }
     }
+    // 세로 방향 터치면 preventDefault를 호출하지 않아 페이지 스크롤 허용
   }
 
   const handleTouchEnd = () => {
@@ -544,7 +559,8 @@ export default function HomePage() {
         isDown: false,
         currentContainer: null,
         isDragging: false,
-        isTouching: false
+        isTouching: false,
+        touchDirection: null // 터치 방향 리셋
       }))
     }, 100)
   }

@@ -13,9 +13,10 @@ body {
   overflow-x: hidden;
 }
 
-/* For admin and host routes, prevent body scroll */
+/* For admin and host routes, allow vertical scroll but prevent horizontal */
 .admin-layout, .host-layout {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   height: 100vh;
 }
 
