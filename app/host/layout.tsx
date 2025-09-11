@@ -28,15 +28,21 @@ export default function HostLayout({
     }
 
     const checkAuth = () => {
-      // 쿠키에서 host-auth 확인 (미들웨어와 동일한 방식)
-      const hostAuthCookie = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('host-auth='))
+      // localStorage에서 Supabase 토큰 확인 + sessionStorage에서 호스트 데이터 확인
+      const supabaseToken = localStorage.getItem('sb-fcmauibvdqbocwhloqov-auth-token')
+      const hostUserData = sessionStorage.getItem('hostUser')
       
-      if (!hostAuthCookie || !hostAuthCookie.split('=')[1]?.startsWith('host-')) {
+      console.log('Layout 인증 체크:', { 
+        hasToken: !!supabaseToken, 
+        hasHostData: !!hostUserData 
+      })
+      
+      if (!supabaseToken && !hostUserData) {
+        console.log('Layout: 인증 정보 없음, 로그인 페이지로 이동')
         setIsAuthenticated(false)
-        router.replace('/host/login') // push 대신 replace 사용
+        router.replace('/host/login')
       } else {
+        console.log('Layout: 인증 확인됨')
         setIsAuthenticated(true)
       }
     }

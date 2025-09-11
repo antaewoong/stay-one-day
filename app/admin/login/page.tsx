@@ -60,10 +60,21 @@ export default function AdminLoginPage() {
           document.cookie = `admin-auth=db-admin-${result.admin.id}; path=/; max-age=86400; samesite=lax`
         }
 
-        // 잠시 대기 후 이동
+        // 호스트와 같은 방식으로 리다이렉트 처리
+        console.log('관리자 로그인 성공, 대시보드로 이동 준비...')
+        
+        // 리다이렉트 처리 (호스트 방식과 동일)
         setTimeout(() => {
+          console.log('대시보드로 이동 중...')
+          // 1차: Next.js router 시도
           router.push('/admin')
-        }, 100)
+          
+          // 2차: 1초 후 강제 window.location 시도
+          setTimeout(() => {
+            console.log('강제 페이지 이동 시도...')
+            window.location.replace('/admin')
+          }, 1000)
+        }, 1000)
       } else {
         setError(result.error || '로그인에 실패했습니다.')
       }

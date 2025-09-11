@@ -43,7 +43,22 @@ export default function InfluencerLoginPage() {
         // 인플루언서 정보를 세션에 저장
         sessionStorage.setItem('influencerUser', JSON.stringify(result.influencer))
         toast.success('로그인 성공!')
-        router.push('/influencer/dashboard')
+        
+        // 호스트와 같은 방식으로 리다이렉트 처리
+        console.log('인플루언서 로그인 성공, 대시보드로 이동 준비...')
+        
+        // 리다이렉트 처리 (호스트 방식과 동일)
+        setTimeout(() => {
+          console.log('대시보드로 이동 중...')
+          // 1차: Next.js router 시도
+          router.push('/influencer/dashboard')
+          
+          // 2차: 1초 후 강제 window.location 시도
+          setTimeout(() => {
+            console.log('강제 페이지 이동 시도...')
+            window.location.replace('/influencer/dashboard')
+          }, 1000)
+        }, 1000)
       } else {
         toast.error(result.message || '로그인에 실패했습니다.')
       }

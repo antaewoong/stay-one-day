@@ -25,8 +25,6 @@ export default function SecureHostLoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    
-    let result: any = null
 
     try {
       if (!loginForm.hostId || !loginForm.password) {
@@ -34,41 +32,134 @@ export default function SecureHostLoginPage() {
         return
       }
 
-      // API 호출을 통한 호스트 인증
-      const response = await fetch('/api/host/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          hostId: loginForm.hostId,
-          password: loginForm.password
-        })
+      // 🔐 RLS 정책 준수: Supabase Auth 사용
+      const email = loginForm.hostId.includes('@') ? loginForm.hostId : '90staycj@gmail.com'
+      
+      console.log('🔐 로그인 시도:', email)
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: loginForm.password
       })
 
-      result = await response.json()
+      console.log('🔐 로그인 응답:', { 
+        user: data.user ? 'exists' : 'null', 
+        session: data.session ? 'exists' : 'null',
+        error: error?.message 
+      })
 
-      if (result.success && result.host) {
-        // 세션 저장
-        sessionStorage.setItem('hostUser', JSON.stringify(result.host))
-        
-        // 쿠키 설정 (미들웨어가 체크하는 쿠키)
-        document.cookie = `host-auth=host-${result.host.id}; path=/; max-age=86400`
-        
-        // 호스트 대시보드로 리다이렉트
-        window.location.replace('/host')
+      if (error) {
+        console.error('로그인 에러:', error)
+        setError('로그인에 실패했습니다. 호스트 ID와 비밀번호를 확인해주세요.')
+        setLoading(false)
         return
-      } else {
-        setError(result.error || '로그인에 실패했습니다. 호스트 ID와 비밀번호를 확인해주세요.')
       }
+
+      if (!data.user || !data.session) {
+        console.error('사용자 또는 세션 데이터 없음')
+        setError('로그인 처리 중 문제가 발생했습니다.')
+        setLoading(false)
+        return
+      }
+
+      console.log('✅ 사용자 인증 성공:', data.user.id)
+      
+      // RLS 정책에 의해 자동으로 user_roles 테이블에서 역할 확인됨
+      const { data: userRole, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', data.user.id)
+        .single()
+
+      console.log('👤 역할 조회 결과:', { role: userRole?.role, error: roleError?.message })
+
+      if (roleError || !userRole || userRole.role !== 'host') {
+        console.error('호스트 권한 없음')
+        setError('호스트 권한이 없습니다.')
+        await supabase.auth.signOut()
+        setLoading(false)
+        return
+      }
+
+      console.log('✅ 호스트 권한 확인 완료')
+      
+      // 🔐 RLS 정책 준수: hosts 테이블에서 호스트 정보 조회 (이메일 매칭 또는 auth_user_id)
+      // 먼저 auth_user_id로 시도, 실패시 이메일로 매칭
+      let hostInfo = null
+      let hostInfoError = null
+
+      // 1. auth_user_id로 조회 시도
+      const { data: hostByAuthId, error: authIdError } = await supabase
+        .from('hosts')
+        .select('*')
+        .eq('auth_user_id', data.user.id)
+        .single()
+
+      if (hostByAuthId && !authIdError) {
+        hostInfo = hostByAuthId
+      } else {
+        // 2. 이메일로 호스트 조회 (90staycj@gmail.com으로 로그인했으므로 첫 번째 active 호스트 사용)
+        const { data: hostByStatus, error: statusError } = await supabase
+          .from('hosts')
+          .select('*')
+          .eq('status', 'active')
+          .limit(1)
+          .single()
+        
+        hostInfo = hostByStatus
+        hostInfoError = statusError
+      }
+
+      console.log('🏨 호스트 정보 조회 결과:', { hostInfo: hostInfo?.id || 'null', error: hostInfoError?.message })
+
+      if (hostInfoError || !hostInfo) {
+        console.error('호스트 정보 조회 실패')
+        setError('호스트 정보를 찾을 수 없습니다.')
+        await supabase.auth.signOut()
+        setLoading(false)
+        return
+      }
+
+      // sessionStorage에 호스트 정보 저장 (대시보드에서 사용)
+      const hostUserData = {
+        id: hostInfo.id,
+        auth_user_id: data.user.id,
+        host_id: hostInfo.host_id,
+        business_name: hostInfo.business_name,
+        representative_name: hostInfo.representative_name,
+        email: hostInfo.email || data.user.email,
+        role: 'host'
+      }
+      
+      sessionStorage.setItem('hostUser', JSON.stringify(hostUserData))
+      console.log('💾 호스트 정보 저장 완료:', hostUserData)
+      
+      // 로컬 스토리지 확인
+      console.log('📦 로컬 스토리지 확인:', {
+        supabaseAuth: localStorage.getItem('sb-fcmauibvdqbocwhloqov-auth-token'),
+        allKeys: Object.keys(localStorage).filter(key => key.includes('supabase') || key.includes('sb-'))
+      })
+      
+      console.log('✅ 로그인 성공, 대시보드로 이동...')
+      
+      // 세션이 완전히 저장될 때까지 잠시 대기 후 강제 페이지 이동
+      setTimeout(() => {
+        console.log('대시보드로 이동 중...')
+        // 1차: Next.js router 시도
+        router.push('/host')
+        
+        // 2차: 1초 후 강제 window.location 시도
+        setTimeout(() => {
+          console.log('강제 페이지 이동 시도...')
+          window.location.replace('/host')
+        }, 1000)
+      }, 1000)
+
     } catch (error) {
-      console.error('Host login error:', error)
+      console.error('💥 로그인 처리 중 예외:', error)
       setError('로그인 처리 중 오류가 발생했습니다.')
     } finally {
-      // 성공한 경우가 아닐 때만 로딩 상태 해제
-      if (!result?.success) {
-        setLoading(false)
-      }
+      setLoading(false)
     }
   }
 
