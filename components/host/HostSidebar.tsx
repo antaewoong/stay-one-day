@@ -12,7 +12,8 @@ import {
   Home,
   Users,
   TrendingUp,
-  LogOut
+  LogOut,
+  Settings
 } from 'lucide-react'
 
 interface MenuItem {
@@ -56,6 +57,11 @@ const menuItems: MenuItem[] = [
     title: '마케팅 분석',
     href: '/host/marketing',
     icon: <TrendingUp className="w-4 h-4" />
+  },
+  {
+    title: '계정 설정',
+    href: '/host/settings',
+    icon: <Settings className="w-4 h-4" />
   }
 ]
 
