@@ -106,8 +106,7 @@ export default function AdminPage() {
         supabase.from('accommodations').select('*', { count: 'exact' }),
         supabase.from('reservations').select(`
           *,
-          accommodations(name),
-          profiles(name)
+          accommodations(name)
         `, { count: 'exact' }).order('created_at', { ascending: false }).limit(5)
       ])
       
@@ -123,7 +122,7 @@ export default function AdminPage() {
       const recentReservations = (reservationsRes.data || []).map(reservation => ({
         id: reservation.id,
         propertyName: reservation.accommodations?.name || '알 수 없는 숙소',
-        guestName: reservation.profiles?.name || reservation.guest_name || '게스트',
+        guestName: reservation.guest_name || '게스트',
         checkIn: reservation.check_in_date,
         checkOut: reservation.check_out_date,
         amount: reservation.total_amount,

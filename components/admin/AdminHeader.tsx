@@ -55,7 +55,7 @@ export default function AdminHeader() {
       const { data } = await supabase
         .from('notices')
         .select('id, title, content, created_at')
-        .eq('active', true)
+        .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(3)
 
