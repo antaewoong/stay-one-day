@@ -6,6 +6,7 @@ import {
   formatPhoneNumber 
 } from '@/lib/utils/reservation'
 import { CreateReservationData } from '@/lib/types/reservation'
+import { NotificationHelpers } from '@/lib/telegram/notification-helpers'
 
 export const dynamic = 'force-dynamic'
 
@@ -185,6 +186,23 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    // 텔레그램 알림 전송 (비동기 처리)
+    NotificationHelpers.notifyNewBooking({
+      id: savedReservation.id,
+      guest_name: savedReservation.guest_name,
+      property_name: savedReservation.accommodations?.name,
+      host_name: savedReservation.accommodations?.location,
+      check_in: savedReservation.reservation_date,
+      check_out: savedReservation.reservation_date, // 당일 숙박으로 추정
+      total_price: savedReservation.total_price,
+      guest_count: savedReservation.guest_count,
+      phone: savedReservation.guest_phone,
+      email: savedReservation.guest_email,
+      special_requests: savedReservation.special_requests
+    }).catch(error => {
+      console.error('예약 알림 전송 실패:', error)
+    })
 
     // 성공 응답
     return NextResponse.json({

@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
-import { Plus, Edit, Trash2, User, Shield, Eye, EyeOff } from 'lucide-react'
+import { Plus, Edit, Trash2, User, Shield, Eye, EyeOff, Key } from 'lucide-react'
 
 interface Admin {
   id: string
@@ -30,6 +30,10 @@ export default function AdminAccountsPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [changingPasswordAdmin, setChangingPasswordAdmin] = useState<Admin | null>(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [passwordLoading, setPasswordLoading] = useState(false)
 
   const [adminForm, setAdminForm] = useState({
     username: '',
@@ -222,6 +226,66 @@ export default function AdminAccountsPage() {
     }
   }
 
+  const handlePasswordChange = async () => {
+    if (!changingPasswordAdmin || !newPassword.trim()) {
+      alert('새 비밀번호를 입력해주세요.')
+      return
+    }
+
+    if (newPassword.length < 8) {
+      alert('비밀번호는 8자 이상이어야 합니다.')
+      return
+    }
+
+    try {
+      setPasswordLoading(true)
+
+      // 관리자 인증 토큰 가져오기
+      const adminUser = sessionStorage.getItem('adminUser')
+      const adminData = adminUser ? JSON.parse(adminUser) : null
+      const authToken = adminData?.access_token || sessionStorage.getItem('adminToken')
+      
+      if (!authToken) {
+        throw new Error('관리자 인증 토큰이 없습니다. 다시 로그인해주세요.')
+      }
+
+      const response = await fetch('/api/admin/change-user-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          userEmail: changingPasswordAdmin.email,
+          newPassword: newPassword,
+          userType: 'admin'
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || '비밀번호 변경에 실패했습니다')
+      }
+
+      alert(`${changingPasswordAdmin.name}의 비밀번호가 성공적으로 변경되었습니다.`)
+      setShowPasswordModal(false)
+      setChangingPasswordAdmin(null)
+      setNewPassword('')
+    } catch (error) {
+      console.error('비밀번호 변경 실패:', error)
+      alert(error instanceof Error ? error.message : '비밀번호 변경에 실패했습니다.')
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
+  const openPasswordModal = (admin: Admin) => {
+    setChangingPasswordAdmin(admin)
+    setNewPassword('')
+    setShowPasswordModal(true)
+  }
+
   return (
     <div className="admin-page space-y-6">
       <div className="flex items-center justify-between">
@@ -323,6 +387,15 @@ export default function AdminAccountsPage() {
                           <Button
                             size="sm"
                             variant="ghost"
+                            onClick={() => openPasswordModal(admin)}
+                            className="text-blue-600 hover:text-blue-700"
+                            title="비밀번호 변경"
+                          >
+                            <Key className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
                             onClick={() => openEditModal(admin)}
                           >
                             <Edit className="w-4 h-4" />
@@ -418,6 +491,76 @@ export default function AdminAccountsPage() {
               disabled={!adminForm.username?.trim() || !adminForm.password?.trim() || !adminForm.name?.trim()}
             >
               {editingAdmin ? '수정' : '등록'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 비밀번호 변경 모달 */}
+      <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
+        <DialogContent className="max-w-md !bg-white !border !border-gray-200">
+          <DialogHeader>
+            <DialogTitle>
+              비밀번호 변경
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {changingPasswordAdmin && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium">{changingPasswordAdmin.name}</div>
+                    <div className="text-sm text-gray-500">{changingPasswordAdmin.email}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div>
+              <Label htmlFor="newPassword">새 비밀번호 *</Label>
+              <div className="relative">
+                <Input
+                  id="newPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="새 비밀번호 (8자 이상)"
+                  disabled={passwordLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  disabled={passwordLoading}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                • 8자 이상 입력해주세요<br />
+                • 이 작업은 Supabase Auth와 시스템 DB에 모두 적용됩니다
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowPasswordModal(false)}
+              disabled={passwordLoading}
+            >
+              취소
+            </Button>
+            <Button 
+              onClick={handlePasswordChange}
+              disabled={!newPassword?.trim() || newPassword.length < 8 || passwordLoading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {passwordLoading ? '변경 중...' : '비밀번호 변경'}
             </Button>
           </div>
         </DialogContent>

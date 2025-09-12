@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { NotificationHelpers } from '@/lib/telegram/notification-helpers'
 
 export async function POST(request: Request) {
   try {
@@ -29,6 +30,18 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
+
+    // 텔레그램 알림 전송 (비동기 처리)
+    NotificationHelpers.notifyNewMessage({
+      sender_name: name,
+      name: name,
+      phone: contact.includes('@') ? undefined : contact,
+      email: contact.includes('@') ? contact : undefined,
+      message: message,
+      source: 'contact_form'
+    }).catch(error => {
+      console.error('연락처 문의 알림 전송 실패:', error)
+    })
 
     return NextResponse.json({ success: true, data })
   } catch (error) {

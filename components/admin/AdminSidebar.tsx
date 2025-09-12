@@ -20,7 +20,8 @@ import {
   Layout,
   Type,
   Star,
-  TrendingUp
+  TrendingUp,
+  Bot
 } from 'lucide-react'
 
 interface MenuItem {
@@ -77,8 +78,11 @@ const menuItems: MenuItem[] = [
   },
   {
     title: '통합 CRM',
-    href: '/admin/crm',
-    icon: <Users className="w-4 h-4" />
+    icon: <Users className="w-4 h-4" />,
+    children: [
+      { title: 'CRM 대시보드', href: '/admin/crm', icon: <></> },
+      { title: '텔레그램 봇 관리', href: '/admin/telegram', icon: <Bot className="w-3 h-3" /> }
+    ]
   },
   {
     title: '마케팅 분석',

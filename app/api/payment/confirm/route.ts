@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { NotificationHelpers } from '@/lib/telegram/notification-helpers'
 
 export async function POST(request: NextRequest) {
   const TOSS_PAYMENTS_SECRET_KEY = process.env.TOSS_PAYMENTS_SECRET_KEY
@@ -44,6 +45,31 @@ export async function POST(request: NextRequest) {
         },
         { status: response.status }
       )
+    }
+
+    // 결제 성공 알림 전송 (비동기 처리)
+    if (paymentData.status === 'DONE') {
+      NotificationHelpers.notifyPaymentCompleted({
+        id: paymentData.paymentKey,
+        customer_name: paymentData.customerName || '고객',
+        amount: paymentData.totalAmount,
+        payment_method: paymentData.method,
+        booking_id: orderId,
+        transaction_id: paymentData.paymentKey
+      }).catch(error => {
+        console.error('결제 완료 알림 전송 실패:', error)
+      })
+    } else if (paymentData.status === 'FAILED') {
+      NotificationHelpers.notifyPaymentFailed({
+        id: paymentData.paymentKey,
+        customer_name: paymentData.customerName || '고객',
+        amount: paymentData.totalAmount,
+        payment_method: paymentData.method,
+        booking_id: orderId,
+        error_message: paymentData.failure?.message || '알 수 없는 오류'
+      }).catch(error => {
+        console.error('결제 실패 알림 전송 실패:', error)
+      })
     }
 
     // 성공적인 결제 승인

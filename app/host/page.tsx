@@ -168,7 +168,7 @@ export default function HostPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* 모바일 간편 메뉴 - 모바일에서만 표시 */}
-      <div className="block md:hidden px-4 pt-4">
+      <div className="md:hidden px-4 pt-4">
         <MobileQuickActions 
           todayCheckins={dashboardData?.today?.checkins || 0}
           todayCheckouts={dashboardData?.today?.checkouts || 0}
@@ -178,7 +178,7 @@ export default function HostPage() {
       </div>
 
       {/* 모바일용 최근 예약 간단 목록 */}
-      <div className="block md:hidden px-4">
+      <div className="md:hidden px-4">
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
           <CardHeader className="border-b border-slate-200/50 bg-gradient-to-r from-blue-50 to-indigo-50 pb-3">
             <div className="flex items-center justify-between">
@@ -228,7 +228,7 @@ export default function HostPage() {
       </div>
 
       {/* PC용 페이지 헤더 - 데스크톱에서만 표시 */}
-      <div className="hidden md:flex items-center justify-between px-4 lg:px-8 pt-8 pb-6">
+      <div className="hidden md:flex items-center justify-between px-4 lg:px-8 pt-6 pb-4">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-blue-800 bg-clip-text text-transparent">
             호스트 대시보드
@@ -251,10 +251,10 @@ export default function HostPage() {
       </div>
 
       {/* 통계 카드 - PC에서만 표시 */}
-      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4 lg:px-8 pb-6">
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-4 lg:px-8 pb-4">
         <Card className="border-0 shadow-xl overflow-hidden bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 group">
           <div className="h-1 bg-gradient-to-r from-emerald-400 to-green-500"></div>
-          <CardContent className="p-6 bg-gradient-to-br from-emerald-50 via-green-50 to-emerald-100">
+          <CardContent className="p-4 bg-gradient-to-br from-emerald-50 via-green-50 to-emerald-100">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-emerald-800">월 수익</p>
@@ -277,7 +277,7 @@ export default function HostPage() {
 
         <Card className="border-0 shadow-xl overflow-hidden bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 group">
           <div className="h-1 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
-          <CardContent className="p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100">
+          <CardContent className="p-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-blue-800">월 예약</p>
@@ -300,7 +300,7 @@ export default function HostPage() {
 
         <Card className="border-0 shadow-xl overflow-hidden bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 group">
           <div className="h-1 bg-gradient-to-r from-amber-400 to-orange-500"></div>
-          <CardContent className="p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100">
+          <CardContent className="p-4 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-amber-800">평균 평점</p>
@@ -322,7 +322,7 @@ export default function HostPage() {
 
         <Card className="border-0 shadow-xl overflow-hidden bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 group">
           <div className="h-1 bg-gradient-to-r from-purple-400 to-pink-500"></div>
-          <CardContent className="p-6 bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100">
+          <CardContent className="p-4 bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-purple-800">점유율</p>
@@ -342,7 +342,7 @@ export default function HostPage() {
       </div>
 
       {/* 메인 콘텐츠 - PC에서만 표시 */}
-      <div className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 lg:px-8">
+      <div className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-4 px-4 lg:px-8">
         
         {/* 최근 예약 */}
         <Card className="lg:col-span-2 border-0 shadow-xl bg-white/80 backdrop-blur-sm">
@@ -357,7 +357,7 @@ export default function HostPage() {
           <CardContent className="p-0">
             <div className="divide-y divide-slate-100">
               {recentBookings.map((booking) => (
-                <div key={booking.id} className="p-5 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-300">
+                <div key={booking.id} className="p-3 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-300">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
@@ -393,7 +393,7 @@ export default function HostPage() {
         </Card>
 
         {/* 사이드 패널 */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* PC용 완전한 호스트 관리 메뉴 */}
           <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
             <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100">

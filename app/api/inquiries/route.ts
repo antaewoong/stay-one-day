@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { NotificationHelpers } from '@/lib/telegram/notification-helpers'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -135,6 +136,19 @@ export async function POST(req: NextRequest) {
           related_type: 'inquiry'
         })
     }
+
+    // 텔레그램 알림 전송 (비동기 처리)
+    NotificationHelpers.notifyNewInquiry({
+      id: data[0].id,
+      type: category,
+      customer_name: inquirerName,
+      email: inquirerEmail,
+      phone: inquirerPhone,
+      content: `${title}\n\n${content}`,
+      property_id: inquirerId || undefined
+    }).catch(error => {
+      console.error('문의 알림 전송 실패:', error)
+    })
 
     return NextResponse.json({
       success: true,

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
   try {
@@ -29,6 +30,11 @@ export async function POST(request: Request) {
     const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD
     
     if (username === adminUsername && password === adminPassword) {
+      console.log('✅ 환경변수 관리자 로그인 성공')
+      
+      // 환경변수 관리자용 임시 토큰 (실제 admin 계정의 auth_user_id 사용)
+      const tempToken = `admin-314ec1cd-a4af-4583-8d72-6f9d22e4d729`
+
       return NextResponse.json({
         success: true,
         admin: {
@@ -36,7 +42,8 @@ export async function POST(request: Request) {
           username: username,
           name: '메인 관리자',
           email: 'admin@stayoneday.com',
-          role: 'super_admin'
+          role: 'super_admin',
+          access_token: tempToken
         }
       })
     }
@@ -88,7 +95,24 @@ export async function POST(request: Request) {
         .update({ last_login: new Date().toISOString() })
         .eq('id', adminAccount.id)
 
-      // 로그인 성공 응답
+      // 정상적인 Supabase Auth 로그인
+      const serverClient = createServerClient()
+      const { data: authData, error: authError } = await serverClient.auth.signInWithPassword({
+        email: adminAccount.email,
+        password: password
+      })
+
+      if (authError || !authData.session) {
+        console.error('❌ Supabase Auth 로그인 실패:', authError?.message)
+        return NextResponse.json(
+          { error: 'Supabase Auth 로그인에 실패했습니다. 비밀번호를 확인해주세요.' },
+          { status: 401 }
+        )
+      }
+
+      console.log('✅ Supabase Auth 로그인 성공')
+
+      // 정상적인 JWT 토큰과 함께 로그인 성공 응답
       return NextResponse.json({
         success: true,
         admin: {
@@ -96,7 +120,9 @@ export async function POST(request: Request) {
           username: adminAccount.username,
           name: adminAccount.name,
           email: adminAccount.email,
-          role: adminAccount.role
+          role: adminAccount.role,
+          access_token: authData.session.access_token,
+          refresh_token: authData.session.refresh_token
         }
       })
     } catch (dbError) {
