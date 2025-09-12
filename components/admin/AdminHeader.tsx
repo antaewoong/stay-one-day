@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { safe } from '@/lib/utils/safe-array'
 import { Button } from '@/components/ui/button'
 import { Search, Bell, User, Menu, X, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -59,7 +60,7 @@ export default function AdminHeader() {
         .order('created_at', { ascending: false })
         .limit(3)
 
-      setNotices(data || [])
+      setNotices(safe(data))
     } catch (error) {
       console.error('공지사항 로드 실패:', error)
     }

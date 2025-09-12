@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { safe } from '@/lib/utils/safe-array'
 import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
 import { 
@@ -114,12 +115,12 @@ export default function AdminPage() {
       await loadNotices()
 
       const totalProperties = accommodationsRes.count || 0
-      const activeProperties = accommodationsRes.data?.filter(acc => acc.status === 'active').length || 0
-      const featuredProperties = accommodationsRes.data?.filter(acc => acc.is_featured === true).length || 0
+      const activeProperties = safe(accommodationsRes.data).filter(acc => acc.status === 'active').length
+      const featuredProperties = safe(accommodationsRes.data).filter(acc => acc.is_featured === true).length
       const totalReservations = reservationsRes.count || 0
 
-      // 최근 예약 데이터 설정 - API 실패 시 빈 배열로 안전하게 처리
-      const recentReservations = (reservationsRes.data || []).map(reservation => ({
+      // 최근 예약 데이터 설정 - 방탄 처리
+      const recentReservations = safe(reservationsRes.data).map(reservation => ({
         id: reservation.id,
         propertyName: reservation.accommodations?.name || '알 수 없는 숙소',
         guestName: reservation.guest_name || '게스트',
@@ -196,8 +197,8 @@ export default function AdminPage() {
         console.error('공지사항 로드 에러:', error)
         setNotices([])
       } else {
-        // 기존 UI에 맞게 데이터 형식 변환
-        const transformedNotices = noticesData.map(notice => ({
+        // 기존 UI에 맞게 데이터 형식 변환 - 방탄 처리
+        const transformedNotices = safe(noticesData).map(notice => ({
           id: notice.id,
           title: notice.title,
           views: notice.view_count || 0,
@@ -408,7 +409,7 @@ export default function AdminPage() {
         </div>
 
         {/* 최근 예약 현황 */}
-        {recentBookings.length > 0 && (
+        {safe(recentBookings).length > 0 && (
           <Card className="border shadow-sm">
             <CardHeader className="border-b bg-gray-50">
               <CardTitle className="text-gray-900">최근 예약 현황</CardTitle>
@@ -427,7 +428,7 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {recentBookings.map((booking) => (
+                    {safe(recentBookings).map((booking) => (
                       <tr key={booking.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 text-sm font-medium text-gray-900">{booking.propertyName}</td>
                         <td className="px-4 py-3 text-sm text-gray-600">{booking.guestName}</td>
@@ -474,12 +475,12 @@ export default function AdminPage() {
                   <div className="p-4 text-center text-gray-500">
                     공지사항을 불러오는 중...
                   </div>
-                ) : notices.length === 0 ? (
+                ) : safe(notices).length === 0 ? (
                   <div className="p-4 text-center text-gray-500">
                     공지사항이 없습니다.
                   </div>
                 ) : (
-                  notices.map((notice) => (
+                  safe(notices).map((notice) => (
                   <div key={notice.id} className="p-4 hover:bg-gray-50 transition-colors cursor-pointer">
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
