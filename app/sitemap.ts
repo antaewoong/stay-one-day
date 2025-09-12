@@ -1,9 +1,9 @@
 import { MetadataRoute } from 'next'
-import { createClient } from '@/lib/supabase/client'
+import { serverSB } from '@/lib/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://stay-oneday.com'
-  const supabase = createClient()
+  const supabase = serverSB()
 
   // 기본 정적 페이지들
   const staticPages = [
