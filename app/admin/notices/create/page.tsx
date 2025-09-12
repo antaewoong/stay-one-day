@@ -43,16 +43,6 @@ export default function CreateNoticePage() {
         authorRole = adminData.role || 'admin'
       }
 
-      // API를 통해 공지사항 생성
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
-      
-      // 관리자 세션 정보 추가
-      if (adminUser) {
-        headers['x-admin-session'] = adminUser
-      }
-      
       await apiFetch('/api/admin/notices', {
         method: 'POST',
         body: JSON.stringify({
