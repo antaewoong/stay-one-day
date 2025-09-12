@@ -1,17 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest } from 'next/server'
+import { adminRoute, sb, ok, bad } from '../_kit'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-export async function POST(request: NextRequest) {
+export const POST = adminRoute(async (req: NextRequest) => {
   try {
-    const supabase = createClient()
-    
-    // Check if user has admin privileges
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 })
-    }
+    const supabase = sb()
 
     // Read the sample data SQL file
     const sqlPath = join(process.cwd(), 'lib', 'sample-accommodations.sql')
@@ -45,7 +39,7 @@ export async function POST(request: NextRequest) {
 
         if (hostError) {
           console.error('호스트 생성 실패:', hostError)
-          return NextResponse.json({ error: '호스트 생성에 실패했습니다.' }, { status: 500 })
+          return bad('호스트 생성에 실패했습니다.', 500)
         }
         
         hostId = newHost.id
@@ -256,34 +250,23 @@ export async function POST(request: NextRequest) {
 
       if (insertError) {
         console.error('숙소 데이터 삽입 실패:', insertError)
-        return NextResponse.json({ 
-          error: '숙소 데이터 삽입에 실패했습니다.',
-          details: insertError.message 
-        }, { status: 500 })
+        return bad(`숙소 데이터 삽입에 실패했습니다. ${insertError.message}`, 500)
       }
 
-      return NextResponse.json({
+      return ok({
         message: '샘플 데이터가 성공적으로 추가되었습니다.',
-        data: {
-          hostId,
-          accommodationsCount: insertedAccommodations?.length || 0,
-          accommodations: insertedAccommodations
-        }
+        hostId,
+        accommodationsCount: insertedAccommodations?.length || 0,
+        accommodations: insertedAccommodations
       })
 
     } catch (sqlError) {
       console.error('SQL 실행 오류:', sqlError)
-      return NextResponse.json(
-        { error: 'SQL 실행 중 오류가 발생했습니다.', details: sqlError },
-        { status: 500 }
-      )
+      return bad(`SQL 실행 중 오류가 발생했습니다. ${sqlError}`, 500)
     }
 
   } catch (error) {
     console.error('샘플 데이터 생성 오류:', error)
-    return NextResponse.json(
-      { error: '샘플 데이터 생성 중 오류가 발생했습니다.' },
-      { status: 500 }
-    )
+    return bad('샘플 데이터 생성 중 오류가 발생했습니다.', 500)
   }
-}
+})

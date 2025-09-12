@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { validateAdminAuth, supabaseService } from '@/lib/auth/admin-service'
+import { NextRequest } from 'next/server'
+import { adminRoute, sb, ok, bad } from '../_kit'
 
 // 새로운 섹션들의 기본 데이터
 const newSections = [
@@ -38,18 +38,12 @@ const newSections = [
   }
 ]
 
-export async function POST(request: NextRequest) {
-  // 관리자 인증 확인
-  const authResult = await validateAdminAuth(request)
-  if (!authResult.isValid) {
-    return authResult.error!
-  }
-
+export const POST = adminRoute(async (req: NextRequest) => {
   try {
     console.log('새로운 섹션 추가 시작...')
 
     // 기존 섹션들이 있는지 확인
-    const { data: existingSections, error: checkError } = await supabaseService
+    const { data: existingSections, error: checkError } = await sb()
       .from('main_page_sections')
       .select('section_id')
       .in('section_id', ['kids', 'party', 'new'])
@@ -68,14 +62,14 @@ export async function POST(request: NextRequest) {
     console.log('추가할 섹션들:', sectionsToAdd.map(s => s.section_id))
 
     if (sectionsToAdd.length === 0) {
-      return NextResponse.json({ 
+      return ok({ 
         message: 'All sections already exist',
         existingSections: existingSectionIds
       })
     }
 
     // 새 섹션들 추가
-    const { data: insertedSections, error: insertError } = await supabaseService
+    const { data: insertedSections, error: insertError } = await sb()
       .from('main_page_sections')
       .insert(sectionsToAdd)
       .select()
@@ -87,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     console.log('섹션 추가 성공:', insertedSections)
 
-    return NextResponse.json({
+    return ok({
       message: `Successfully added ${sectionsToAdd.length} new sections`,
       addedSections: sectionsToAdd.map(s => s.section_id),
       data: insertedSections
@@ -95,9 +89,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('새 섹션 추가 실패:', error)
-    return NextResponse.json({ 
-      error: 'Failed to add new sections',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+    return bad('Failed to add new sections', 500)
   }
-}
+})

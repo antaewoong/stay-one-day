@@ -1,17 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest } from 'next/server'
+import { adminRoute, sb, ok, bad } from '../_kit'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-export async function POST(request: NextRequest) {
+export const POST = adminRoute(async (req: NextRequest) => {
   try {
-    const supabase = createClient()
-    
-    // Check if user has admin privileges (you can implement proper admin check)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 })
-    }
+    const supabase = sb()
 
     // Read the schema fix SQL file
     const sqlPath = join(process.cwd(), 'lib', 'fix-database-schema.sql')
@@ -51,7 +45,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    return ok({
       message: '데이터베이스 스키마 수정이 완료되었습니다.',
       results,
       totalCommands: commands.length,
@@ -60,9 +54,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('스키마 수정 오류:', error)
-    return NextResponse.json(
-      { error: '스키마 수정 중 오류가 발생했습니다.' },
-      { status: 500 }
-    )
+    return bad('스키마 수정 중 오류가 발생했습니다.', 500)
   }
-}
+})

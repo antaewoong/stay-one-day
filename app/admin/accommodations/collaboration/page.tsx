@@ -77,42 +77,19 @@ export default function CollaborationAccommodationsPage() {
       setUpdating(accommodationId)
       setError('')
       
-      // 슈퍼 관리자인 경우 API 라우트를 통해 업데이트
-      const adminUser = sessionStorage.getItem('adminUser')
-      const isSuperAdmin = adminUser && JSON.parse(adminUser).role === 'super_admin'
-      
-      if (isSuperAdmin) {
-        // 슈퍼 관리자는 API 라우트 사용
-        const response = await fetch('/api/admin/accommodations/collaboration', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD}`
-          },
-          body: JSON.stringify({
-            accommodation_id: accommodationId,
-            is_collaboration_available: !currentStatus
-          })
+      // RLS 정책으로 처리 - 직접 Supabase 사용
+      const { error } = await supabase
+        .from('accommodations')
+        .update({ 
+          is_collaboration_available: !currentStatus,
+          updated_at: new Date().toISOString()
         })
-        
-        if (!response.ok) {
-          throw new Error('업데이트 실패')
-        }
-      } else {
-        // 일반 관리자는 직접 Supabase 사용
-        const { error } = await supabase
-          .from('accommodations')
-          .update({ 
-            is_collaboration_available: !currentStatus,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', accommodationId)
+        .eq('id', accommodationId)
 
-        if (error) {
-          console.error('협찬 설정 업데이트 실패:', error)
-          setError('협찬 설정 업데이트에 실패했습니다.')
-          return
-        }
+      if (error) {
+        console.error('협찬 설정 업데이트 실패:', error)
+        setError('협찬 설정 업데이트에 실패했습니다.')
+        return
       }
 
       // 로컬 상태 업데이트

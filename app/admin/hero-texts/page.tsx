@@ -19,7 +19,7 @@ import {
   Type,
   MessageSquare
 } from 'lucide-react'
-import { adminGet, adminPost, adminPut, adminDelete } from '@/lib/admin-api'
+import { apiFetch } from '@/lib/auth-helpers'
 
 interface HeroText {
   id: string
@@ -53,15 +53,7 @@ export default function HeroTextsManagementPage() {
 
   const loadHeroTexts = async () => {
     try {
-      const response = await adminGet('/api/admin/hero-texts')
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error('히어로 텍스트 로드 실패:', errorData.error)
-        return
-      }
-      
-      const result = await response.json()
+      const result = await apiFetch('/api/admin/hero-texts')
       setHeroTexts(result.data || [])
     } catch (error) {
       console.error('히어로 텍스트 로드 실패:', error)
@@ -76,13 +68,16 @@ export default function HeroTextsManagementPage() {
         { id: editingText.id, ...form } : 
         { ...form, display_order: heroTexts.length + 1 }
       
-      const response = editingText ? 
-        await adminPut('/api/admin/hero-texts', body) :
-        await adminPost('/api/admin/hero-texts', body)
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Save failed')
+      if (editingText) {
+        await apiFetch('/api/admin/hero-texts', {
+          method: 'PUT',
+          body: JSON.stringify(body)
+        })
+      } else {
+        await apiFetch('/api/admin/hero-texts', {
+          method: 'POST',
+          body: JSON.stringify(body)
+        })
       }
       
       await loadHeroTexts()
@@ -102,12 +97,9 @@ export default function HeroTextsManagementPage() {
     try {
       setLoading(true)
       
-      const response = await adminDelete(`/api/admin/hero-texts?id=${id}`)
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Delete failed')
-      }
+      await apiFetch(`/api/admin/hero-texts?id=${id}`, {
+        method: 'DELETE'
+      })
       
       await loadHeroTexts()
     } catch (error) {
@@ -138,21 +130,27 @@ export default function HeroTextsManagementPage() {
 
       // 순서가 변경된 두 항목만 업데이트
       await Promise.all([
-        adminPut('/api/admin/hero-texts', {
-          id: newTexts[textIndex].id,
-          english_phrase: newTexts[textIndex].english_phrase,
-          main_text: newTexts[textIndex].main_text,
-          sub_text: newTexts[textIndex].sub_text,
-          display_order: newTexts[textIndex].display_order,
-          is_active: newTexts[textIndex].is_active
+        apiFetch('/api/admin/hero-texts', {
+          method: 'PUT',
+          body: JSON.stringify({
+            id: newTexts[textIndex].id,
+            english_phrase: newTexts[textIndex].english_phrase,
+            main_text: newTexts[textIndex].main_text,
+            sub_text: newTexts[textIndex].sub_text,
+            display_order: newTexts[textIndex].display_order,
+            is_active: newTexts[textIndex].is_active
+          })
         }),
-        adminPut('/api/admin/hero-texts', {
-          id: newTexts[targetIndex].id,
-          english_phrase: newTexts[targetIndex].english_phrase,
-          main_text: newTexts[targetIndex].main_text,
-          sub_text: newTexts[targetIndex].sub_text,
-          display_order: newTexts[targetIndex].display_order,
-          is_active: newTexts[targetIndex].is_active
+        apiFetch('/api/admin/hero-texts', {
+          method: 'PUT',
+          body: JSON.stringify({
+            id: newTexts[targetIndex].id,
+            english_phrase: newTexts[targetIndex].english_phrase,
+            main_text: newTexts[targetIndex].main_text,
+            sub_text: newTexts[targetIndex].sub_text,
+            display_order: newTexts[targetIndex].display_order,
+            is_active: newTexts[targetIndex].is_active
+          })
         })
       ])
 

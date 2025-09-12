@@ -46,7 +46,7 @@ import {
   AlertCircle,
   Download
 } from 'lucide-react'
-import { adminGet } from '@/lib/admin-api'
+import { apiFetch } from '@/lib/auth-helpers'
 
 interface Reservation {
   id: string
@@ -112,15 +112,7 @@ export default function ReservationInfoPage() {
         ...(searchQuery && { search: searchQuery })
       })
 
-      const response = await adminGet(`/api/admin/reservations?${params}`)
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error('예약 조회 실패:', errorData.error)
-        return
-      }
-      
-      const result = await response.json()
+      const result = await apiFetch(`/api/admin/reservations?${params}`)
 
       if (result.success) {
         setReservations(result.data || [])

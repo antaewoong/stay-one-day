@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { withAdminAuth } from '@/middleware/withAdminAuth'
+import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
+export const GET = (req: NextRequest) =>
+  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
   try {
     const searchParams = request.nextUrl.searchParams
     const period = searchParams.get('period') || '30d'
@@ -42,8 +44,16 @@ export async function GET(request: NextRequest) {
       accommodationFilter = { accommodation_id: accommodationId }
     }
 
+    console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+
+    // Service role client 사용 (GPT 권장)
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     // 예약 데이터 조회 (전체 또는 특정 숙소)
-    let query = supabase
+    let query = supabaseAdmin
       .from('reservations')
       .select(`
         *,
@@ -74,7 +84,7 @@ export async function GET(request: NextRequest) {
     prevStart.setTime(prevStart.getTime() - periodDiff)
     prevEnd.setTime(prevEnd.getTime() - periodDiff)
 
-    let prevQuery = supabase
+    let prevQuery = supabaseAdmin
       .from('reservations')
       .select('*')
       .gte('created_at', prevStart.toISOString())
@@ -180,8 +190,8 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Admin Group KPI API 오류:', error)
     return NextResponse.json(
-      { error: 'KPI 데이터를 가져오는데 실패했습니다.' },
+      { error: 'KPI 데이터를 가져오는데 실패했습니다.', details: error },
       { status: 500 }
     )
   }
-}
+})

@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateAdminAuth } from '@/lib/auth/admin-service'
-import { supabase } from '@/lib/supabase'
+import { withAdminAuth } from '@/middleware/withAdminAuth'
+import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
 // GET: 공지사항 목록 조회
-export async function GET(request: NextRequest) {
-  try {
+export const GET = (req: NextRequest) =>
+  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+    try {
+      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+      
+      // Service role client 사용 (GPT 권장)
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
     
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
@@ -15,7 +23,7 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit
 
     // 공지사항 조회 (최신순)
-    let query = supabase
+    let query = supabaseAdmin
       .from('notices')
       .select('*')
       .eq('status', 'published')
@@ -50,23 +58,23 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('공지사항 API 에러:', error)
     return NextResponse.json(
-      { error: '서버 오류가 발생했습니다' },
+      { error: '서버 오류가 발생했습니다', details: error },
       { status: 500 }
     )
   }
-}
+})
 
 // POST: 새 공지사항 생성
-export async function POST(request: NextRequest) {
-  try {
-    // 관리자 인증 확인
-    const authResult = await validateAdminAuth(request)
-    if (!authResult.isValid || !authResult.isAdmin) {
-      return authResult.error || NextResponse.json(
-        { error: '관리자 권한이 필요합니다' },
-        { status: 401 }
+export const POST = (req: NextRequest) =>
+  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+    try {
+      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+      
+      // Service role client 사용 (GPT 권장)
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
       )
-    }
 
     const body = await request.json()
     const { title, content, is_important, target_audience, author_name, author_role } = body
@@ -79,12 +87,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 공지사항 생성
-    const { data: notice, error } = await supabase
+    const { data: notice, error } = await supabaseAdmin
       .from('notices')
       .insert({
         title: title.trim(),
         content: content?.trim() || '',
-        admin_id: authResult.userId,
+        admin_id: ctx.adminId,
         notice_type: 'general',
         target_audience: target_audience || 'all',
         is_pinned: is_important || false,
@@ -105,8 +113,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('공지사항 생성 API 에러:', error)
     return NextResponse.json(
-      { error: '서버 오류가 발생했습니다' },
+      { error: '서버 오류가 발생했습니다', details: error },
       { status: 500 }
     )
   }
-}
+})

@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Save } from 'lucide-react'
-import { adminGet, adminPut } from '@/lib/admin-api'
+import { apiFetch } from '@/lib/auth-helpers'
 
 interface Notice {
   id: string
@@ -42,17 +42,8 @@ export default function EditNoticePage() {
   const loadNotice = async () => {
     try {
       setLoading(true)
-      const response = await adminGet(`/api/admin/notices/${params.id}`)
+      const result = await apiFetch(`/api/admin/notices/${params.id}`)
       
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error('공지사항 조회 실패:', errorData.error)
-        alert('공지사항을 불러오는데 실패했습니다.')
-        router.push('/admin/notices')
-        return
-      }
-      
-      const result = await response.json()
       if (result.success) {
         const noticeData = result.data
         setNotice(noticeData)
@@ -84,17 +75,15 @@ export default function EditNoticePage() {
     setSaving(true)
 
     try {
-      const response = await adminPut(`/api/admin/notices/${params.id}`, {
-        title: title.trim(),
-        content: content.trim(),
-        is_important: isImportant,
-        target_audience: targetAudience
+      await apiFetch(`/api/admin/notices/${params.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          title: title.trim(),
+          content: content.trim(),
+          is_important: isImportant,
+          target_audience: targetAudience
+        })
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || '공지사항 수정에 실패했습니다.')
-      }
 
       alert('공지사항이 성공적으로 수정되었습니다.')
       router.push(`/admin/notices/${params.id}`)

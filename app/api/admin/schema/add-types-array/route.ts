@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateAdminAuth, supabaseService } from '@/lib/auth/admin-service'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseService = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(request: NextRequest) {
   // 임시로 인증 스킵 (스키마 변경용)

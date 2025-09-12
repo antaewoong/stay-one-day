@@ -1,69 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateAdminAuth, supabaseService } from '@/lib/auth/admin-service'
+import { withAdminAuth } from '@/middleware/withAdminAuth'
+import { createClient } from '@supabase/supabase-js'
 
-export async function GET() {
-  try {
-    const { data: admins, error } = await supabaseService
-      .from('admin_accounts')
-      .select('*')
-      .order('created_at', { ascending: false })
+export const dynamic = 'force-dynamic'
 
-    if (error) {
-      console.error('Get admins error:', error)
-      return NextResponse.json({ error: 'Failed to fetch admins' }, { status: 500 })
-    }
-
-    return NextResponse.json({ admins })
-  } catch (error) {
-    console.error('Get admins error:', error)
-    return NextResponse.json({ error: 'Failed to fetch admins' }, { status: 500 })
-  }
-}
-
-export async function POST(request: NextRequest) {
-  // 관리자 인증 확인
-  const authResult = await validateAdminAuth(request)
-  if (!authResult.isValid) {
-    return authResult.error!
-  }
-
-  try {
-    const body = await request.json()
-    const { username, password, name, email, role = 'admin' } = body
-
-    if (!username || !password || !name) {
-      return NextResponse.json(
-        { error: '필수 필드를 모두 입력해주세요.' },
-        { status: 400 }
+export const GET = (req: NextRequest) =>
+  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+    try {
+      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+      
+      // Service role client 사용 (GPT 권장)
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
       )
+
+      const { data: admins, error } = await supabaseAdmin
+        .from('admin_accounts')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('관리자 목록 조회 에러:', error)
+        return NextResponse.json({ error: '관리자 목록 조회에 실패했습니다' }, { status: 500 })
+      }
+
+      return NextResponse.json({ admins })
+    } catch (error) {
+      console.error('관리자 목록 조회 에러:', error)
+      return NextResponse.json({ error: '관리자 목록 조회에 실패했습니다' }, { status: 500 })
     }
+  })
 
-    const { data, error } = await supabaseService
-      .from('admin_accounts')
-      .insert({
-        username,
-        password_hash: password, // 실제로는 bcrypt 해시화 필요
-        name,
-        email,
-        role,
-        is_active: true
-      })
-      .select()
+export const POST = (req: NextRequest) =>
+  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+    try {
+      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+      
+      // Service role client 사용 (GPT 권장)
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
 
-    if (error) {
-      console.error('Create admin error:', error)
+      const body = await request.json()
+      const { username, password, name, email, role = 'admin' } = body
+
+      if (!username || !password || !name) {
+        return NextResponse.json(
+          { error: '필수 필드를 모두 입력해주세요.' },
+          { status: 400 }
+        )
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from('admin_accounts')
+        .insert({
+          username,
+          password_hash: password, // 실제로는 bcrypt 해시화 필요
+          name,
+          email,
+          role,
+          is_active: true
+        })
+        .select()
+
+      if (error) {
+        console.error('관리자 생성 에러:', error)
+        return NextResponse.json(
+          { error: error.message || '관리자 생성에 실패했습니다' },
+          { status: 500 }
+        )
+      }
+
+      return NextResponse.json({ success: true, admin: data[0] })
+    } catch (error) {
+      console.error('관리자 생성 에러:', error)
       return NextResponse.json(
-        { error: error.message || 'Failed to create admin' },
+        { error: '관리자 생성에 실패했습니다' },
         { status: 500 }
       )
     }
-
-    return NextResponse.json({ success: true, admin: data[0] })
-  } catch (error) {
-    console.error('Create admin error:', error)
-    return NextResponse.json(
-      { error: 'Failed to create admin' },
-      { status: 500 }
-    )
-  }
-}
+  })

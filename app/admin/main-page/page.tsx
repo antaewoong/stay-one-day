@@ -31,7 +31,7 @@ import {
   Music,
   Sparkles
 } from 'lucide-react'
-import { adminGet, adminPost, adminPut } from '@/lib/admin-api'
+import { apiFetch } from '@/lib/auth-helpers'
 import { createClient } from '@/lib/supabase/client'
 
 interface HeroSlide {
@@ -111,15 +111,7 @@ export default function MainPageManagementPage() {
 
   const loadHeroSlides = async () => {
     try {
-      const response = await adminGet('/api/admin/hero-slides')
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error('히어로 슬라이드 로드 실패:', errorData.error)
-        return
-      }
-      
-      const result = await response.json()
+      const result = await apiFetch('/api/admin/hero-slides')
       const data = result.data || []
 
       setHeroSlides(data.map((slide: any) => ({
@@ -141,15 +133,7 @@ export default function MainPageManagementPage() {
 
   const loadSections = async () => {
     try {
-      const response = await adminGet('/api/admin/sections')
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error('섹션 로드 실패:', errorData.error)
-        return
-      }
-      
-      const result = await response.json()
+      const result = await apiFetch('/api/admin/sections')
       const data = result.data || []
 
       setSections(data.map((section: any) => ({
@@ -196,12 +180,10 @@ export default function MainPageManagementPage() {
         active: slide.active
       }))
       
-      const response = await adminPost('/api/admin/hero-slides', slidesToInsert)
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Save failed')
-      }
+      await apiFetch('/api/admin/hero-slides', {
+        method: 'POST',
+        body: JSON.stringify(slidesToInsert)
+      })
       
       setHeroSlides(newSlides)
       await loadHeroSlides() // 다시 로드해서 동기화
@@ -217,13 +199,10 @@ export default function MainPageManagementPage() {
     try {
       setLoading(true)
       
-      const response = await adminPut('/api/admin/sections', newSections)
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error('섹션 저장 실패 응답:', errorData.error)
-        throw new Error(errorData.error || 'Save failed')
-      }
+      await apiFetch('/api/admin/sections', {
+        method: 'PUT',
+        body: JSON.stringify(newSections)
+      })
       
       console.log('섹션 저장 성공')
     } catch (error) {

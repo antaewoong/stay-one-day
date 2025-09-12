@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Edit, Eye } from 'lucide-react'
-import { adminGet } from '@/lib/admin-api'
+import { apiFetch } from '@/lib/auth-helpers'
 
 interface Notice {
   id: string
@@ -36,17 +36,8 @@ export default function NoticeDetailPage() {
   const loadNotice = async () => {
     try {
       setLoading(true)
-      const response = await adminGet(`/api/admin/notices/${params.id}`)
+      const result = await apiFetch(`/api/admin/notices/${params.id}`)
       
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error('공지사항 조회 실패:', errorData.error)
-        alert('공지사항을 불러오는데 실패했습니다.')
-        router.push('/admin/notices')
-        return
-      }
-      
-      const result = await response.json()
       if (result.success) {
         setNotice(result.data)
       } else {

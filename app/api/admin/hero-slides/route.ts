@@ -1,40 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { validateAdminAuth, supabaseService } from '@/lib/auth/admin-service'
+import { NextRequest } from 'next/server'
+import { adminRoute, sb, ok, bad } from '../_kit'
 
-export async function GET() {
-  try {
-    const { data, error } = await supabaseService
-      .from('hero_slides')
-      .select('*')
-      .order('slide_order', { ascending: true })
+export const dynamic = 'force-dynamic'
 
-    if (error) throw error
-    return NextResponse.json({ data })
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch slides' }, { status: 500 })
-  }
-}
+export const GET = adminRoute(async () => {
+  const { data, error } = await sb().from('hero_slides').select('*').order('slide_order', { ascending: true })
+  if (error) return bad(error)
+  return ok(data)
+})
 
-export async function POST(request: NextRequest) {
-  // 관리자 인증 확인
-  const authResult = await validateAdminAuth(request)
-  if (!authResult.isValid) {
-    return authResult.error!
-  }
+export const POST = adminRoute(async (req: NextRequest) => {
+  const slides = await req.json()
+  
+  // 기존 슬라이드 모두 삭제 후 새로 삽입
+  const { error: deleteError } = await sb().from('hero_slides').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+  if (deleteError) return bad(deleteError)
+  
+  const { data, error } = await sb().from('hero_slides').insert(slides).select()
+  if (error) return bad(error)
+  return ok(data)
+})
 
-  try {
-    const slides = await request.json()
-    // 기존 슬라이드 모두 삭제
-    await supabaseService.from('hero_slides').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-
-    // 새 슬라이드들 삽입
-    const { data, error } = await supabaseService
-      .from('hero_slides')
-      .insert(slides)
-
-    if (error) throw error
-    return NextResponse.json({ data })
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to save slides' }, { status: 500 })
-  }
-}
+export const DELETE = adminRoute(async (req: NextRequest) => {
+  const id = new URL(req.url).searchParams.get('id')
+  if (!id) return bad('id required', 400)
+  const { error } = await sb().from('hero_slides').delete().eq('id', id)
+  if (error) return bad(error)
+  return ok(true)
+})

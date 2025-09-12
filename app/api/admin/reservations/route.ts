@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { withAdminAuth } from '@/middleware/withAdminAuth'
+import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
-  try {
-    const supabase = createClient()
+export const GET = (req: NextRequest) =>
+  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+    try {
+      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+      
+      // Service role client 사용 (GPT 권장)
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
@@ -15,7 +23,7 @@ export async function GET(request: NextRequest) {
     
     const offset = (page - 1) * limit
 
-    let query = supabase
+    let query = supabaseAdmin
       .from('reservations')
       .select(`
         *,
@@ -62,7 +70,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 전체 카운트 조회
-    let countQuery = supabase
+    let countQuery = supabaseAdmin
       .from('reservations')
       .select('*', { count: 'exact', head: true })
 
@@ -101,14 +109,21 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('예약 API 오류:', error)
-    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
+    return NextResponse.json({ error: '서버 오류가 발생했습니다.', details: error }, { status: 500 })
   }
-}
+})
 
 // 예약 상태 업데이트
-export async function PUT(request: NextRequest) {
-  try {
-    const supabase = createClient()
+export const PUT = (req: NextRequest) =>
+  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+    try {
+      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+      
+      // Service role client 사용 (GPT 권장)
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
     const body = await request.json()
     const { id, status, payment_status, admin_notes } = body
 
@@ -124,7 +139,7 @@ export async function PUT(request: NextRequest) {
     if (payment_status) updateData.payment_status = payment_status
     if (admin_notes) updateData.special_requests = admin_notes
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('reservations')
       .update(updateData)
       .eq('id', id)
@@ -153,6 +168,6 @@ export async function PUT(request: NextRequest) {
 
   } catch (error) {
     console.error('예약 업데이트 API 오류:', error)
-    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 })
+    return NextResponse.json({ error: '서버 오류가 발생했습니다.', details: error }, { status: 500 })
   }
-}
+})

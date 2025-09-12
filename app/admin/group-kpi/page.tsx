@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Users, Heart, Camera, Baby, Crown, TrendingUp, TrendingDown, Minus, Building2 } from 'lucide-react'
-import { adminGet } from '@/lib/admin-api'
+import { apiFetch } from '@/lib/auth-helpers'
 
 interface GroupKPIData {
   totalGroupBookings: number
@@ -84,15 +84,10 @@ export default function AdminGroupKPIPage() {
 
   const loadAccommodations = async () => {
     try {
-      const response = await adminGet('/api/admin/accommodations')
+      const result = await apiFetch('/api/admin/accommodations')
       
-      if (response.ok) {
-        const result = await response.json()
-        if (result.success) {
-          setAccommodations(result.data)
-        }
-      } else {
-        console.error('숙소 목록 로딩 실패:', response.status, response.statusText)
+      if (result.success) {
+        setAccommodations(result.data)
       }
     } catch (error) {
       console.error('숙소 목록 로딩 실패:', error)
@@ -108,13 +103,7 @@ export default function AdminGroupKPIPage() {
         ...(selectedAccommodation !== 'all' && { accommodationId: selectedAccommodation })
       })
       
-      const response = await adminGet(`/api/admin/group-kpi?${params}`)
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch KPI data')
-      }
-
-      const kpiData = await response.json()
+      const kpiData = await apiFetch(`/api/admin/group-kpi?${params}`)
       setData(kpiData)
     } catch (error) {
       console.error('KPI 데이터 로딩 오류:', error)

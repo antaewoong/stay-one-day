@@ -45,7 +45,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'react-hot-toast'
-import { adminGet, adminPost } from '@/lib/admin-api'
+import { apiFetch } from '@/lib/auth-helpers'
 
 interface SocialMediaLink {
   platform: string
@@ -131,16 +131,13 @@ export default function AdminInfluencersPage() {
   const loadInfluencers = async () => {
     setLoading(true)
     try {
-      const response = await adminGet(`/api/admin/influencers?page=${currentPage}&limit=${itemsPerPage}&status=${statusFilter}&category=${categoryFilter}`)
+      const result = await apiFetch(`/api/admin/influencers?page=${currentPage}&limit=${itemsPerPage}&status=${statusFilter}&category=${categoryFilter}`)
       
-      if (response.ok) {
-        const result = await response.json()
-        if (result.success) {
-          setInfluencers(result.data)
-          setTotalPages(result.pagination.totalPages)
-        }
+      if (result.success) {
+        setInfluencers(result.data)
+        setTotalPages(result.pagination.totalPages)
       } else {
-        console.error('인플루언서 목록 로드 실패:', response.status, response.statusText)
+        console.error('인플루언서 목록 로드 실패:', result.error)
         toast.error('인플루언서 목록을 불러올 수 없습니다')
       }
     } catch (error) {
@@ -175,13 +172,11 @@ export default function AdminInfluencersPage() {
         return
       }
 
-      const response = await adminPost('/api/admin/influencers', newInfluencer)
-
-      if (!response.ok) {
-        throw new Error('인플루언서 등록 실패')
-      }
-
-      const result = await response.json()
+      const result = await apiFetch('/api/admin/influencers', {
+        method: 'POST',
+        body: JSON.stringify(newInfluencer)
+      })
+      
       if (result.success) {
         toast.success('인플루언서가 성공적으로 등록되었습니다')
         setShowAddModal(false)

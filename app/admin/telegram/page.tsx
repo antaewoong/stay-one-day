@@ -20,7 +20,7 @@ import {
   Bot
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
-import { adminGet, adminPost, adminDelete } from '@/lib/admin-api'
+import { apiFetch } from '@/lib/auth-helpers'
 
 interface TelegramSession {
   chatId: number
@@ -44,15 +44,7 @@ export default function TelegramBotManagePage() {
     try {
       setLoading(true)
       
-      const response = await adminGet('/api/admin/telegram/register')
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.error || '세션 목록 로드 실패')
-        return
-      }
-      
-      const result = await response.json()
+      const result = await apiFetch('/api/admin/telegram/register')
 
       if (result.success) {
         setSessions(result.data.sessions || [])
@@ -77,17 +69,12 @@ export default function TelegramBotManagePage() {
     try {
       setLoading(true)
       
-      const response = await adminPost('/api/admin/telegram/register', {
-        targetAdminEmail: newAdminEmail.trim()
+      const result = await apiFetch('/api/admin/telegram/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          targetAdminEmail: newAdminEmail.trim()
+        })
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.error || '토큰 생성 실패')
-        return
-      }
-
-      const result = await response.json()
 
       if (result.success) {
         setGeneratedToken({
@@ -112,15 +99,9 @@ export default function TelegramBotManagePage() {
 
     try {
       setLoading(true)
-      const response = await adminDelete(`/api/admin/telegram/register?chatId=${chatId}`)
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.error || '세션 종료 실패')
-        return
-      }
-
-      const result = await response.json()
+      const result = await apiFetch(`/api/admin/telegram/register?chatId=${chatId}`, {
+        method: 'DELETE'
+      })
 
       if (result.success) {
         toast.success('세션이 종료되었습니다')
@@ -141,15 +122,9 @@ export default function TelegramBotManagePage() {
 
     try {
       setLoading(true)
-      const response = await adminDelete('/api/admin/telegram/register?emergency=true')
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.error || '비상 종료 실패')
-        return
-      }
-
-      const result = await response.json()
+      const result = await apiFetch('/api/admin/telegram/register?emergency=true', {
+        method: 'DELETE'
+      })
 
       if (result.success) {
         toast.success('모든 세션이 종료되었습니다')

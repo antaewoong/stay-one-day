@@ -1,25 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateAdminAuth } from '@/lib/auth/admin-service'
-import { supabase } from '@/lib/supabase'
+import { withAdminAuth } from '@/middleware/withAdminAuth'
 import { createClient } from '@supabase/supabase-js'
-
-// Service role client for admin operations
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
-  try {
-    // 관리자 인증 확인
-    const authResult = await validateAdminAuth(request)
-    if (!authResult.isValid || !authResult.isAdmin) {
-      return authResult.error || NextResponse.json(
-        { error: '관리자 권한이 필요합니다' },
-        { status: 401 }
+export const GET = (req: NextRequest) =>
+  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+    try {
+      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+      
+      // Service role client 사용 (GPT 권장)
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
       )
-    }
 
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
@@ -30,7 +24,7 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit
 
     // 인플루언서 조회
-    let query = supabase
+    let query = supabaseAdmin
       .from('influencers')
       .select('*')
       .order('created_at', { ascending: false })
@@ -76,22 +70,22 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('인플루언서 목록 조회 에러:', error)
     return NextResponse.json(
-      { error: '인플루언서 목록을 불러올 수 없습니다' },
+      { error: '인플루언서 목록을 불러올 수 없습니다', details: error },
       { status: 500 }
     )
   }
-}
+})
 
-export async function POST(request: NextRequest) {
-  try {
-    // 관리자 인증 확인
-    const authResult = await validateAdminAuth(request)
-    if (!authResult.isValid || !authResult.isAdmin) {
-      return authResult.error || NextResponse.json(
-        { error: '관리자 권한이 필요합니다' },
-        { status: 401 }
+export const POST = (req: NextRequest) =>
+  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+    try {
+      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+      
+      // Service role client 사용 (GPT 권장)
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
       )
-    }
 
     const body = await request.json()
     const {
@@ -239,8 +233,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('인플루언서 등록 에러:', error)
     return NextResponse.json(
-      { error: '인플루언서 등록에 실패했습니다' },
+      { error: '인플루언서 등록에 실패했습니다', details: error },
       { status: 500 }
     )
   }
-}
+})

@@ -1,18 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+import { adminRoute, sb, ok, bad } from '../_kit'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
-
-export async function POST() {
+export const POST = adminRoute(async (req: NextRequest) => {
   try {
     const marketingTablesSQL = `
       -- 웹 세션 추적 테이블
@@ -153,13 +142,13 @@ export async function POST() {
       CREATE INDEX IF NOT EXISTS idx_campaign_performance_date ON campaign_performance(date);
     `
 
-    const { error } = await supabaseAdmin.rpc('exec_sql', {
+    const { error } = await sb().rpc('exec_sql', {
       sql: marketingTablesSQL
     })
 
     if (error) {
       // rpc가 없으면 직접 쿼리 실행 시도
-      const { error: directError } = await supabaseAdmin.from('information_schema.tables').select('*').limit(1)
+      const { error: directError } = await sb().from('information_schema.tables').select('*').limit(1)
       
       if (directError) {
         throw new Error(`Database access failed: ${directError.message}`)
@@ -177,7 +166,7 @@ export async function POST() {
       
       for (const table of tables) {
         try {
-          const { error: tableError } = await supabaseAdmin
+          const { error: tableError } = await sb()
             .from(table)
             .select('*')
             .limit(1)
@@ -192,22 +181,19 @@ export async function POST() {
         }
       }
       
-      return NextResponse.json({ 
+      return ok({ 
         message: 'Marketing tables setup initiated (manual creation needed)',
         results,
         sql: marketingTablesSQL
       })
     }
 
-    return NextResponse.json({ 
+    return ok({ 
       message: 'Marketing tables created successfully!' 
     })
 
   } catch (error: any) {
     console.error('Marketing setup error:', error)
-    return NextResponse.json(
-      { error: error.message }, 
-      { status: 500 }
-    )
+    return bad(error.message, 500)
   }
-}
+})

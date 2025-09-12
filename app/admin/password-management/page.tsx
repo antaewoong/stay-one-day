@@ -18,7 +18,7 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
-import { adminGet, adminPost } from '@/lib/admin-api'
+import { apiFetch } from '@/lib/auth-helpers'
 
 interface AdminAccount {
   id: string
@@ -46,15 +46,7 @@ export default function PasswordManagementPage() {
     try {
       setLoading(true)
       
-      const response = await adminGet('/api/admin/password-management')
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.error || '관리자 목록 로드 실패')
-        return
-      }
-      
-      const result = await response.json()
+      const result = await apiFetch('/api/admin/password-management')
 
       if (result.success) {
         setAdmins(result.data.admins || [])
@@ -83,18 +75,13 @@ export default function PasswordManagementPage() {
     try {
       setIsChangingPassword(true)
       
-      const response = await adminPost('/api/admin/password-management', {
-        adminId: selectedAdmin,
-        newPassword: newPassword
+      const result = await apiFetch('/api/admin/password-management', {
+        method: 'POST',
+        body: JSON.stringify({
+          adminId: selectedAdmin,
+          newPassword: newPassword
+        })
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.error || '비밀번호 변경 실패')
-        return
-      }
-
-      const result = await response.json()
 
       if (result.success) {
         toast.success('비밀번호가 성공적으로 변경되었습니다')
