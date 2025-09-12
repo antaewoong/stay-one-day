@@ -188,10 +188,10 @@ export default function AdminPage() {
       // 실제 notices 테이블에서 공지사항 가져오기
       const { data: noticesData, error } = await supabase
         .from('notices')
-        .select('*')
-        .eq('status', 'published')
+        .select('id, title, content, created_at')
+        .eq('active', true)
         .order('created_at', { ascending: false })
-        .limit(5)
+        .limit(3)
       
       if (error) {
         console.error('공지사항 로드 에러:', error)
