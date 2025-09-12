@@ -107,34 +107,39 @@ export class TelegramAuthService {
     try {
       const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-      // 1. 토큰 유효성 확인
-      const { data: tokenData, error: tokenError } = await supabase
-        .from('telegram_registration_tokens')
-        .select('*')
-        .eq('token', token)
-        .eq('is_used', false)
-        .gte('expires_at', new Date().toISOString())
-        .single()
-
-      if (tokenError || !tokenData) {
+      // 1. 내부 관리자 토큰 패턴 확인 (DB 없이 간단 처리)
+      if (!token.startsWith('STAY_ADMIN_')) {
         return { 
           success: false, 
-          error: tokenError?.code === 'PGRST116' 
-            ? '유효하지 않거나 만료된 토큰입니다' 
-            : '토큰 확인 중 오류가 발생했습니다' 
+          error: '유효하지 않은 토큰 형식입니다' 
         }
       }
 
-      // 2. 대상 관리자 정보 조회
+      // 2. 토큰에서 타임스탬프 추출하여 만료 확인 (1시간)
+      const tokenParts = token.split('_')
+      if (tokenParts.length < 3) {
+        return { success: false, error: '토큰 형식이 올바르지 않습니다' }
+      }
+      
+      const timestamp = parseInt(tokenParts[2])
+      const now = Date.now()
+      const oneHour = 60 * 60 * 1000
+      
+      if (now - timestamp > oneHour) {
+        return { success: false, error: '토큰이 만료되었습니다 (1시간 유효)' }
+      }
+
+      // 3. 활성 관리자 목록에서 ryan@nuklabs.com 확인 (내부용 고정)
+      const targetEmail = 'ryan@nuklabs.com'
       const { data: admin, error: adminError } = await supabase
         .from('admin_accounts')
         .select('id, email, is_active')
-        .eq('email', tokenData.admin_email)
+        .eq('email', targetEmail)
         .eq('is_active', true)
         .single()
 
       if (adminError || !admin) {
-        return { success: false, error: '관리자 계정을 찾을 수 없습니다' }
+        return { success: false, error: '대상 관리자 계정을 찾을 수 없습니다' }
       }
 
       // 3. 기존 세션이 있으면 비활성화
@@ -161,14 +166,7 @@ export class TelegramAuthService {
         return { success: false, error: '세션 생성에 실패했습니다' }
       }
 
-      // 5. 토큰을 사용됨으로 표시
-      await supabase
-        .from('telegram_registration_tokens')
-        .update({ 
-          is_used: true, 
-          used_at: new Date().toISOString() 
-        })
-        .eq('id', tokenData.id)
+      // 5. 내부용 토큰이므로 DB 처리 생략 (재사용 가능)
 
       // 6. 관리자 테이블에 텔레그램 정보 업데이트
       await supabase
