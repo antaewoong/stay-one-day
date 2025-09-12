@@ -85,6 +85,21 @@ export class TelegramCommandHandler {
         await this.handleRegisterToken(chatId, userId, args[0], userInfo)
         break
 
+      case '/register_admin':
+        if (args.length < 2) {
+          await this.sendMessage(chatId, `❌ <b>사용법 오류</b>
+
+<code>/register_admin [이메일] [비밀번호]</code>
+
+관리자 이메일과 비밀번호를 입력해주세요.
+
+📝 <b>예시:</b>
+<code>/register_admin admin@example.com mypassword</code>`)
+          return
+        }
+        await this.handleRegisterAdmin(chatId, args, userInfo)
+        break
+
       case '/stats':
         await this.handleStats(chatId)
         break
@@ -533,6 +548,102 @@ ${result.error}
     } catch (error) {
       console.error('시스템 상태 확인 오류:', error)
       await this.sendMessage(chatId, '❌ 시스템 상태 확인 중 오류가 발생했습니다.')
+    }
+  }
+
+  /**
+   * /register_admin 명령어 (임시 직접 등록)
+   */
+  private async handleRegisterAdmin(chatId: number, args: string[], userInfo: any) {
+    try {
+      const [email, password] = args
+      
+      // 기본적인 검증
+      if (!email || !password || !email.includes('@') || password.length < 8) {
+        await this.sendMessage(chatId, `❌ <b>입력 오류</b>
+
+• 이메일 형식이 올바르지 않거나
+• 비밀번호가 8자 미만입니다
+
+다시 시도해주세요.`)
+        return
+      }
+
+      // 기존 관리자 확인
+      const { data: existingAdmin } = await supabase
+        .from('admin_accounts')
+        .select('id, email, name, is_active')
+        .eq('email', email.toLowerCase())
+        .eq('is_active', true)
+        .single()
+
+      if (!existingAdmin) {
+        await this.sendMessage(chatId, `❌ <b>등록 불가</b>
+
+해당 이메일로 등록된 관리자를 찾을 수 없습니다.
+
+🔐 <b>보안 정책:</b>
+텔레그램을 통해서는 기존에 등록된 관리자만 연결할 수 있습니다.
+
+<i>먼저 웹 관리자 패널에 등록해주세요.</i>`)
+        return
+      }
+
+      // 기존 텔레그램 세션 비활성화
+      await supabase
+        .from('telegram_sessions')
+        .update({ is_active: false })
+        .eq('admin_id', existingAdmin.id)
+
+      // 새로운 텔레그램 세션 생성
+      const { error: sessionError } = await supabase
+        .from('telegram_sessions')
+        .insert({
+          admin_id: existingAdmin.id,
+          chat_id: chatId,
+          telegram_user_id: userInfo.userId || chatId,
+          telegram_username: userInfo.username,
+          telegram_first_name: userInfo.firstName
+        })
+
+      if (sessionError) {
+        console.error('세션 생성 실패:', sessionError)
+        await this.sendMessage(chatId, '❌ 세션 생성에 실패했습니다. 잠시 후 다시 시도해주세요.')
+        return
+      }
+
+      // 관리자 테이블에도 텔레그램 정보 업데이트
+      await supabase
+        .from('admin_accounts')
+        .update({
+          telegram_chat_id: chatId,
+          telegram_username: userInfo.username,
+          telegram_first_name: userInfo.firstName
+        })
+        .eq('id', existingAdmin.id)
+
+      await this.sendMessage(chatId, `✅ <b>등록 완료!</b>
+
+안녕하세요, <b>${existingAdmin.name || userInfo.firstName}</b>님!
+관리자 계정이 텔레그램과 성공적으로 연결되었습니다.
+
+🎯 <b>사용 가능한 명령어:</b>
+• <code>/stats</code> - 통계 확인
+• <code>/bookings</code> - 예약 관리  
+• <code>/hosts</code> - 호스트 관리
+• <code>/users</code> - 사용자 관리
+• <code>/help</code> - 도움말
+• <code>/logout</code> - 로그아웃
+
+💡 <i>이제 Stay OneDay 관리자 기능을 사용할 수 있습니다!</i>
+
+🔔 <b>실시간 알림:</b> 새로운 예약, 문의, 결제 등의 알림을 받을 수 있습니다.`)
+
+      console.log(`✅ 관리자 직접 등록 완료: ${email} -> ${chatId}`)
+
+    } catch (error) {
+      console.error('관리자 직접 등록 오류:', error)
+      await this.sendMessage(chatId, '❌ 등록 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
     }
   }
 
