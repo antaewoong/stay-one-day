@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { SingleImageUpload } from '@/components/ui/single-image-upload'
+import { apiFetch } from '@/lib/auth/helpers'
 import { 
   Plus, 
   Edit, 
@@ -23,19 +25,14 @@ import {
 
 interface HeroSlide {
   id: string
-  title: string
-  subtitle: string
-  description: string
-  image: string
-  cta: string
-  badge: string
-  stats: {
-    avgRating?: string
-    bookings?: string
-    price?: string
-  }
-  order: number
-  active: boolean
+  image_url: string
+  headline: string
+  subheadline: string
+  cta_text: string
+  cta_link: string
+  is_active: boolean
+  sort_order: number
+  created_at: string
 }
 
 export default function AdminHeroSlidesPage() {
@@ -43,115 +40,124 @@ export default function AdminHeroSlidesPage() {
   const [loading, setLoading] = useState(false)
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null)
-  const [newSlide, setNewSlide] = useState<Partial<HeroSlide>>({
-    title: '',
-    subtitle: '',
-    description: '',
-    image: '',
-    cta: '지금 예약하기',
-    badge: '추천',
-    stats: { avgRating: '4.8', bookings: '100+', price: '150,000원' },
-    active: true
+  const [error, setError] = useState('')
+  const [newSlide, setNewSlide] = useState({
+    headline: '',
+    subheadline: '',
+    image_url: '',
+    cta_text: '지금 예약하기',
+    cta_link: '/booking',
+    is_active: true
   })
 
   useEffect(() => {
     loadSlides()
   }, [])
 
-  const loadSlides = () => {
+  const loadSlides = async () => {
     try {
-      const savedSlides = localStorage.getItem('adminHeroSlides')
-      if (savedSlides) {
-        const parsedSlides = JSON.parse(savedSlides)
-        setSlides(parsedSlides.map((slide: any, index: number) => ({
-          ...slide,
-          id: slide.id || `slide-${index}`,
-          order: slide.order || index,
-          active: slide.active !== false
-        })))
+      setLoading(true)
+      const response = await apiFetch('/api/admin/hero-slides')
+      if (response.ok) {
+        setSlides(response.data || [])
+      } else {
+        setError('슬라이드 로드에 실패했습니다.')
       }
     } catch (error) {
       console.error('슬라이드 로드 실패:', error)
+      setError('슬라이드 로드 중 오류가 발생했습니다.')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const saveSlides = (newSlides: HeroSlide[]) => {
-    try {
-      localStorage.setItem('adminHeroSlides', JSON.stringify(newSlides))
-      setSlides(newSlides)
-    } catch (error) {
-      console.error('슬라이드 저장 실패:', error)
-      alert('슬라이드 저장에 실패했습니다.')
-    }
-  }
-
-  const addSlide = () => {
-    if (!newSlide.title || !newSlide.image) {
+  const addSlide = async () => {
+    if (!newSlide.headline || !newSlide.image_url) {
       alert('제목과 이미지는 필수입니다.')
       return
     }
 
-    const slide: HeroSlide = {
-      id: `slide-${Date.now()}`,
-      title: newSlide.title!,
-      subtitle: newSlide.subtitle || '',
-      description: newSlide.description || '',
-      image: newSlide.image!,
-      cta: newSlide.cta || '지금 예약하기',
-      badge: newSlide.badge || '추천',
-      stats: newSlide.stats || { avgRating: '4.8', bookings: '100+', price: '150,000원' },
-      order: slides.length,
-      active: true
-    }
+    try {
+      setLoading(true)
+      const response = await apiFetch('/api/admin/hero-slides', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...newSlide,
+          sort_order: slides.length
+        })
+      })
 
-    saveSlides([...slides, slide])
-    setNewSlide({
-      title: '',
-      subtitle: '',
-      description: '',
-      image: '',
-      cta: '지금 예약하기',
-      badge: '추천',
-      stats: { avgRating: '4.8', bookings: '100+', price: '150,000원' },
-      active: true
-    })
-    setShowAddDialog(false)
-  }
-
-  const updateSlide = (updatedSlide: HeroSlide) => {
-    const updatedSlides = slides.map(slide => 
-      slide.id === updatedSlide.id ? updatedSlide : slide
-    )
-    saveSlides(updatedSlides)
-    setEditingSlide(null)
-  }
-
-  const deleteSlide = (id: string) => {
-    if (confirm('이 슬라이드를 삭제하시겠습니까?')) {
-      const updatedSlides = slides.filter(slide => slide.id !== id)
-      saveSlides(updatedSlides)
+      if (response.ok) {
+        await loadSlides()
+        setNewSlide({
+          headline: '',
+          subheadline: '',
+          image_url: '',
+          cta_text: '지금 예약하기',
+          cta_link: '/booking',
+          is_active: true
+        })
+        setShowAddDialog(false)
+      } else {
+        alert(response.error || '슬라이드 추가에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('슬라이드 추가 실패:', error)
+      alert('슬라이드 추가 중 오류가 발생했습니다.')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const moveSlide = (id: string, direction: 'up' | 'down') => {
-    const slideIndex = slides.findIndex(slide => slide.id === id)
-    if (slideIndex === -1) return
+  const updateSlide = async (updatedSlide: HeroSlide) => {
+    try {
+      setLoading(true)
+      const response = await apiFetch(`/api/admin/hero-slides/${updatedSlide.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updatedSlide)
+      })
 
-    const newSlides = [...slides]
-    const targetIndex = direction === 'up' ? slideIndex - 1 : slideIndex + 1
-
-    if (targetIndex >= 0 && targetIndex < slides.length) {
-      [newSlides[slideIndex], newSlides[targetIndex]] = [newSlides[targetIndex], newSlides[slideIndex]]
-      newSlides.forEach((slide, index) => { slide.order = index })
-      saveSlides(newSlides)
+      if (response.ok) {
+        await loadSlides()
+        setEditingSlide(null)
+      } else {
+        alert(response.error || '슬라이드 수정에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('슬라이드 수정 실패:', error)
+      alert('슬라이드 수정 중 오류가 발생했습니다.')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const toggleSlideActive = (id: string) => {
-    const updatedSlides = slides.map(slide => 
-      slide.id === id ? { ...slide, active: !slide.active } : slide
-    )
-    saveSlides(updatedSlides)
+  const deleteSlide = async (id: string) => {
+    if (!confirm('이 슬라이드를 삭제하시겠습니까?')) return
+
+    try {
+      setLoading(true)
+      const response = await apiFetch(`/api/admin/hero-slides/${id}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        await loadSlides()
+      } else {
+        alert(response.error || '슬라이드 삭제에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('슬라이드 삭제 실패:', error)
+      alert('슬라이드 삭제 중 오류가 발생했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const toggleSlideActive = async (id: string) => {
+    const slide = slides.find(s => s.id === id)
+    if (!slide) return
+
+    await updateSlide({ ...slide, is_active: !slide.is_active })
   }
 
   return (
@@ -178,9 +184,25 @@ export default function AdminHeroSlidesPage() {
         </div>
       </div>
 
+      {/* 오류 메시지 */}
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-4 text-red-800">
+            {error}
+          </CardContent>
+        </Card>
+      )}
+
       {/* 슬라이드 목록 */}
       <div className="space-y-4">
-        {slides.length === 0 ? (
+        {loading ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p>로딩 중...</p>
+            </CardContent>
+          </Card>
+        ) : slides.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
               <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -194,15 +216,15 @@ export default function AdminHeroSlidesPage() {
           </Card>
         ) : (
           slides.map((slide, index) => (
-            <Card key={slide.id} className={`${!slide.active ? 'opacity-60' : ''}`}>
+            <Card key={slide.id} className={`${!slide.is_active ? 'opacity-60' : ''}`}>
               <CardContent className="p-6">
                 <div className="flex items-start gap-6">
                   {/* 슬라이드 이미지 */}
                   <div className="w-32 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                    {slide.image ? (
+                    {slide.image_url ? (
                       <img 
-                        src={slide.image} 
-                        alt={slide.title}
+                        src={slide.image_url} 
+                        alt={slide.headline}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -217,71 +239,47 @@ export default function AdminHeroSlidesPage() {
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{slide.title}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">{slide.headline}</h3>
                           <Badge 
-                            className={`text-xs ${slide.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                            className={`text-xs ${slide.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
                           >
-                            {slide.active ? '활성' : '비활성'}
+                            {slide.is_active ? '활성' : '비활성'}
                           </Badge>
-                          <Badge variant="outline" className="text-xs">{slide.badge}</Badge>
                         </div>
-                        <p className="text-sm text-gray-600 mb-1">{slide.subtitle}</p>
-                        <p className="text-xs text-gray-500 mb-3 line-clamp-2">{slide.description}</p>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <span>평점: {slide.stats.avgRating}</span>
-                          <span>예약: {slide.stats.bookings}</span>
-                          <span>가격: {slide.stats.price}</span>
-                        </div>
+                        <p className="text-sm text-gray-600 mb-1">{slide.subheadline}</p>
+                        <p className="text-xs text-gray-500 mb-3">CTA: {slide.cta_text} → {slide.cta_link}</p>
+                        <p className="text-xs text-gray-400">순서: {slide.sort_order}</p>
                       </div>
 
                       {/* 컨트롤 버튼들 */}
-                      <div className="flex flex-col gap-2">
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => moveSlide(slide.id, 'up')}
-                            disabled={index === 0}
-                            className="h-8 w-8 p-0"
-                          >
-                            <ArrowUp className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => moveSlide(slide.id, 'down')}
-                            disabled={index === slides.length - 1}
-                            className="h-8 w-8 p-0"
-                          >
-                            <ArrowDown className="w-3 h-3" />
-                          </Button>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setEditingSlide(slide)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => toggleSlideActive(slide.id)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Eye className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => deleteSlide(slide.id)}
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEditingSlide(slide)}
+                          className="h-8 w-8 p-0"
+                          disabled={loading}
+                        >
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => toggleSlideActive(slide.id)}
+                          className="h-8 w-8 p-0"
+                          disabled={loading}
+                        >
+                          <Eye className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deleteSlide(slide.id)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                          disabled={loading}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -301,104 +299,64 @@ export default function AdminHeroSlidesPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="title">제목 *</Label>
+                <Label htmlFor="headline">제목 *</Label>
                 <Input
-                  id="title"
-                  value={newSlide.title || ''}
-                  onChange={(e) => setNewSlide({...newSlide, title: e.target.value})}
+                  id="headline"
+                  value={newSlide.headline}
+                  onChange={(e) => setNewSlide({...newSlide, headline: e.target.value})}
                   placeholder="슬라이드 제목"
+                  autoComplete="off"
                 />
               </div>
               <div>
-                <Label htmlFor="subtitle">부제목</Label>
+                <Label htmlFor="subheadline">부제목</Label>
                 <Input
-                  id="subtitle"
-                  value={newSlide.subtitle || ''}
-                  onChange={(e) => setNewSlide({...newSlide, subtitle: e.target.value})}
+                  id="subheadline"
+                  value={newSlide.subheadline}
+                  onChange={(e) => setNewSlide({...newSlide, subheadline: e.target.value})}
                   placeholder="슬라이드 부제목"
+                  autoComplete="off"
                 />
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="description">설명</Label>
-              <Textarea
-                id="description"
-                value={newSlide.description || ''}
-                onChange={(e) => setNewSlide({...newSlide, description: e.target.value})}
-                placeholder="슬라이드 설명"
-                rows={3}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="image">이미지 URL *</Label>
-              <Input
-                id="image"
-                value={newSlide.image || ''}
-                onChange={(e) => setNewSlide({...newSlide, image: e.target.value})}
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
+            <SingleImageUpload
+              value={newSlide.image_url}
+              onChange={(url) => setNewSlide({...newSlide, image_url: url})}
+              onError={(error) => alert(error)}
+              label="이미지 *"
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="cta">CTA 버튼 텍스트</Label>
+                <Label htmlFor="cta_text">CTA 버튼 텍스트</Label>
                 <Input
-                  id="cta"
-                  value={newSlide.cta || ''}
-                  onChange={(e) => setNewSlide({...newSlide, cta: e.target.value})}
+                  id="cta_text"
+                  value={newSlide.cta_text}
+                  onChange={(e) => setNewSlide({...newSlide, cta_text: e.target.value})}
                   placeholder="지금 예약하기"
+                  autoComplete="off"
                 />
               </div>
               <div>
-                <Label htmlFor="badge">배지 텍스트</Label>
+                <Label htmlFor="cta_link">CTA 링크</Label>
                 <Input
-                  id="badge"
-                  value={newSlide.badge || ''}
-                  onChange={(e) => setNewSlide({...newSlide, badge: e.target.value})}
-                  placeholder="추천"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="rating">평점</Label>
-                <Input
-                  id="rating"
-                  value={newSlide.stats?.avgRating || ''}
-                  onChange={(e) => setNewSlide({...newSlide, stats: {...newSlide.stats, avgRating: e.target.value}})}
-                  placeholder="4.8"
-                />
-              </div>
-              <div>
-                <Label htmlFor="bookings">예약 수</Label>
-                <Input
-                  id="bookings"
-                  value={newSlide.stats?.bookings || ''}
-                  onChange={(e) => setNewSlide({...newSlide, stats: {...newSlide.stats, bookings: e.target.value}})}
-                  placeholder="100+"
-                />
-              </div>
-              <div>
-                <Label htmlFor="price">가격</Label>
-                <Input
-                  id="price"
-                  value={newSlide.stats?.price || ''}
-                  onChange={(e) => setNewSlide({...newSlide, stats: {...newSlide.stats, price: e.target.value}})}
-                  placeholder="150,000원"
+                  id="cta_link"
+                  value={newSlide.cta_link}
+                  onChange={(e) => setNewSlide({...newSlide, cta_link: e.target.value})}
+                  placeholder="/booking"
+                  autoComplete="off"
                 />
               </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+              <Button variant="outline" onClick={() => setShowAddDialog(false)} disabled={loading}>
                 취소
               </Button>
-              <Button onClick={addSlide} className="bg-green-600 hover:bg-green-700">
+              <Button onClick={addSlide} className="bg-green-600 hover:bg-green-700" disabled={loading}>
                 <Save className="w-4 h-4 mr-2" />
-                슬라이드 추가
+                {loading ? '추가 중...' : '슬라이드 추가'}
               </Button>
             </div>
           </div>
@@ -415,68 +373,60 @@ export default function AdminHeroSlidesPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="edit-title">제목 *</Label>
+                  <Label htmlFor="edit-headline">제목 *</Label>
                   <Input
-                    id="edit-title"
-                    value={editingSlide.title}
-                    onChange={(e) => setEditingSlide({...editingSlide, title: e.target.value})}
+                    id="edit-headline"
+                    value={editingSlide.headline}
+                    onChange={(e) => setEditingSlide({...editingSlide, headline: e.target.value})}
+                    autoComplete="off"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit-subtitle">부제목</Label>
+                  <Label htmlFor="edit-subheadline">부제목</Label>
                   <Input
-                    id="edit-subtitle"
-                    value={editingSlide.subtitle}
-                    onChange={(e) => setEditingSlide({...editingSlide, subtitle: e.target.value})}
+                    id="edit-subheadline"
+                    value={editingSlide.subheadline}
+                    onChange={(e) => setEditingSlide({...editingSlide, subheadline: e.target.value})}
+                    autoComplete="off"
                   />
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="edit-description">설명</Label>
-                <Textarea
-                  id="edit-description"
-                  value={editingSlide.description}
-                  onChange={(e) => setEditingSlide({...editingSlide, description: e.target.value})}
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="edit-image">이미지 URL *</Label>
-                <Input
-                  id="edit-image"
-                  value={editingSlide.image}
-                  onChange={(e) => setEditingSlide({...editingSlide, image: e.target.value})}
-                />
-              </div>
+              <SingleImageUpload
+                value={editingSlide.image_url}
+                onChange={(url) => setEditingSlide({...editingSlide, image_url: url})}
+                onError={(error) => alert(error)}
+                label="이미지 *"
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="edit-cta">CTA 버튼 텍스트</Label>
+                  <Label htmlFor="edit-cta-text">CTA 버튼 텍스트</Label>
                   <Input
-                    id="edit-cta"
-                    value={editingSlide.cta}
-                    onChange={(e) => setEditingSlide({...editingSlide, cta: e.target.value})}
+                    id="edit-cta-text"
+                    value={editingSlide.cta_text}
+                    onChange={(e) => setEditingSlide({...editingSlide, cta_text: e.target.value})}
+                    autoComplete="off"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit-badge">배지 텍스트</Label>
+                  <Label htmlFor="edit-cta-link">CTA 링크</Label>
                   <Input
-                    id="edit-badge"
-                    value={editingSlide.badge}
-                    onChange={(e) => setEditingSlide({...editingSlide, badge: e.target.value})}
+                    id="edit-cta-link"
+                    value={editingSlide.cta_link}
+                    onChange={(e) => setEditingSlide({...editingSlide, cta_link: e.target.value})}
+                    autoComplete="off"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={() => setEditingSlide(null)}>
+                <Button variant="outline" onClick={() => setEditingSlide(null)} disabled={loading}>
                   취소
                 </Button>
-                <Button onClick={() => updateSlide(editingSlide)} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={() => updateSlide(editingSlide)} className="bg-blue-600 hover:bg-blue-700" disabled={loading}>
                   <Save className="w-4 h-4 mr-2" />
-                  저장
+                  {loading ? '저장 중...' : '저장'}
                 </Button>
               </div>
             </div>

@@ -135,7 +135,7 @@ export default function HomePage() {
         // 2. 평점 데이터가 로드된 후 관리자 설정과 히어로 텍스트 로드
         const [accommodationResponse, heroTextsResponse] = await Promise.all([
           fetch('/api/accommodations?limit=1000').catch(() => ({ ok: false })),
-          fetch('/api/admin/hero-texts').catch(() => ({ ok: false }))
+          fetch('/api/site/hero-slides', { next: { revalidate: 60 } }).catch(() => ({ ok: false }))
         ])
         
         const response = accommodationResponse
@@ -146,8 +146,8 @@ export default function HomePage() {
 
           // API를 통해 관리자 설정 로드 (단순화)
           const [sectionsResponse, slidesResponse] = await Promise.all([
-            fetch('/api/admin/sections').then(res => res.json()),
-            supabase.from('hero_slides').select('*').eq('active', true).order('slide_order', { ascending: true })
+            fetch('/api/site/sections', { next: { revalidate: 60 } }).then(res => res.json()),
+            supabase.from('hero_slides').select('*').eq('active', true).order('sort_order', { ascending: true })
           ])
           
           if (!isActive) return

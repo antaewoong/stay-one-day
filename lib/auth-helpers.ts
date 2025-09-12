@@ -10,26 +10,31 @@ export async function getAccessTokenOrThrow() {
   return data.session.access_token
 }
 
-// 서버에서 내부 API 호출용 (JSON 자동 파싱)
+// 관리자용 API 호출 헬퍼 (Bearer 토큰 자동 첨부)
 export async function apiFetch(path: string, init: RequestInit = {}) {
-  const token = await getAccessTokenOrThrow()
-  const response = await fetch(path, {
-    ...init,
-    credentials: 'include',      // 👈 쿠키 확실히 포함
-    headers: {
-      ...(init.headers || {}),
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    cache: 'no-store',
+  const sb = createClient()
+  const { data: { session } } = await sb.auth.getSession()
+  const headers = new Headers(init.headers || {})
+  
+  if (session?.access_token) {
+    headers.set('Authorization', `Bearer ${session.access_token}`)
+  }
+  headers.set('Content-Type', 'application/json')
+
+  const res = await fetch(path, { 
+    ...init, 
+    headers, 
+    credentials: 'include',
+    cache: 'no-store'
   })
   
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'API Error' }))
-    throw new Error(error.message || `HTTP ${response.status}`)
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    console.error('API 4xx/5xx >>>', path, body) // ← stage/error 정보 포함
+    throw new Error(`HTTP ${res.status}`)
   }
   
-  return response.json()
+  return res.json()
 }
 
 // 관리자 세션 안전하게 가져오기

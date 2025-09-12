@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { createClient } from '@/lib/supabase/client'
+import { browserSB } from '@/lib/supabase/client'
+import { useSupabaseSessionSync } from '@/hooks/useSupabaseSessionSync'
 import { Lock, User, Shield, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 
 export default function AdminLoginPage() {
+  useSupabaseSessionSync() // ✅ 세션 동기화
+  const sb = browserSB() // ✅ 싱글톤
   const router = useRouter()
-  const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -34,7 +36,7 @@ export default function AdminLoginPage() {
       console.log('🔐 관리자 로그인 시도:', loginForm.username)
 
       // Supabase Auth를 통한 인증
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await sb.auth.signInWithPassword({
         email: loginForm.username, // username을 email로 사용
         password: loginForm.password
       })
@@ -60,7 +62,7 @@ export default function AdminLoginPage() {
       console.log('✅ 사용자 인증 성공:', data.user.id)
 
       // admin_accounts 테이블에서 관리자 확인 (RLS 정책에 의해 자동으로 본인만 조회됨)
-      const { data: admin, error: adminError } = await supabase
+      const { data: admin, error: adminError } = await sb
         .from('admin_accounts')
         .select('*')
         .eq('email', data.user.email)
@@ -72,7 +74,7 @@ export default function AdminLoginPage() {
       if (adminError || !admin) {
         console.error('관리자 정보 조회 실패')
         setError('관리자 권한이 없습니다.')
-        await supabase.auth.signOut()
+        await sb.auth.signOut()
         return
       }
 
@@ -90,11 +92,21 @@ export default function AdminLoginPage() {
 
       console.log('✅ 로그인 성공, 대시보드로 이동...')
       
-      // 세션이 완전히 저장될 때까지 잠시 대기 후 페이지 이동
-      setTimeout(() => {
-        console.log('대시보드로 이동 중...')
-        router.push('/admin')
-      }, 1000)
+      // 세션 쿠키 동기화 확인 (선택)
+      const s = await sb.auth.getSession()
+      console.log('🍪 쿠키세션 확인:', s?.data?.session?.access_token ? 'ok' : 'no')
+      
+      // ⚠️ 서버 쿠키 동기화가 확실히 끝난 뒤 이동 (추가 안전망)
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'SIGNED_IN', session: data.session }),
+      })
+      
+      console.log('대시보드로 이동 중...')
+      router.replace('/admin')
+      // 최신 서버 세션 반영
+      router.refresh()
 
     } catch (error) {
       console.error('💥 로그인 처리 중 예외:', error)

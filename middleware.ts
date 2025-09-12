@@ -1,4 +1,4 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -10,16 +10,15 @@ export async function middleware(req: NextRequest) {
   // 현재 경로
   const pathname = req.nextUrl.pathname
   
-  // 정적 파일들은 건너뛰기
+  // 정적 파일들만 건너뛰기 (API는 세션 갱신 필요)
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
     pathname.includes('.') ||
     pathname === '/favicon.ico'
   ) {
     return res
   }
-
+  
   try {
     // 🔐 RLS 정책 준수: Supabase 세션 확인
     let supabase
@@ -27,15 +26,54 @@ export async function middleware(req: NextRequest) {
     let sessionError = null
     
     try {
-      supabase = createMiddlewareClient({ req, res })
+      supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            get(name: string) {
+              return req.cookies.get(name)?.value
+            },
+            set(name: string, value: string, options: any) {
+              req.cookies.set({
+                name,
+                value,
+                ...options,
+              })
+              res.cookies.set({
+                name,
+                value,
+                ...options,
+              })
+            },
+            remove(name: string, options: any) {
+              req.cookies.set({
+                name,
+                value: '',
+                ...options,
+              })
+              res.cookies.set({
+                name,
+                value: '',
+                ...options,
+              })
+            },
+          },
+        }
+      )
+      
       const authResult = await supabase.auth.getSession()
       session = authResult.data.session
       sessionError = authResult.error
     } catch (cookieError) {
       console.error('Cookie parsing error:', cookieError)
-      // 쿠키 오류 시 기본값으로 처리
       session = null
       sessionError = null
+    }
+    
+    // API 경로는 세션 갱신만 하고 권한 체크 없이 통과
+    if (pathname.startsWith('/api')) {
+      return res
     }
     
     console.log('Middleware - pathname:', pathname)
@@ -173,7 +211,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // 임시로 미들웨어 비활성화 - 쿠키 파싱 오류 해결 후 재활성화 예정
-    '/middleware-disabled'
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
