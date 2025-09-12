@@ -511,19 +511,25 @@ export default function HomePage() {
     const distanceX = Math.abs(x - dragState.startX)
     const distanceY = Math.abs(y - dragState.startY)
     
-    // 터치 방향이 결정되지 않았고 움직임이 있으면 방향 결정
-    if (!dragState.touchDirection && (distanceX > 5 || distanceY > 5)) {
-      // 가로 방향으로 더 많이 움직여야만 가로 스크롤로 인식 (더 관대한 세로 스크롤)
-      const direction = (distanceX > distanceY * 1.5) ? 'horizontal' : 'vertical'
-      setDragState(prev => ({ ...prev, touchDirection: direction }))
+    // 터치 방향 결정 - 세로 스크롤을 기본으로 하고 명확한 가로 의도만 감지
+    if (!dragState.touchDirection && (distanceX > 8 || distanceY > 8)) {
+      // 가로 스크롤 조건을 더욱 엄격하게: 가로가 세로의 3배 이상이어야 함
+      if (distanceX > 30 && distanceX > distanceY * 3) {
+        setDragState(prev => ({ ...prev, touchDirection: 'horizontal' }))
+      } else {
+        // 그 외 모든 경우는 세로 스크롤로 처리
+        setDragState(prev => ({ ...prev, touchDirection: 'vertical' }))
+        return // 세로 스크롤이므로 바로 리턴하여 기본 브라우저 동작 허용
+      }
     }
     
-    // 가로 방향 터치이고 15px 이상 움직이면 드래그로 간주 (더 명확한 의도가 필요)
-    if (dragState.touchDirection === 'horizontal' && distanceX > 15) {
+    // 가로 방향으로 확실히 결정된 경우에만 가로 스크롤 처리
+    if (dragState.touchDirection === 'horizontal' && distanceX > 30) {
       setDragState(prev => ({ ...prev, isDragging: true }))
       e.preventDefault() // 가로 터치일 때만 preventDefault
+      e.stopPropagation() // 이벤트 전파도 중단
       
-      // 부드러운 터치 드래그 (감도 1.0으로 자연스럽게)
+      // 부드러운 터치 드래그
       const walk = (x - dragState.startX) * 1.0
       dragState.currentContainer.scrollLeft = dragState.scrollLeft - walk
       
@@ -539,7 +545,7 @@ export default function HomePage() {
         }))
       }
     }
-    // 세로 방향 터치면 preventDefault를 호출하지 않아 페이지 스크롤 허용
+    // 세로 방향 터치이거나 방향이 결정되지 않은 경우 preventDefault 호출하지 않아 페이지 스크롤 허용
   }
 
   const handleTouchEnd = () => {
@@ -798,8 +804,50 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* 스크롤바 숨김 및 부드러운 스크롤 전역 스타일 */}
+      {/* 전역 부드러운 스크롤 + 풀스크린 스타일 */}
       <style jsx global>{`
+        /* 풀스크린 노치 대응 */
+        html, body {
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          /* 노치 및 홈 인디케이터 영역까지 화면 확장 */
+          padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+          background: #000; /* 노치 영역 배경색 */
+          min-height: 100vh;
+          min-height: -webkit-fill-available; /* iOS Safari 지원 */
+        }
+        
+        body {
+          overscroll-behavior: contain;
+          background: white; /* 실제 콘텐츠 배경 */
+          min-height: 100vh;
+          min-height: -webkit-fill-available;
+          margin: 0;
+        }
+        
+        /* 메인 컨테이너 풀스크린 최적화 */
+        .min-h-screen {
+          min-height: 100vh;
+          min-height: -webkit-fill-available;
+        }
+        
+        /* iOS PWA 지원 */
+        @media all and (display-mode: standalone) {
+          body {
+            padding-top: env(safe-area-inset-top);
+          }
+        }
+        
+        /* 상태바 영역 처리 */
+        @supports (padding: max(0px)) {
+          body {
+            padding-left: max(env(safe-area-inset-left), 0px);
+            padding-right: max(env(safe-area-inset-right), 0px);
+            padding-bottom: max(env(safe-area-inset-bottom), 0px);
+          }
+        }
+        
+        /* 가로 스크롤 컨테이너 */
         .scroll-container {
           scrollbar-width: none;
           -ms-overflow-style: none;
@@ -808,7 +856,7 @@ export default function HomePage() {
           cursor: grab;
           user-select: none;
           scroll-snap-type: x proximity;
-          touch-action: pan-x;
+          touch-action: pan-x pan-y; /* 가로와 세로 모두 허용 */
         }
         .scroll-container::-webkit-scrollbar {
           display: none;
@@ -837,6 +885,19 @@ export default function HomePage() {
         @media (hover: hover) and (pointer: fine) {
           .scroll-container {
             transition: scroll-left 0.1s ease-out;
+          }
+        }
+        
+        /* iOS Safari 스크롤 최적화 */
+        @supports (-webkit-touch-callout: none) {
+          body {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+          }
+          
+          .scroll-container {
+            -webkit-overflow-scrolling: touch;
+            transform: translateZ(0); /* 하드웨어 가속 */
           }
         }
       `}</style>
@@ -1083,7 +1144,8 @@ export default function HomePage() {
               scrollbarWidth: 'none', 
               msOverflowStyle: 'none',
               WebkitOverflowScrolling: 'touch',
-              scrollBehavior: 'auto'
+              scrollBehavior: 'auto',
+              touchAction: 'pan-y pan-x' // 세로 스크롤 우선, 가로 스크롤도 허용
             }}
             onMouseDown={(e) => handleMouseDown(recommendedScrollRef, e)}
             onMouseMove={handleMouseMove}

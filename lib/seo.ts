@@ -33,6 +33,13 @@ export function generateMetadata({
     authors: [{ name: "Stay One Day" }],
     creator: "Stay One Day",
     publisher: "Stay One Day",
+    viewport: {
+      width: "device-width",
+      initialScale: 1,
+      maximumScale: 1,
+      userScalable: false,
+      viewportFit: "cover" // 노치 대응 풀스크린
+    },
     formatDetection: {
       email: false,
       address: false,

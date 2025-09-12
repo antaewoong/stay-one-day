@@ -43,11 +43,23 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fcmauibvdqbocwhloqov.supabase.co" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         
-        {/* PWA 설정 */}
-        <meta name="theme-color" content="#3B82F6" />
+        {/* PWA 및 풀스크린 설정 */}
+        <meta name="theme-color" content="#000" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Stay One Day" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        
+        {/* 노치/홈 인디케이터 대응 */}
+        <meta name="viewport-fit" content="cover" />
+        <style dangerouslySetInnerHTML={{ __html: `
+          :root {
+            --safe-area-inset-top: env(safe-area-inset-top, 0);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0);
+            --safe-area-inset-left: env(safe-area-inset-left, 0);
+            --safe-area-inset-right: env(safe-area-inset-right, 0);
+          }
+        ` }} />
         
         {/* 보안 헤더 */}
         <meta name="referrer" content="strict-origin-when-cross-origin" />
