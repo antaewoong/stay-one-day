@@ -19,6 +19,7 @@ import {
   HelpCircle
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { hostGet, hostPost } from '@/lib/host-api'
 
 interface Inquiry {
   id: string
@@ -54,7 +55,7 @@ export default function HostSupportPage() {
 
   const loadInquiries = async (hostId: string) => {
     try {
-      const response = await fetch(`/api/host/inquiries?hostId=${hostId}`)
+      const response = await hostGet(`/api/host/inquiries?hostId=${hostId}`)
       const result = await response.json()
       
       if (result.success) {
@@ -83,17 +84,11 @@ export default function HostSupportPage() {
     setSubmitting(true)
 
     try {
-      const response = await fetch('/api/host/inquiries', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          hostId: hostData.id,
-          title: newInquiry.title.trim(),
-          category: newInquiry.category,
-          content: newInquiry.content.trim()
-        })
+      const response = await hostPost('/api/host/inquiries', {
+        hostId: hostData.id,
+        title: newInquiry.title.trim(),
+        category: newInquiry.category,
+        content: newInquiry.content.trim()
       })
 
       const result = await response.json()

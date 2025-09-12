@@ -46,6 +46,7 @@ import {
   AlertCircle,
   Download
 } from 'lucide-react'
+import { adminGet } from '@/lib/admin-api'
 
 interface Reservation {
   id: string
@@ -111,12 +112,19 @@ export default function ReservationInfoPage() {
         ...(searchQuery && { search: searchQuery })
       })
 
-      const response = await fetch(`/api/admin/reservations?${params}`)
+      const response = await adminGet(`/api/admin/reservations?${params}`)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('예약 조회 실패:', errorData.error)
+        return
+      }
+      
       const result = await response.json()
 
-      if (response.ok) {
+      if (result.success) {
         setReservations(result.data || [])
-        setPagination(result.pagination)
+        setPagination(result.pagination || pagination)
       } else {
         console.error('예약 조회 실패:', result.error)
       }

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { hostGet } from '@/lib/host-api'
 import { 
   Calendar,
   Download,
@@ -18,7 +19,8 @@ import {
   Eye,
   Edit,
   Settings,
-  Phone
+  Phone,
+  Bell
 } from 'lucide-react'
 import Link from 'next/link'
 import MobileQuickActions from '@/components/host/MobileQuickActions'
@@ -133,7 +135,7 @@ export default function HostPage() {
   const loadDashboardData = async (hostId: string) => {
     try {
       // 실제 데이터베이스에서 데이터 가져오기
-      const response = await fetch(`/api/host/dashboard?hostId=${hostId}`)
+      const response = await hostGet(`/api/host/dashboard?hostId=${hostId}`)
       const result = await response.json()
       
       if (result.success) {
@@ -335,6 +337,99 @@ export default function HostPage() {
               </div>
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br from-purple-400 to-pink-500 shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Building2 className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* PC용 오늘의 현황, 빠른액션, 알림 - 3칸 가로 배치 */}
+      <div className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 lg:px-8 mb-6">
+        
+        {/* 오늘의 현황 */}
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-indigo-50 backdrop-blur-sm">
+          <CardHeader className="bg-gradient-to-r from-blue-100 to-indigo-100 border-b border-blue-200">
+            <CardTitle className="text-lg font-bold text-blue-800 flex items-center">
+              <Calendar className="w-5 h-5 mr-3 text-blue-600" />
+              오늘의 현황
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-white/60 rounded-lg">
+                <p className="text-2xl font-bold text-blue-600">{dashboardData?.today?.checkins || 0}</p>
+                <p className="text-sm text-blue-700">체크인</p>
+              </div>
+              <div className="text-center p-3 bg-white/60 rounded-lg">
+                <p className="text-2xl font-bold text-emerald-600">{dashboardData?.today?.checkouts || 0}</p>
+                <p className="text-sm text-emerald-700">체크아웃</p>
+              </div>
+            </div>
+            <div className="text-center p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+              <p className="text-xl font-bold text-amber-700">{dashboardData?.today?.pendingBookings || 0}</p>
+              <p className="text-sm text-amber-600">대기 중 예약</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 빠른액션 */}
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-emerald-50 to-green-50 backdrop-blur-sm">
+          <CardHeader className="bg-gradient-to-r from-emerald-100 to-green-100 border-b border-emerald-200">
+            <CardTitle className="text-lg font-bold text-emerald-800 flex items-center">
+              <TrendingUp className="w-5 h-5 mr-3 text-emerald-600" />
+              빠른액션
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 space-y-2">
+            <Button asChild variant="outline" className="w-full justify-start text-sm h-10 border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+              <Link href="/host/reservations/new">
+                <Plus className="w-4 h-4 mr-2" />
+                전화 예약 등록
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full justify-start text-sm h-10 border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+              <Link href="/host/calendar">
+                <Calendar className="w-4 h-4 mr-2" />
+                방막기/방열기
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full justify-start text-sm h-10 border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+              <Link href="/host/photos">
+                <Eye className="w-4 h-4 mr-2" />
+                사진 업로드
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* 알림 */}
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-violet-50 backdrop-blur-sm">
+          <CardHeader className="bg-gradient-to-r from-purple-100 to-violet-100 border-b border-purple-200">
+            <CardTitle className="text-lg font-bold text-purple-800 flex items-center">
+              <Bell className="w-5 h-5 mr-3 text-purple-600" />
+              알림
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border-l-4 border-yellow-400">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2"></div>
+              <div>
+                <p className="text-sm font-medium text-slate-800">새로운 예약 요청</p>
+                <p className="text-xs text-slate-600">2시간 전</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border-l-4 border-blue-400">
+              <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
+              <div>
+                <p className="text-sm font-medium text-slate-800">체크인 알림</p>
+                <p className="text-xs text-slate-600">오늘 15:00</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border-l-4 border-green-400">
+              <div className="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+              <div>
+                <p className="text-sm font-medium text-slate-800">리뷰 등록됨</p>
+                <p className="text-xs text-slate-600">1일 전</p>
               </div>
             </div>
           </CardContent>

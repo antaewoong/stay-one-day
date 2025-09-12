@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Save } from 'lucide-react'
+import { adminPost } from '@/lib/admin-api'
 
 export default function CreateNoticePage() {
   const [title, setTitle] = useState('')
@@ -52,17 +53,13 @@ export default function CreateNoticePage() {
         headers['x-admin-session'] = adminUser
       }
       
-      const response = await fetch('/api/admin/notices', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          title: title.trim(),
-          content: content.trim(),
-          is_important: isImportant,
-          target_audience: targetAudience,
-          author_name: authorName,
-          author_role: authorRole
-        })
+      const response = await adminPost('/api/admin/notices', {
+        title: title.trim(),
+        content: content.trim(),
+        is_important: isImportant,
+        target_audience: targetAudience,
+        author_name: authorName,
+        author_role: authorRole
       })
 
       const result = await response.json()

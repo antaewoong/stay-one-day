@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { toast } from 'react-hot-toast'
+import { hostGet, hostPost } from '@/lib/host-api'
 
 interface InfluencerReview {
   id: string
@@ -93,7 +94,7 @@ export default function HostInfluencerReviewsPage() {
   const loadInfluencerReviews = async (hostId: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/host/influencer-reviews?hostId=${hostId}`)
+      const response = await hostGet(`/api/host/influencer-reviews?hostId=${hostId}`)
       
       if (response.ok) {
         const result = await response.json()
@@ -138,15 +139,10 @@ export default function HostInfluencerReviewsPage() {
     try {
       setReplyLoading(true)
       
-      const response = await fetch('/api/host/influencer-reviews/reply', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          reviewId: selectedReview.id,
-          hostId: hostData.host_id,
-          reply: replyContent.trim()
+      const response = await hostPost('/api/host/influencer-reviews/reply', {
+        reviewId: selectedReview.id,
+        hostId: hostData.host_id,
+        reply: replyContent.trim()
         })
       })
 

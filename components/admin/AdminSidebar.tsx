@@ -86,8 +86,11 @@ const menuItems: MenuItem[] = [
   },
   {
     title: '마케팅 분석',
-    href: '/admin/marketing',
-    icon: <TrendingUp className="w-4 h-4" />
+    icon: <TrendingUp className="w-4 h-4" />,
+    children: [
+      { title: '마케팅 분석', href: '/admin/marketing', icon: <></> },
+      { title: 'Group KPI', href: '/admin/group-kpi', icon: <></> }
+    ]
   },
   {
     title: '점주 공지사항',

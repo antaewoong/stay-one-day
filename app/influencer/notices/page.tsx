@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
+import { influencerGet } from '@/lib/influencer-api'
 
 interface Notice {
   id: string
@@ -66,7 +67,7 @@ export default function InfluencerNoticesPage() {
 
   const loadNotices = async () => {
     try {
-      const response = await fetch('/api/influencer/notices')
+      const response = await influencerGet('/api/influencer/notices')
       const result = await response.json()
       
       if (result.success) {

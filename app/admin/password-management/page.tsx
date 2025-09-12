@@ -18,6 +18,7 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { adminGet, adminPost } from '@/lib/admin-api'
 
 interface AdminAccount {
   id: string
@@ -45,28 +46,20 @@ export default function PasswordManagementPage() {
     try {
       setLoading(true)
       
-      // 관리자 인증 토큰 가져오기
-      const adminUser = sessionStorage.getItem('adminUser')
-      const adminData = adminUser ? JSON.parse(adminUser) : null
+      const response = await adminGet('/api/admin/password-management')
       
-      // localStorage에서 Supabase 토큰 가져오기
-      const supabaseAuth = localStorage.getItem('sb-fcmauibvdqbocwhloqov-auth-token')
-      const supabaseData = supabaseAuth ? JSON.parse(supabaseAuth) : null
-      
-      const authToken = adminData?.access_token || supabaseData?.access_token || sessionStorage.getItem('adminToken')
-      
-      const headers: Record<string, string> = {}
-      if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`
+      if (!response.ok) {
+        const errorData = await response.json()
+        toast.error(errorData.error || '관리자 목록 로드 실패')
+        return
       }
       
-      const response = await fetch('/api/admin/password-management', { headers })
       const result = await response.json()
 
       if (result.success) {
         setAdmins(result.data.admins || [])
       } else {
-        toast.error('관리자 목록 로드 실패')
+        toast.error(result.error || '관리자 목록 로드 실패')
       }
     } catch (error) {
       console.error('관리자 목록 로드 실패:', error)
@@ -90,29 +83,16 @@ export default function PasswordManagementPage() {
     try {
       setIsChangingPassword(true)
       
-      const adminUser = sessionStorage.getItem('adminUser')
-      const adminData = adminUser ? JSON.parse(adminUser) : null
-      
-      const supabaseAuth = localStorage.getItem('sb-fcmauibvdqbocwhloqov-auth-token')
-      const supabaseData = supabaseAuth ? JSON.parse(supabaseAuth) : null
-      
-      const authToken = adminData?.access_token || supabaseData?.access_token || sessionStorage.getItem('adminToken')
-      
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
-      if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`
-      }
-      
-      const response = await fetch('/api/admin/password-management', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          adminId: selectedAdmin,
-          newPassword: newPassword
-        })
+      const response = await adminPost('/api/admin/password-management', {
+        adminId: selectedAdmin,
+        newPassword: newPassword
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        toast.error(errorData.error || '비밀번호 변경 실패')
+        return
+      }
 
       const result = await response.json()
 

@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, Search, Edit, Trash2, Eye, MapPin } from 'lucide-react'
+import { hostGet } from '@/lib/host-api'
 
 interface HostAccommodation {
   id: string
@@ -60,7 +61,7 @@ export default function HostAccommodationsPage() {
       console.log('호스트 UUID:', hostUUID)
       
       // API를 통해서 숙소 조회 (RLS 문제 해결)
-      const response = await fetch(`/api/host/accommodations?hostId=${hostUUID}`)
+      const response = await hostGet(`/api/host/accommodations?hostId=${hostUUID}`)
       const result = await response.json()
       
       console.log('API 응답:', result)
@@ -105,7 +106,7 @@ export default function HostAccommodationsPage() {
         ...(searchQuery && { search: searchQuery })
       })
       
-      const response = await fetch(`/api/host/accommodations?${params}`)
+      const response = await hostGet(`/api/host/accommodations?${params}`)
       const result = await response.json()
       
       if (result.success) {

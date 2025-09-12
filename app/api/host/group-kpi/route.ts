@@ -4,34 +4,23 @@ import { getUser } from '@/lib/auth/session'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const { searchParams } = new URL(request.url)
     const period = searchParams.get('period') || '30d'
+    const hostId = searchParams.get('hostId')
+
+    if (!hostId) {
+      return NextResponse.json({ error: 'Host ID required' }, { status: 400 })
+    }
 
     // 기간별 일수 계산
     const periodDays = period === '7d' ? 7 : period === '30d' ? 30 : 90
     const startDate = new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-    // 호스트 ID 가져오기
-    const { data: hostData, error: hostError } = await supabase
-      .from('hosts')
-      .select('id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (hostError || !hostData) {
-      return NextResponse.json({ error: 'Host not found' }, { status: 404 })
-    }
-
     // 호스트의 숙소 ID들 가져오기
     const { data: accommodations } = await supabase
       .from('accommodations')
       .select('id')
-      .eq('host_id', hostData.id)
+      .eq('host_id', hostId)
 
     const accommodationIds = accommodations?.map(a => a.id) || []
 

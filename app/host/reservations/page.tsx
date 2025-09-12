@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Search, Calendar, Users, MapPin, Phone, Mail, CheckCircle, XCircle, Clock, CreditCard, AlertCircle } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { hostGet, hostPut } from '@/lib/host-api'
 
 interface Reservation {
   id: string
@@ -66,7 +67,7 @@ export default function HostReservationsPage() {
         limit: '100'
       })
       
-      const response = await fetch(`/api/host/reservations?${params}`)
+      const response = await hostGet(`/api/host/reservations?${params}`)
       const result = await response.json()
       
       if (response.ok) {
@@ -89,16 +90,10 @@ export default function HostReservationsPage() {
     if (!hostData?.id) return
     
     try {
-      const response = await fetch('/api/host/reservations', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: reservationId,
-          status: newStatus,
-          hostId: hostData.id
-        })
+      const response = await hostPut('/api/host/reservations', {
+        id: reservationId,
+        status: newStatus,
+        hostId: hostData.id
       })
 
       const result = await response.json()

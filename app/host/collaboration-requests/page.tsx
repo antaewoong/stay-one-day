@@ -41,6 +41,7 @@ import {
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { toast } from 'react-hot-toast'
+import { hostGet, hostPut } from '@/lib/host-api'
 
 interface CollaborationRequest {
   id: string
@@ -106,7 +107,7 @@ export default function HostCollaborationRequestsPage() {
     
     try {
       setLoading(true)
-      const response = await fetch(`/api/host/collaboration-requests?host_id=${hostData.id}&status=${statusFilter}&limit=50`)
+      const response = await hostGet(`/api/host/collaboration-requests?host_id=${hostData.id}&status=${statusFilter}&limit=50`)
       const result = await response.json()
       
       if (result.success) {
@@ -126,17 +127,11 @@ export default function HostCollaborationRequestsPage() {
     try {
       setProcessing(requestId)
       
-      const response = await fetch('/api/host/collaboration-requests', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          request_id: requestId,
-          status,
-          host_notes: hostNotes,
-          host_id: hostData?.id
-        })
+      const response = await hostPut('/api/host/collaboration-requests', {
+        request_id: requestId,
+        status,
+        host_notes: hostNotes,
+        host_id: hostData?.id
       })
 
       const result = await response.json()

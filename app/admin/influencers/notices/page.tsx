@@ -43,6 +43,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
+import { adminGet, adminPost, adminPut } from '@/lib/admin-api'
 
 interface Notice {
   id: string
@@ -79,7 +80,7 @@ export default function InfluencerNoticesPage() {
   const loadNotices = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/influencer-notices')
+      const response = await adminGet('/api/admin/influencer-notices')
       const result = await response.json()
       
       if (result.success) {
@@ -102,13 +103,7 @@ export default function InfluencerNoticesPage() {
         return
       }
 
-      const response = await fetch('/api/admin/influencer-notices', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newNotice)
-      })
+      const response = await adminPost('/api/admin/influencer-notices', newNotice)
 
       const result = await response.json()
       if (result.success) {
@@ -136,13 +131,7 @@ export default function InfluencerNoticesPage() {
 
   const toggleNoticeStatus = async (id: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`/api/admin/influencer-notices/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ is_active: !currentStatus })
-      })
+      const response = await adminPut(`/api/admin/influencer-notices/${id}`, { is_active: !currentStatus })
 
       if (response.ok) {
         toast.success(currentStatus ? '공지사항을 비활성화했습니다' : '공지사항을 활성화했습니다')

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Save } from 'lucide-react'
+import { adminGet, adminPut } from '@/lib/admin-api'
 
 interface Notice {
   id: string
@@ -41,23 +42,26 @@ export default function EditNoticePage() {
   const loadNotice = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/notices/${params.id}`)
+      const response = await adminGet(`/api/admin/notices/${params.id}`)
       
-      if (response.ok) {
-        const result = await response.json()
-        if (result.success) {
-          const noticeData = result.data
-          setNotice(noticeData)
-          setTitle(noticeData.title || '')
-          setContent(noticeData.content || '')
-          setIsImportant(noticeData.is_pinned || false)
-          setTargetAudience(noticeData.target_audience || 'all')
-        } else {
-          alert('공지사항을 찾을 수 없습니다.')
-          router.push('/admin/notices')
-        }
-      } else {
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('공지사항 조회 실패:', errorData.error)
         alert('공지사항을 불러오는데 실패했습니다.')
+        router.push('/admin/notices')
+        return
+      }
+      
+      const result = await response.json()
+      if (result.success) {
+        const noticeData = result.data
+        setNotice(noticeData)
+        setTitle(noticeData.title || '')
+        setContent(noticeData.content || '')
+        setIsImportant(noticeData.is_pinned || false)
+        setTargetAudience(noticeData.target_audience || 'all')
+      } else {
+        alert('공지사항을 찾을 수 없습니다.')
         router.push('/admin/notices')
       }
     } catch (error) {
@@ -80,33 +84,16 @@ export default function EditNoticePage() {
     setSaving(true)
 
     try {
-      // 관리자 세션 정보 가져오기
-      const adminUser = sessionStorage.getItem('adminUser')
-      
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
-      
-      // 관리자 세션 정보 추가
-      if (adminUser) {
-        headers['x-admin-session'] = adminUser
-      }
-      
-      const response = await fetch(`/api/admin/notices/${params.id}`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({
-          title: title.trim(),
-          content: content.trim(),
-          is_important: isImportant,
-          target_audience: targetAudience
-        })
+      const response = await adminPut(`/api/admin/notices/${params.id}`, {
+        title: title.trim(),
+        content: content.trim(),
+        is_important: isImportant,
+        target_audience: targetAudience
       })
 
-      const result = await response.json()
-
       if (!response.ok) {
-        throw new Error(result.error || '공지사항 수정에 실패했습니다.')
+        const errorData = await response.json()
+        throw new Error(errorData.error || '공지사항 수정에 실패했습니다.')
       }
 
       alert('공지사항이 성공적으로 수정되었습니다.')

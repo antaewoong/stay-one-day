@@ -1,18 +1,22 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { validateAdminAuth } from '@/lib/auth/admin-service'
+import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+// Service role client for admin operations
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
-    
     // 관리자 인증 확인
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      return NextResponse.json(
-        { error: '인증이 필요합니다' },
+    const authResult = await validateAdminAuth(request)
+    if (!authResult.isValid || !authResult.isAdmin) {
+      return authResult.error || NextResponse.json(
+        { error: '관리자 권한이 필요합니다' },
         { status: 401 }
       )
     }
@@ -80,13 +84,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
-    
     // 관리자 인증 확인
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      return NextResponse.json(
-        { error: '인증이 필요합니다' },
+    const authResult = await validateAdminAuth(request)
+    if (!authResult.isValid || !authResult.isAdmin) {
+      return authResult.error || NextResponse.json(
+        { error: '관리자 권한이 필요합니다' },
         { status: 401 }
       )
     }
@@ -119,7 +121,7 @@ export async function POST(request: NextRequest) {
     const defaultPassword = password || 'influencer123!' // 기본 비밀번호
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: email.trim(),
         password: defaultPassword,
         email_confirm: true,
@@ -141,7 +143,7 @@ export async function POST(request: NextRequest) {
       console.log('✅ Supabase Auth 인플루언서 생성 성공:', authUser.id)
 
       // user_roles 테이블에 역할 추가
-      const { error: roleError } = await supabase
+      const { error: roleError } = await supabaseAdmin
         .from('user_roles')
         .insert({
           user_id: authUser.id,
@@ -160,9 +162,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. 인플루언서 테이블에 정보 저장
-    const { data: influencer, error } = await supabase
+    const { data: influencer, error } = await supabaseAdmin
       .from('influencers')
       .insert({
+        auth_user_id: authUser?.id || null, // Supabase Auth ID 연결
         name: name.trim(),
         email: email.trim(),
         phone: phone || null,
@@ -186,7 +189,7 @@ export async function POST(request: NextRequest) {
       // 인플루언서 테이블 생성 실패 시 Auth 사용자도 삭제
       if (authUser) {
         try {
-          await supabase.auth.admin.deleteUser(authUser.id)
+          await supabaseAdmin.auth.admin.deleteUser(authUser.id)
           console.log('❌ Auth 인플루언서 롤백 완료')
         } catch (deleteError) {
           console.error('Auth 인플루언서 삭제 실패:', deleteError)
@@ -215,7 +218,7 @@ export async function POST(request: NextRequest) {
         const aiResult = await aiEvaluationResponse.json()
         
         // AI 평가 결과를 인플루언서 레코드에 업데이트
-        await supabase
+        await supabaseAdmin
           .from('influencers')
           .update({
             ai_evaluation: aiResult.analysis,

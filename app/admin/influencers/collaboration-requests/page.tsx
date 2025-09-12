@@ -52,6 +52,7 @@ import {
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { toast } from 'react-hot-toast'
+import { adminGet, adminPut } from '@/lib/admin-api'
 
 interface CollaborationRequest {
   id: string
@@ -110,13 +111,21 @@ export default function AdminCollaborationRequestsPage() {
   const loadCollaborationRequests = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/collaboration-requests?status=${statusFilter}&limit=100`)
+      const response = await adminGet(`/api/admin/collaboration-requests?status=${statusFilter}&limit=100`)
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('협업 요청 로드 실패:', errorData.error)
+        toast.error('협업 요청을 불러올 수 없습니다')
+        return
+      }
+      
       const result = await response.json()
       
       if (result.success) {
         setRequests(result.data)
       } else {
-        toast.error('협업 요청을 불러올 수 없습니다')
+        toast.error(result.error || '협업 요청을 불러올 수 없습니다')
       }
     } catch (error) {
       console.error('협업 요청 로드 실패:', error)
@@ -130,17 +139,17 @@ export default function AdminCollaborationRequestsPage() {
     try {
       setProcessing(requestId)
       
-      const response = await fetch('/api/admin/collaboration-requests', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          request_id: requestId,
-          status,
-          admin_notes: adminNotes
-        })
+      const response = await adminPut('/api/admin/collaboration-requests', {
+        request_id: requestId,
+        status,
+        admin_notes: adminNotes
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        toast.error(errorData.error || '처리에 실패했습니다')
+        return
+      }
 
       const result = await response.json()
       

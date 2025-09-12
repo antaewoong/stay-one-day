@@ -6,18 +6,16 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Users, Heart, Camera, Baby, Crown, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Users, Heart, Camera, Baby, Crown, TrendingUp, TrendingDown, Minus, Building2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { hostGet } from '@/lib/host-api'
 
 interface GroupKPIData {
-  // 전체 그룹 성과
   totalGroupBookings: number
   groupRevenue: number
   avgGroupSize: number
   groupGrowthRate: number
   
-  // 페르소나별 성과
   personaBreakdown: {
     moms: { bookings: number; revenue: number; growth: number }
     bridal: { bookings: number; revenue: number; growth: number }
@@ -25,7 +23,6 @@ interface GroupKPIData {
     couples: { bookings: number; revenue: number; growth: number }
   }
   
-  // 감정 기반 POI 성과
   emotionScores: {
     photoSpotScore: number
     kidsFriendlyScore: number
@@ -34,7 +31,6 @@ interface GroupKPIData {
     lhiGroupScore: number
   }
   
-  // Same-Day Fit 지표
   sameDayFitMetrics: {
     moms: number
     bridal: number
@@ -43,13 +39,18 @@ interface GroupKPIData {
     recommended: string
   }
   
-  // A/B 테스트 성과
   abTestResults: {
     testGroup: string
     conversionRate: number
     bookingRate: number
     isWinning: boolean
   }[]
+}
+
+interface AccommodationOption {
+  id: string
+  name: string
+  location: string
 }
 
 const PersonaIcons = {
@@ -66,32 +67,52 @@ const PersonaColors = {
   couples: 'bg-red-100 text-red-800 border-red-200'
 }
 
-export default function GroupKPIPage() {
+export default function AdminGroupKPIPage() {
   const [data, setData] = useState<GroupKPIData | null>(null)
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState('30d')
-  const [hostData, setHostData] = useState<any>(null)
+  const [selectedAccommodation, setSelectedAccommodation] = useState<string>('all')
+  const [accommodations, setAccommodations] = useState<AccommodationOption[]>([])
 
   useEffect(() => {
-    // 호스트 데이터 가져오기
-    const userData = sessionStorage.getItem('hostUser')
-    if (userData) {
-      const parsedData = JSON.parse(userData)
-      setHostData(parsedData)
-    }
+    loadAccommodations()
   }, [])
 
   useEffect(() => {
-    if (hostData) {
-      fetchKPIData()
+    fetchKPIData()
+  }, [period, selectedAccommodation])
+
+  const loadAccommodations = async () => {
+    try {
+      const { data: accommodationData } = await supabase
+        .from('accommodations')
+        .select('id, name, location')
+        .eq('status', 'active')
+        .order('name')
+
+      if (accommodationData) {
+        setAccommodations(accommodationData)
+      }
+    } catch (error) {
+      console.error('숙소 목록 로딩 실패:', error)
     }
-  }, [hostData, period])
+  }
 
   const fetchKPIData = async () => {
     try {
       setLoading(true)
       
-      const response = await hostGet(`/api/host/group-kpi?period=${period}&hostId=${hostData.id}`)
+      const params = new URLSearchParams({
+        period,
+        ...(selectedAccommodation !== 'all' && { accommodationId: selectedAccommodation })
+      })
+      
+      const response = await fetch(`/api/admin/group-kpi?${params}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
 
       if (!response.ok) {
         throw new Error('Failed to fetch KPI data')
@@ -165,9 +186,22 @@ export default function GroupKPIPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">
-              🎯 그룹 예약 KPI 대시보드
+              🎯 전체 그룹 예약 KPI 대시보드
             </h1>
             <div className="flex items-center gap-4">
+              <Select value={selectedAccommodation} onValueChange={setSelectedAccommodation}>
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="숙소 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">전체 숙소</SelectItem>
+                  {accommodations.map((acc) => (
+                    <SelectItem key={acc.id} value={acc.id}>
+                      {acc.name} - {acc.location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Tabs value={period} onValueChange={setPeriod}>
                 <TabsList>
                   <TabsTrigger value="7d">7일</TabsTrigger>
@@ -178,7 +212,7 @@ export default function GroupKPIPage() {
             </div>
           </div>
           <p className="text-gray-600 mt-2">
-            모임 특화 마케팅 성과를 한눈에 확인하세요
+            전체 플랫폼의 모임 특화 마케팅 성과를 관리하고 분석하세요
           </p>
         </div>
 

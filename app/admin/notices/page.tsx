@@ -14,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Search, Plus, Eye, Edit, Trash2, Loader2 } from 'lucide-react'
+import { adminGet, adminDelete } from '@/lib/admin-api'
 
 interface Notice {
   id: string
@@ -41,8 +42,15 @@ export default function NoticesPage() {
     try {
       setLoading(true)
       
-      // 실제 API 호출
-      const response = await fetch('/api/admin/notices?limit=50')
+      const response = await adminGet('/api/admin/notices?limit=50')
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('공지사항 로드 실패:', errorData.error)
+        setNotices([])
+        return
+      }
+      
       const result = await response.json()
       
       if (result.success && result.data) {
@@ -90,12 +98,11 @@ export default function NoticesPage() {
       try {
         // 실제 삭제 API 호출
         for (const noticeId of selectedNotices) {
-          await fetch(`/api/notices/${noticeId}`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          })
+          const response = await adminDelete(`/api/admin/notices/${noticeId}`)
+          if (!response.ok) {
+            const errorData = await response.json()
+            console.error(`공지사항 ${noticeId} 삭제 실패:`, errorData.error)
+          }
         }
         
         await loadNotices()

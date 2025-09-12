@@ -31,6 +31,7 @@ import {
   Music,
   Sparkles
 } from 'lucide-react'
+import { adminGet, adminPost, adminPut } from '@/lib/admin-api'
 import { createClient } from '@/lib/supabase/client'
 
 interface HeroSlide {
@@ -110,8 +111,13 @@ export default function MainPageManagementPage() {
 
   const loadHeroSlides = async () => {
     try {
-      const response = await fetch('/api/admin/hero-slides')
-      if (!response.ok) throw new Error('Failed to fetch slides')
+      const response = await adminGet('/api/admin/hero-slides')
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('히어로 슬라이드 로드 실패:', errorData.error)
+        return
+      }
       
       const result = await response.json()
       const data = result.data || []
@@ -135,15 +141,13 @@ export default function MainPageManagementPage() {
 
   const loadSections = async () => {
     try {
-      const response = await fetch('/api/admin/sections', {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      })
+      const response = await adminGet('/api/admin/sections')
       
-      if (!response.ok) throw new Error('Failed to fetch sections')
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('섹션 로드 실패:', errorData.error)
+        return
+      }
       
       const result = await response.json()
       const data = result.data || []
@@ -192,21 +196,11 @@ export default function MainPageManagementPage() {
         active: slide.active
       }))
       
-      // Supabase 세션에서 토큰 가져오기
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token || process.env.NEXT_PUBLIC_ADMIN_PASSWORD
-      
-      const response = await fetch('/api/admin/hero-slides', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(slidesToInsert)
-      })
+      const response = await adminPost('/api/admin/hero-slides', slidesToInsert)
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Save failed')
       }
       
       setHeroSlides(newSlides)
@@ -223,23 +217,12 @@ export default function MainPageManagementPage() {
     try {
       setLoading(true)
       
-      // Supabase 세션에서 토큰 가져오기
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token || process.env.NEXT_PUBLIC_ADMIN_PASSWORD
-      
-      const response = await fetch('/api/admin/sections', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(newSections)
-      })
+      const response = await adminPut('/api/admin/sections', newSections)
       
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error('섹션 저장 실패 응답:', errorText)
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        const errorData = await response.json()
+        console.error('섹션 저장 실패 응답:', errorData.error)
+        throw new Error(errorData.error || 'Save failed')
       }
       
       console.log('섹션 저장 성공')

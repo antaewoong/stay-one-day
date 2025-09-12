@@ -19,7 +19,7 @@ import {
   Type,
   MessageSquare
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { adminGet, adminPost, adminPut, adminDelete } from '@/lib/admin-api'
 
 interface HeroText {
   id: string
@@ -46,7 +46,6 @@ export default function HeroTextsManagementPage() {
     is_active: true
   })
 
-  const supabase = createClient()
 
   useEffect(() => {
     loadHeroTexts()
@@ -54,8 +53,13 @@ export default function HeroTextsManagementPage() {
 
   const loadHeroTexts = async () => {
     try {
-      const response = await fetch('/api/admin/hero-texts')
-      if (!response.ok) throw new Error('Failed to fetch hero texts')
+      const response = await adminGet('/api/admin/hero-texts')
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('히어로 텍스트 로드 실패:', errorData.error)
+        return
+      }
       
       const result = await response.json()
       setHeroTexts(result.data || [])
@@ -68,26 +72,17 @@ export default function HeroTextsManagementPage() {
     try {
       setLoading(true)
       
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token || process.env.NEXT_PUBLIC_ADMIN_PASSWORD
-      
-      const url = editingText ? '/api/admin/hero-texts' : '/api/admin/hero-texts'
-      const method = editingText ? 'PUT' : 'POST'
       const body = editingText ? 
         { id: editingText.id, ...form } : 
         { ...form, display_order: heroTexts.length + 1 }
       
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(body)
-      })
+      const response = editingText ? 
+        await adminPut('/api/admin/hero-texts', body) :
+        await adminPost('/api/admin/hero-texts', body)
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Save failed')
       }
       
       await loadHeroTexts()
@@ -107,18 +102,11 @@ export default function HeroTextsManagementPage() {
     try {
       setLoading(true)
       
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token || process.env.NEXT_PUBLIC_ADMIN_PASSWORD
-      
-      const response = await fetch(`/api/admin/hero-texts?id=${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await adminDelete(`/api/admin/hero-texts?id=${id}`)
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Delete failed')
       }
       
       await loadHeroTexts()
@@ -147,41 +135,24 @@ export default function HeroTextsManagementPage() {
 
     try {
       setLoading(true)
-      
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token || process.env.NEXT_PUBLIC_ADMIN_PASSWORD
 
       // 순서가 변경된 두 항목만 업데이트
       await Promise.all([
-        fetch('/api/admin/hero-texts', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            id: newTexts[textIndex].id,
-            english_phrase: newTexts[textIndex].english_phrase,
-            main_text: newTexts[textIndex].main_text,
-            sub_text: newTexts[textIndex].sub_text,
-            display_order: newTexts[textIndex].display_order,
-            is_active: newTexts[textIndex].is_active
-          })
+        adminPut('/api/admin/hero-texts', {
+          id: newTexts[textIndex].id,
+          english_phrase: newTexts[textIndex].english_phrase,
+          main_text: newTexts[textIndex].main_text,
+          sub_text: newTexts[textIndex].sub_text,
+          display_order: newTexts[textIndex].display_order,
+          is_active: newTexts[textIndex].is_active
         }),
-        fetch('/api/admin/hero-texts', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            id: newTexts[targetIndex].id,
-            english_phrase: newTexts[targetIndex].english_phrase,
-            main_text: newTexts[targetIndex].main_text,
-            sub_text: newTexts[targetIndex].sub_text,
-            display_order: newTexts[targetIndex].display_order,
-            is_active: newTexts[targetIndex].is_active
-          })
+        adminPut('/api/admin/hero-texts', {
+          id: newTexts[targetIndex].id,
+          english_phrase: newTexts[targetIndex].english_phrase,
+          main_text: newTexts[targetIndex].main_text,
+          sub_text: newTexts[targetIndex].sub_text,
+          display_order: newTexts[targetIndex].display_order,
+          is_active: newTexts[targetIndex].is_active
         })
       ])
 

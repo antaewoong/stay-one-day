@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { createClient } from '@/lib/supabase/client'
+import { influencerGet } from '@/lib/influencer-api'
 import { 
   CalendarIcon, 
   Loader2, 
@@ -125,7 +126,7 @@ export default function InfluencerApplyPage() {
       console.log('📊 페이지 데이터 로드 중...')
       
       // 현재 협업 기간 정보 로드
-      const periodResponse = await fetch('/api/influencer/current-period')
+      const periodResponse = await influencerGet('/api/influencer/current-period')
       const periodResult = await periodResponse.json()
       
       console.log('📅 협업 기간 조회 결과:', periodResult)
