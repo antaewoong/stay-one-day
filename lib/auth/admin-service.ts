@@ -32,32 +32,40 @@ export async function validateAdminAuth(request: NextRequest): Promise<{
   
   // JWT 토큰으로 관리자 권한 확인
   try {
-    const normalClient = createClient()
-    const { data: { user }, error } = await normalClient.auth.getUser(token)
+    // 서버 사이드에서는 service role을 사용해야 함
+    const { data: { user }, error } = await supabaseService.auth.getUser(token)
     
     if (error || !user) {
+      console.log('❌ validateAdminAuth - 토큰으로 유저 조회 실패:', error)
       return {
         isValid: false,
         isAdmin: false,
-        error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        error: NextResponse.json({ error: '유효하지 않거나 만료된 토큰입니다' }, { status: 401 })
       }
     }
     
-    // admin_accounts 테이블에서 관리자 확인 (RLS 정책 준수)
-    const { data: adminUser, error: adminError } = await normalClient
+    console.log('✅ validateAdminAuth - 유저 확인:', user.id, user.email)
+    
+    // admin_accounts 테이블에서 관리자 확인 (service role 사용으로 RLS 우회)
+    const { data: adminUser, error: adminError } = await supabaseService
       .from('admin_accounts')
       .select('role, email, is_active')
       .eq('auth_user_id', user.id)
       .eq('is_active', true)
       .single()
     
+    console.log('🔍 validateAdminAuth - 관리자 계정 조회:', { adminUser, adminError })
+    
     if (adminError || !adminUser || !['admin', 'super_admin', 'manager'].includes(adminUser.role)) {
+      console.log('❌ validateAdminAuth - 관리자 권한 없음')
       return {
         isValid: false,
         isAdmin: false,
-        error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        error: NextResponse.json({ error: '관리자 권한이 없습니다' }, { status: 403 })
       }
     }
+    
+    console.log('✅ validateAdminAuth - 관리자 인증 성공:', user.email, adminUser.role)
     
     return { 
       isValid: true,
@@ -66,10 +74,11 @@ export async function validateAdminAuth(request: NextRequest): Promise<{
       email: adminUser.email
     }
   } catch (error) {
+    console.error('❌ validateAdminAuth - 예외 발생:', error)
     return {
       isValid: false,
       isAdmin: false,
-      error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      error: NextResponse.json({ error: '인증 처리 중 오류가 발생했습니다' }, { status: 500 })
     }
   }
 }

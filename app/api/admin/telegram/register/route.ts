@@ -52,17 +52,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Service Role 클라이언트를 사용하여 RLS 우회
-    const { createClient } = await import('@supabase/supabase-js')
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    )
+    const { supabaseService } = await import('@/lib/auth/admin-service')
+    const supabase = supabaseService
 
     // 대상 관리자 확인
     const { data: targetAdmin, error: targetError } = await supabase
@@ -113,9 +104,12 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    // DB 저장 실패해도 무시하고 성공 처리 (내부용)
     if (tokenError) {
-      console.log('⚠️ DB 저장 실패했지만 내부용이므로 계속 진행:', tokenError.message)
+      console.error('❌ 토큰 저장 실패:', tokenError)
+      return NextResponse.json(
+        { error: '토큰 저장에 실패했습니다' },
+        { status: 500 }
+      )
     }
 
     console.log(`✅ 텔레그램 등록 토큰 생성: ${targetAdminEmail} by ${adminAuth.email}`)

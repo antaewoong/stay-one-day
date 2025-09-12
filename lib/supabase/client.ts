@@ -16,7 +16,6 @@ const customStorage = {
     if (typeof window === 'undefined') return
     try {
       window.localStorage.setItem(key, value)
-      console.log(`✅ Saved to localStorage: ${key}`)
     } catch (error) {
       console.error('Failed to save to localStorage:', error)
     }
@@ -32,11 +31,6 @@ const customStorage = {
 }
 
 export function createClient() {
-  // Return existing instance if already created (singleton pattern)
-  if (supabaseClientInstance) {
-    return supabaseClientInstance
-  }
-
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -44,7 +38,24 @@ export function createClient() {
     throw new Error('Missing Supabase environment variables')
   }
 
-  // Create new instance only if none exists
+  // 개발 환경에서는 항상 새 인스턴스 생성하여 GoTrueClient 중복 방지
+  if (process.env.NODE_ENV === 'development') {
+    return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        storageKey: 'sb-fcmauibvdqbocwhloqov-auth-token',
+        storage: customStorage,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    })
+  }
+
+  // 프로덕션에서만 싱글톤 패턴 사용
+  if (supabaseClientInstance) {
+    return supabaseClientInstance
+  }
+
   supabaseClientInstance = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: true,
