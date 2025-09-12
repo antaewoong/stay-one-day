@@ -511,20 +511,20 @@ export default function HomePage() {
     const distanceX = Math.abs(x - dragState.startX)
     const distanceY = Math.abs(y - dragState.startY)
     
-    // 터치 방향 결정 - 세로 스크롤을 기본으로 하고 명확한 가로 의도만 감지
-    if (!dragState.touchDirection && (distanceX > 8 || distanceY > 8)) {
-      // 가로 스크롤 조건을 더욱 엄격하게: 가로가 세로의 3배 이상이어야 함
-      if (distanceX > 30 && distanceX > distanceY * 3) {
+    // 터치 방향 결정 개선 - 세로 스크롤 최우선, 명확한 가로 의도만 감지
+    if (!dragState.touchDirection && (distanceX > 5 || distanceY > 5)) {
+      if (distanceX > 15 && distanceX > distanceY * 2.5) {
+        // 명확한 가로 의도: 가로가 15px 이상 + 세로의 2.5배 이상
         setDragState(prev => ({ ...prev, touchDirection: 'horizontal' }))
       } else {
-        // 그 외 모든 경우는 세로 스크롤로 처리
+        // 나머지는 모두 세로 스크롤로 처리 (대각선, 세로, 애매한 경우)
         setDragState(prev => ({ ...prev, touchDirection: 'vertical' }))
-        return // 세로 스크롤이므로 바로 리턴하여 기본 브라우저 동작 허용
+        return // 즉시 리턴하여 브라우저 기본 세로 스크롤 허용
       }
     }
     
     // 가로 방향으로 확실히 결정된 경우에만 가로 스크롤 처리
-    if (dragState.touchDirection === 'horizontal' && distanceX > 30) {
+    if (dragState.touchDirection === 'horizontal' && distanceX > 15) {
       setDragState(prev => ({ ...prev, isDragging: true }))
       e.preventDefault() // 가로 터치일 때만 preventDefault
       e.stopPropagation() // 이벤트 전파도 중단
@@ -803,7 +803,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="fullscreen-container bg-white">
       {/* 전역 부드러운 스크롤 + 풀스크린 스타일 */}
       <style jsx global>{`
         /* 풀스크린 노치 대응 */
@@ -888,16 +888,31 @@ export default function HomePage() {
           }
         }
         
+        /* 노치 풀스크린 대응 */
+        body {
+          padding-top: env(safe-area-inset-top);
+          padding-bottom: env(safe-area-inset-bottom);
+          padding-left: env(safe-area-inset-left);
+          padding-right: env(safe-area-inset-right);
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior-y: contain;
+        }
+        
+        .fullscreen-container {
+          min-height: 100vh;
+          min-height: calc(100vh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
+        }
+        
         /* iOS Safari 스크롤 최적화 */
         @supports (-webkit-touch-callout: none) {
-          body {
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: contain;
-          }
-          
           .scroll-container {
             -webkit-overflow-scrolling: touch;
             transform: translateZ(0); /* 하드웨어 가속 */
+          }
+          
+          /* 노치폰 상태바 영역까지 풀스크린 */
+          .hero-section {
+            padding-top: env(safe-area-inset-top);
           }
         }
       `}</style>
