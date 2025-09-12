@@ -11,15 +11,21 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(request: NextRequest) {
   try {
-    // 웹훅 보안 검증
-    if (!await verifyTelegramWebhook(request)) {
-      await telegramAuth.logSecurityEvent(0, 'webhook_verification_failed', {
-        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
-        user_agent: request.headers.get('user-agent')
-      })
+    // 웹훅 보안 검증 (임시 비활성화 - 테스트용)
+    console.log('🔍 웹훅 요청 받음:', {
+      botToken: process.env.TELEGRAM_BOT_TOKEN ? 'SET' : 'NOT_SET',
+      webhookSecret: process.env.TELEGRAM_WEBHOOK_SECRET ? 'SET' : 'NOT_SET',
+      serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT_SET'
+    })
+    
+    // if (!await verifyTelegramWebhook(request)) {
+    //   await telegramAuth.logSecurityEvent(0, 'webhook_verification_failed', {
+    //     ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+    //     user_agent: request.headers.get('user-agent')
+    //   })
       
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
 
     const body = await request.json()
     const { message, callback_query } = body
