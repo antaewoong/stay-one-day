@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 예약 데이터 조회 (전체 또는 특정 숙소)
-    const { data: reservations } = await supabase
+    let query = supabase
       .from('reservations')
       .select(`
         *,
@@ -51,7 +51,13 @@ export async function GET(request: NextRequest) {
       .lte('created_at', end)
       .eq('status', 'confirmed')
       .gte('guest_count', 2)
-      ...(accommodationId && accommodationId !== 'all' ? [{ accommodation_id: accommodationId }] : [])
+
+    // 숙소 필터링 적용
+    if (accommodationId && accommodationId !== 'all') {
+      query = query.eq('accommodation_id', accommodationId)
+    }
+
+    const { data: reservations, error } = await query
 
     // 기본 통계 계산
     const totalGroupBookings = reservations?.length || 0
@@ -66,14 +72,20 @@ export async function GET(request: NextRequest) {
     prevStart.setTime(prevStart.getTime() - periodDiff)
     prevEnd.setTime(prevEnd.getTime() - periodDiff)
 
-    const { data: prevReservations } = await supabase
+    let prevQuery = supabase
       .from('reservations')
       .select('*')
       .gte('created_at', prevStart.toISOString())
       .lte('created_at', prevEnd.toISOString())
       .eq('status', 'confirmed')
       .gte('guest_count', 2)
-      ...(accommodationId && accommodationId !== 'all' ? [{ accommodation_id: accommodationId }] : [])
+
+    // 숙소 필터링 적용
+    if (accommodationId && accommodationId !== 'all') {
+      prevQuery = prevQuery.eq('accommodation_id', accommodationId)
+    }
+
+    const { data: prevReservations } = await prevQuery
 
     const prevGroupBookings = prevReservations?.length || 0
     const groupGrowthRate = prevGroupBookings > 0 

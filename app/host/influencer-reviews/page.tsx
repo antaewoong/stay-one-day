@@ -143,7 +143,6 @@ export default function HostInfluencerReviewsPage() {
         reviewId: selectedReview.id,
         hostId: hostData.host_id,
         reply: replyContent.trim()
-        })
       })
 
       if (response.ok) {
