@@ -5,7 +5,10 @@
  * - Service Role 사용 없이 안전한 인증
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 interface TelegramSession {
   id: string
@@ -47,7 +50,7 @@ export class TelegramAuthService {
       console.log(`🔍 직접 토큰 생성 시작: ${adminEmail} by ${requestedByAdminEmail}`)
       
       // 1. 요청한 관리자 확인 (이미 API에서 검증됨)
-      const supabase = createClient()
+      const supabase = createClient(supabaseUrl, supabaseServiceKey)
       
       const { data: requestingAdmin, error: requestingError } = await supabase
         .from('admin_accounts')
@@ -102,7 +105,7 @@ export class TelegramAuthService {
     lastName?: string
   }): Promise<{ success: boolean; admin?: any; error?: string }> {
     try {
-      const supabase = createClient()
+      const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
       // 1. 토큰 유효성 확인
       const { data: tokenData, error: tokenError } = await supabase
@@ -201,7 +204,7 @@ export class TelegramAuthService {
    */
   async authenticateAdmin(chatId: number): Promise<{ isValid: boolean; admin?: any }> {
     try {
-      const supabase = createClient()
+      const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
       // 활성 세션 조회
       const { data: session, error } = await supabase
@@ -244,7 +247,7 @@ export class TelegramAuthService {
    */
   async logoutAdmin(chatId: number): Promise<boolean> {
     try {
-      const supabase = createClient()
+      const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
       const { error } = await supabase
         .from('telegram_sessions')
@@ -275,7 +278,7 @@ export class TelegramAuthService {
     lastActivity: string
   }>> {
     try {
-      const supabase = createClient()
+      const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
       const { data: sessions, error } = await supabase
         .from('telegram_sessions')
@@ -310,7 +313,7 @@ export class TelegramAuthService {
    */
   async emergencyInvalidateAllSessions(reason: string): Promise<{ success: boolean; count: number }> {
     try {
-      const supabase = createClient()
+      const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
       // 현재 활성 세션 수 조회
       const { count } = await supabase
@@ -349,7 +352,7 @@ export class TelegramAuthService {
    */
   async terminateSession(chatId: number): Promise<boolean> {
     try {
-      const supabase = createClient()
+      const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
       const { error } = await supabase
         .from('telegram_sessions')

@@ -3,7 +3,10 @@
  * 예약, 메시지, 중요 이벤트 발생 시 관리자들에게 즉시 알림 전송
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 interface NotificationData {
   type: 'booking' | 'message' | 'inquiry' | 'payment' | 'system' | 'emergency'
@@ -25,7 +28,7 @@ export class TelegramNotificationService {
    */
   async sendNotificationToAllAdmins(notification: NotificationData): Promise<boolean> {
     try {
-      const supabase = createClient()
+      const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
       // 텔레그램에 연결된 활성 관리자들 조회
       const { data: activeSessions, error } = await supabase
@@ -67,7 +70,7 @@ export class TelegramNotificationService {
    */
   async sendNotificationToAdmin(adminEmail: string, notification: NotificationData): Promise<boolean> {
     try {
-      const supabase = createClient()
+      const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
       const { data: session, error } = await supabase
         .from('telegram_sessions')
