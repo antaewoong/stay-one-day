@@ -197,7 +197,7 @@ export default function TelegramBotManagePage() {
 1. 텔레그램에서 Stay OneDay Bot 검색
 2. /start 명령어로 봇 시작
 3. /register_token ${generatedToken?.token} 명령어 입력
-4. 등록 완료 (토큰은 1시간 후 만료)`
+4. 등록 완료 (토큰은 30일 후 만료)`
 
     navigator.clipboard.writeText(instructions)
     toast.success('등록 방법이 클립보드에 복사되었습니다')
@@ -318,7 +318,7 @@ export default function TelegramBotManagePage() {
                   </div>
 
                   <p className="text-xs text-green-700">
-                    ⏰ 토큰은 1시간 후 자동 만료됩니다. 관리자에게 즉시 전달해주세요.
+                    ⏰ 토큰은 30일 후 자동 만료됩니다. 충분한 시간이 있으니 안전하게 등록하세요.
                   </p>
                 </div>
               </AlertDescription>

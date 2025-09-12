@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
           '1. 텔레그램에서 Stay OneDay Bot 검색',
           '2. /start 명령어로 봇 시작',
           `3. /register_token ${token} 명령어 입력`,
-          '4. 등록 완료 (토큰은 1시간 후 만료)'
+          '4. 등록 완료 (토큰은 30일 후 만료)'
         ]
       }
     })

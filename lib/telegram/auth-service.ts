@@ -130,10 +130,10 @@ export class TelegramAuthService {
       
       const timestamp = parseInt(tokenParts[2])
       const now = Date.now()
-      const oneHour = 60 * 60 * 1000
+      const oneMonth = 30 * 24 * 60 * 60 * 1000 // 30일 = 1개월
       
-      if (now - timestamp > oneHour) {
-        return { success: false, error: '토큰이 만료되었습니다 (1시간 유효)' }
+      if (now - timestamp > oneMonth) {
+        return { success: false, error: '토큰이 만료되었습니다 (30일 유효)' }
       }
 
       // 3. 활성 관리자 목록에서 ryan@nuklabs.com 확인 (내부용 고정)
@@ -285,10 +285,13 @@ export class TelegramAuthService {
         return { isValid: false }
       }
 
-      // 세션 활동 시간 업데이트 (DB)
+      // 세션 활동 시간 업데이트 및 세션 갱신 (DB)
       await supabase
         .from('telegram_sessions')
-        .update({ last_activity: new Date().toISOString() })
+        .update({ 
+          last_activity: new Date().toISOString(),
+          is_active: true  // 활동 시 세션 자동 활성화
+        })
         .eq('id', session.id)
 
       // 메모리 캐시에도 저장
