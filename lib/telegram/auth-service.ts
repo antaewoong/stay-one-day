@@ -136,8 +136,24 @@ export class TelegramAuthService {
         return { success: false, error: '토큰이 만료되었습니다 (30일 유효)' }
       }
 
-      // 3. 활성 관리자 목록에서 ryan@nuklabs.com 확인 (내부용 고정)
-      const targetEmail = 'ryan@nuklabs.com'
+      // 3. 토큰에서 관리자 이메일 추출 또는 DB에서 토큰 확인
+      let targetEmail = null
+      
+      // DB에서 토큰 정보 조회 (토큰에서 admin_email 가져오기)
+      const { data: tokenData, error: tokenError } = await supabase
+        .from('telegram_registration_tokens')
+        .select('admin_email, expires_at')
+        .eq('token', token)
+        .eq('is_used', false)
+        .single()
+      
+      if (tokenData) {
+        targetEmail = tokenData.admin_email
+      } else {
+        // 기존 내부용 고정 방식 (ryan@nuklabs.com)
+        targetEmail = 'ryan@nuklabs.com'
+      }
+      
       const { data: admin, error: adminError } = await supabase
         .from('admin_accounts')
         .select('id, email, is_active')
@@ -271,7 +287,6 @@ export class TelegramAuthService {
           admin_accounts!inner(id, email, is_active)
         `)
         .eq('chat_id', chatId)
-        .eq('is_active', true)
         .single()
 
       console.log(`💾 DB 조회 결과:`, { 
