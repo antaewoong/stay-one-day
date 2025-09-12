@@ -72,6 +72,11 @@ DEVELOPMENT_WORKFLOW.md
 # Scripts with hardcoded secrets (security risk)
 scripts/
 
+# Test files with sensitive tokens/keys
+test-telegram-*.js
+*-test.js
+test-*.js
+
 # Spotlight 인덱싱 최적화 (CPU 사용량 감소)
 .git/
 dist/
