@@ -23,6 +23,9 @@ export function withAdminAuth(
     const isJWT = (t?: string|null) =>
       !!t && /^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$/.test(t)
 
+    const decode = (t: string) => JSON.parse(Buffer.from(t.split('.')[1], 'base64').toString())
+    const SUPA_ISS = `${URL}/auth/v1`
+
     const pickToken = (raw: string|null) => {
       if (!raw) return null
       const v = raw.trim()
@@ -41,6 +44,22 @@ export function withAdminAuth(
       }
 
       if (token) {
+        // Issuer 체크
+        try {
+          const payload = decode(token!)
+          if (payload?.iss !== SUPA_ISS) {
+            dbg('issuerMismatch', { tokenIss: payload?.iss, expectedIss: SUPA_ISS })
+            return NextResponse.json({
+              ok: false,
+              stage: 'auth:issuerMismatch',
+              error: `token.iss=${payload?.iss} expected=${SUPA_ISS}`
+            }, { status: 401 })
+          }
+        } catch (decodeErr) {
+          dbg('decode:fail', decodeErr)
+          return NextResponse.json({ ok: false, stage: 'auth:decode', error: 'cannot decode token' }, { status: 401 })
+        }
+
         dbg('headerToken', token.slice(0, 12) + '…')
         const tokenClient = createClient(URL, ANON, { auth: { persistSession: false, autoRefreshToken: false } })
         const { data: tu, error: te } = await tokenClient.auth.getUser(token)
