@@ -15,12 +15,15 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   const sb = createClient()
   const { data: { session } } = await sb.auth.getSession()
   const headers = new Headers(init.headers || {})
+  const token = session?.access_token
   
-  if (session?.access_token) {
-    headers.set('Authorization', `Bearer ${session.access_token}`)
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+    headers.set('x-supabase-auth', token) // 🔁 백업 헤더
   }
   headers.set('Content-Type', 'application/json')
 
+  // 절대 URL 쓰지 말고 상대 경로 유지 (/api/...)
   const res = await fetch(path, { 
     ...init, 
     headers, 
@@ -30,7 +33,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    console.error('API 4xx/5xx >>>', path, body) // ← stage/error 정보 포함
+    console.error('ADMIN 4xx/5xx >>>', path, body)
     throw new Error(`HTTP ${res.status}`)
   }
   
