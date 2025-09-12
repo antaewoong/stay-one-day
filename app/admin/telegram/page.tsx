@@ -77,6 +77,7 @@ export default function TelegramBotManagePage() {
     } catch (error) {
       console.error('세션 로드 실패:', error)
       toast.error('세션 로드 중 오류 발생')
+      setSessions([]) // 에러 시 빈 배열로 안전 처리
     } finally {
       setLoading(false)
     }
@@ -367,11 +368,11 @@ export default function TelegramBotManagePage() {
                           마지막 활동: {new Date(session.lastActivity).toLocaleString('ko-KR')}
                         </p>
                         
-                        {session.permissions.length > 0 && (
+                        {(session.permissions || []).length > 0 && (
                           <div className="flex items-center gap-1 mt-2">
                             <Shield className="w-3 h-3" />
                             <span className="text-xs">권한:</span>
-                            {session.permissions.map((perm, idx) => (
+                            {(session.permissions || []).map((perm, idx) => (
                               <Badge key={idx} variant="outline" className="text-xs">
                                 {perm}
                               </Badge>
