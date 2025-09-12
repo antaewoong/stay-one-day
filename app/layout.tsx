@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Noto_Sans_KR } from 'next/font/google'
-import { generateMetadata, jsonLd } from '@/lib/seo'
+import { generateMetadata, generateViewport, jsonLd } from '@/lib/seo'
 import ClientLayout from '@/components/client-layout'
 import { GoogleAnalytics } from '@/lib/analytics/ga4-setup'
 import './globals.css'
@@ -13,6 +13,7 @@ const notoSansKR = Noto_Sans_KR({
 })
 
 export const metadata: Metadata = generateMetadata()
+export const viewport = generateViewport()
 
 export default function RootLayout({
   children,

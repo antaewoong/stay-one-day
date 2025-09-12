@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * 🎯 Stay OneDay 차별화 핵심: 지역 상권 인텔리전스 API
  * 
