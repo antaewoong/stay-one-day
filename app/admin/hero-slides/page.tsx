@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { SingleImageUpload } from '@/components/ui/single-image-upload'
-import { apiFetch } from '@/lib/auth/helpers'
+import { apiFetch } from '@/lib/auth-helpers'
 import { 
   Plus, 
   Edit, 
