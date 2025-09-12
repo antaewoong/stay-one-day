@@ -1,20 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAdminAuth } from '@/middleware/withAdminAuth'
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
-export const GET = (req: NextRequest) =>
-  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
-    try {
-      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+export const GET = (req: NextRequest) => withAdminAuth(req, async () => {
+  const cookieStore = cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+
+  try {
       
-      // Service role client 사용 (GPT 권장)
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      )
-      
-      // Service Role로 RLS 우회하여 호스트 목록 조회
-      const { data: hostData, error: hostsError } = await supabaseAdmin
+      // RLS를 통한 호스트 목록 조회
+      const { data: hostData, error: hostsError } = await supabase
       .from('hosts')
       .select(`
         id,

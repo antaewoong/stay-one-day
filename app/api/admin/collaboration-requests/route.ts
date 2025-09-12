@@ -20,10 +20,23 @@ export const GET = (req: NextRequest) =>
       const status = searchParams.get('status') || 'all'
       const limit = parseInt(searchParams.get('limit') || '50')
 
-      // 협업 요청 조회 (안전한 쿼리)
+      // 협업 요청 조회 (관련 데이터 포함)
       let query = supabaseAdmin
         .from('influencer_collaboration_requests')
-        .select('*')
+        .select(`
+          id, request_type, proposed_rate, message, check_in_date, check_out_date,
+          guest_count, status, created_at, admin_notes,
+          influencers:influencers!influencer_id (
+            id, name, email, phone, instagram_handle, youtube_channel, tiktok_handle,
+            follower_count, engagement_rate, content_category, profile_image_url, location
+          ),
+          accommodations:accommodations!accommodation_id (
+            id, name, location, price_per_night, images
+          ),
+          hosts:hosts!host_id (
+            id, business_name, representative_name, phone, email
+          )
+        `)
         .order('created_at', { ascending: false })
         .limit(isNaN(limit) ? 50 : limit)
 
@@ -32,7 +45,7 @@ export const GET = (req: NextRequest) =>
         query = query.eq('status', status)
       }
 
-      const { data: requests, error } = await query
+      const { data: rawRequests, error } = await query
 
       if (error) {
         console.error('협업 요청 조회 에러:', error)
@@ -42,9 +55,54 @@ export const GET = (req: NextRequest) =>
         )
       }
 
+      // 스키마 어댑트: 프론트가 기대하는 profile_image_url로 매핑
+      const requests = (rawRequests || []).map((r: any) => ({
+        id: r.id,
+        request_type: r.request_type,
+        proposed_rate: r.proposed_rate,
+        message: r.message,
+        check_in_date: r.check_in_date,
+        check_out_date: r.check_out_date,
+        guest_count: r.guest_count,
+        status: r.status,
+        created_at: r.created_at,
+        admin_notes: r.admin_notes,
+        influencer: r.influencers ? {
+          ...r.influencers,
+          profile_image_url: r.influencers.profile_image_url ?? null,
+        } : {
+          id: '',
+          name: '정보없음',
+          email: '',
+          phone: '',
+          instagram_handle: '',
+          youtube_channel: '',
+          tiktok_handle: '',
+          follower_count: 0,
+          engagement_rate: 0,
+          content_category: [],
+          profile_image_url: null,
+          location: ''
+        },
+        accommodation: r.accommodations ?? {
+          id: '',
+          name: '정보없음',
+          location: '',
+          price_per_night: 0,
+          images: []
+        },
+        host: r.hosts ?? {
+          id: '',
+          business_name: '정보없음',
+          representative_name: '',
+          phone: '',
+          email: ''
+        }
+      }))
+
       return NextResponse.json({
         success: true,
-        data: requests || []
+        data: requests
       })
 
     } catch (error) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAdminAuth } from '@/middleware/withAdminAuth'
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,52 +65,46 @@ export const GET = (req: NextRequest) =>
   }
 })
 
-// POST: 새 공지사항 생성
-export const POST = (req: NextRequest) =>
-  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
-    try {
-      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
-      
-      // Service role client 사용 (GPT 권장)
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      )
+// POST: 새 공지사항 생성  
+export const POST = (req: NextRequest) => withAdminAuth(req, async () => {
+  const cookieStore = cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
 
-    const body = await request.json()
-    const { title, content, is_important, target_audience, author_name, author_role } = body
-
-    if (!title?.trim()) {
-      return NextResponse.json(
-        { error: '제목을 입력해주세요' },
-        { status: 400 }
-      )
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    const body = await req.json()
+    
+    const payload = {
+      title: body.title?.trim(),
+      content: body.content ?? '',
+      admin_id: user!.id,          // 서버에서 확정
+      is_pinned: !!body.is_important,
+      status: 'published',
+      target_audience: body.target_audience || 'all',
     }
 
-    // 공지사항 생성
-    const { data: notice, error } = await supabaseAdmin
-      .from('notices')
-      .insert({
-        title: title.trim(),
-        content: content?.trim() || '',
-        admin_id: ctx.adminId,
-        notice_type: 'general',
-        target_audience: target_audience || 'all',
-        is_pinned: is_important || false,
-        status: 'published'
-      })
-      .select()
-      .single()
+    if (!payload.title) {
+      return NextResponse.json({ ok: false, error: '제목을 입력해주세요' }, { status: 400 })
+    }
+
+    const { data: notice, error } = await supabase.from('notices').insert(payload).select().single()
 
     if (error) {
       console.error('공지사항 생성 에러:', error)
-      return NextResponse.json(
-        { error: '공지사항 생성에 실패했습니다' },
-        { status: 500 }
-      )
+      return NextResponse.json({ ok: false, error: error.message }, { status: 400 })
     }
-
-    return NextResponse.json({ notice })
+    
+    return NextResponse.json({ ok: true, data: notice })
   } catch (error) {
     console.error('공지사항 생성 API 에러:', error)
     return NextResponse.json(
