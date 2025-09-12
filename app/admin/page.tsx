@@ -119,8 +119,8 @@ export default function AdminPage() {
       const featuredProperties = accommodationsRes.data?.filter(acc => acc.is_featured === true).length || 0
       const totalReservations = reservationsRes.count || 0
 
-      // 최근 예약 데이터 설정
-      const recentReservations = reservationsRes.data?.map(reservation => ({
+      // 최근 예약 데이터 설정 - API 실패 시 빈 배열로 안전하게 처리
+      const recentReservations = (reservationsRes.data || []).map(reservation => ({
         id: reservation.id,
         propertyName: reservation.accommodations?.name || '알 수 없는 숙소',
         guestName: reservation.profiles?.name || reservation.guest_name || '게스트',
@@ -129,22 +129,22 @@ export default function AdminPage() {
         amount: reservation.total_amount,
         status: reservation.status,
         paymentStatus: reservation.payment_status
-      })) || []
+      }))
 
       setRecentBookings(recentReservations)
 
-      // 월간 매출 계산
-      const monthlyRevenue = reservationsRes.data?.reduce((sum, reservation) => {
+      // 월간 매출 계산 - API 실패 시 안전 처리
+      const monthlyRevenue = (reservationsRes.data || []).reduce((sum, reservation) => {
         const reservationDate = new Date(reservation.created_at)
         const currentMonth = new Date().getMonth()
         if (reservationDate.getMonth() === currentMonth) {
           return sum + (reservation.total_amount || 0)
         }
         return sum
-      }, 0) || 0
+      }, 0)
 
-      // 월간 게스트 수 계산
-      const monthlyGuests = reservationsRes.data?.filter(reservation => {
+      // 월간 게스트 수 계산 - API 실패 시 안전 처리
+      const monthlyGuests = (reservationsRes.data || []).filter(reservation => {
         const reservationDate = new Date(reservation.created_at)
         const currentMonth = new Date().getMonth()
         return reservationDate.getMonth() === currentMonth
