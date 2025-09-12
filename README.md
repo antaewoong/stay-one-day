@@ -63,3 +63,4 @@ Stay One Day는 기존 숙박 중심의 스테이 서비스와 달리, 당일치
 - 프리미엄 노출 옵션
 - 마케팅 서비스 제공// Trigger Vercel rebuild
 // Trigger deployment with env vars
+// Complete environment variables setup
