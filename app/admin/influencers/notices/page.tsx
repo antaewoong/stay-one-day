@@ -136,9 +136,9 @@ export default function InfluencerNoticesPage() {
         method: 'PUT',
         body: JSON.stringify({ is_active: !currentStatus })
       })
-        toast.success(currentStatus ? '공지사항을 비활성화했습니다' : '공지사항을 활성화했습니다')
-        loadNotices()
-      }
+      
+      toast.success(currentStatus ? '공지사항을 비활성화했습니다' : '공지사항을 활성화했습니다')
+      loadNotices()
     } catch (error) {
       console.error('공지사항 상태 변경 오류:', error)
       toast.error('상태 변경에 실패했습니다')
