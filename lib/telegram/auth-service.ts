@@ -232,9 +232,15 @@ export class TelegramAuthService {
    */
   async authenticateAdmin(chatId: number): Promise<{ isValid: boolean; admin?: any }> {
     try {
+      console.log(`🔍 인증 확인 시작: chatId=${chatId}`)
+      
       // 1. 메모리 캐시 확인 (우선)
       const cachedSession = this.memorySessionCache.get(chatId)
+      console.log(`🗄️ 메모리 캐시 확인:`, cachedSession ? 'found' : 'not found')
+      
       if (cachedSession && cachedSession.isActive) {
+        console.log(`✅ 메모리 캐시에서 인증 성공: ${cachedSession.email}`)
+        
         // 활동 시간 업데이트
         cachedSession.lastActivity = new Date().toISOString()
         this.memorySessionCache.set(chatId, cachedSession)
@@ -250,7 +256,14 @@ export class TelegramAuthService {
       }
 
       // 2. DB 조회 (백업)
-      const supabase = createClient(supabaseUrl, supabaseServiceKey)
+      console.log(`💾 DB에서 세션 조회 시도: chatId=${chatId}`)
+      const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      })
+      
       const { data: session, error } = await supabase
         .from('telegram_sessions')
         .select(`
@@ -261,7 +274,14 @@ export class TelegramAuthService {
         .eq('is_active', true)
         .single()
 
+      console.log(`💾 DB 조회 결과:`, { 
+        sessionFound: !!session,
+        error: error?.message,
+        adminActive: session?.admin_accounts?.is_active 
+      })
+
       if (error || !session || !session.admin_accounts.is_active) {
+        console.log(`❌ DB 인증 실패: chatId=${chatId}`)
         return { isValid: false }
       }
 
@@ -272,13 +292,15 @@ export class TelegramAuthService {
         .eq('id', session.id)
 
       // 메모리 캐시에도 저장
-      this.memorySessionCache.set(chatId, {
+      const cacheData = {
         adminId: session.admin_id,
         email: session.admin_accounts.email,
         chatId: session.chat_id,
         isActive: true,
         lastActivity: new Date().toISOString()
-      })
+      }
+      this.memorySessionCache.set(chatId, cacheData)
+      console.log(`✅ DB에서 인증 성공 및 캐시 저장: ${session.admin_accounts.email}`)
 
       return {
         isValid: true,
@@ -290,7 +312,7 @@ export class TelegramAuthService {
       }
 
     } catch (error) {
-      console.error('인증 확인 실패:', error)
+      console.error(`❌ 인증 확인 실패 (chatId=${chatId}):`, error)
       return { isValid: false }
     }
   }
