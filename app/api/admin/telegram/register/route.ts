@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAdminAuth } from '@/lib/auth/admin-service'
 import { telegramAuth } from '@/lib/telegram/auth-service'
-import { createClient } from '@/lib/supabase/server'
+// Service Role Client만 사용 - RLS 우회
 
 export const dynamic = 'force-dynamic'
 
@@ -35,12 +35,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // RLS 우회 없이 완전 안전한 처리
-    // validateAdminAuth에서 이미 모든 인증과 권한을 확인했으므로
-    // Service Role 사용해서 직접 처리 (이미 검증된 관리자이므로 안전)
-    
+    // Service Role 클라이언트로 RLS 우회 (이미 검증된 관리자이므로 안전)
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    
+    if (!supabaseServiceKey) {
+      console.error('❌ SUPABASE_SERVICE_ROLE_KEY가 설정되지 않음')
+      return NextResponse.json(
+        { error: '서버 설정 오류입니다' },
+        { status: 500 }
+      )
+    }
+
     const { createClient } = await import('@supabase/supabase-js')
     const supabaseService = createClient(supabaseUrl, supabaseServiceKey)
 
