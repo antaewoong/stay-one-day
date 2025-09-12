@@ -1,30 +1,32 @@
-import { NextRequest } from 'next/server'
-import { adminRoute, sb, ok, bad } from '../_kit'
+import { NextRequest, NextResponse } from 'next/server'
+import { withAdminAuth } from '@/middleware/withAdminAuth'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
+export const runtime = 'nodejs'
 
-export const GET = adminRoute(async () => {
-  const { data, error } = await sb().from('hero_slides').select('*').order('slide_order', { ascending: true })
-  if (error) return bad(error)
-  return ok(data)
+export const GET = (req: NextRequest) => withAdminAuth(req, async (_req, sb) => {
+  const { data, error } = await sb()
+    .from('hero_slides')
+    .select('id,image_url,headline,subheadline,cta_text,cta_link,is_active,sort_order,created_at')
+    .order('sort_order', { ascending: true })
+  if (error) return NextResponse.json({ ok:false, error: error.message }, { status: 500 })
+  return NextResponse.json({ ok:true, data })
 })
 
-export const POST = adminRoute(async (req: NextRequest) => {
-  const slides = await req.json()
-  
-  // 기존 슬라이드 모두 삭제 후 새로 삽입
-  const { error: deleteError } = await sb().from('hero_slides').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-  if (deleteError) return bad(deleteError)
-  
-  const { data, error } = await sb().from('hero_slides').insert(slides).select()
-  if (error) return bad(error)
-  return ok(data)
-})
-
-export const DELETE = adminRoute(async (req: NextRequest) => {
-  const id = new URL(req.url).searchParams.get('id')
-  if (!id) return bad('id required', 400)
-  const { error } = await sb().from('hero_slides').delete().eq('id', id)
-  if (error) return bad(error)
-  return ok(true)
+export const POST = (req: NextRequest) => withAdminAuth(req, async (_req, sb) => {
+  const body = await _req.json()
+  const payload = {
+    image_url: body.image_url?.trim(),
+    headline: body.headline?.trim() ?? '',
+    subheadline: body.subheadline?.trim() ?? '',
+    cta_text: body.cta_text?.trim() ?? '',
+    cta_link: body.cta_link?.trim() ?? '',
+    is_active: !!body.is_active,
+    sort_order: Number(body.sort_order ?? 0),
+  }
+  const { data, error } = await sb().from('hero_slides').insert(payload).select().single()
+  if (error) return NextResponse.json({ ok:false, error: error.message }, { status: 400 })
+  return NextResponse.json({ ok:true, data })
 })

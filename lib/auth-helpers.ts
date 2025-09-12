@@ -15,6 +15,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   const token = await getAccessTokenOrThrow()
   const response = await fetch(path, {
     ...init,
+    credentials: 'include',      // 👈 쿠키 확실히 포함
     headers: {
       ...(init.headers || {}),
       Authorization: `Bearer ${token}`,
