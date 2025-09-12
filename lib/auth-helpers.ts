@@ -10,20 +10,25 @@ export async function getAccessTokenOrThrow() {
   return data.session.access_token
 }
 
+const isJWT = (t?: string|null) =>
+  !!t && /^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$/.test(t)
+
 // 관리자용 API 호출 헬퍼 (Bearer 토큰 자동 첨부)
 export async function apiFetch(path: string, init: RequestInit = {}) {
   const sb = createClient()
   const { data: { session } } = await sb.auth.getSession()
   const headers = new Headers(init.headers || {})
-  const token = session?.access_token
+  const at = session?.access_token || null
   
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`)
-    headers.set('x-supabase-auth', token) // 🔁 백업 헤더
+  if (!isJWT(at)) {
+    console.error('❌ access_token not JWT. aborting request')
+    throw new Error('No valid access token')
   }
+  
+  headers.set('Authorization', `Bearer ${at}`)
+  headers.set('x-supabase-auth', at) // 문자열 그대로 (JSON.stringify 금지)
   headers.set('Content-Type', 'application/json')
 
-  // 절대 URL 쓰지 말고 상대 경로 유지 (/api/...)
   const res = await fetch(path, { 
     ...init, 
     headers, 

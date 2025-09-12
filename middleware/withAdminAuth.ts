@@ -20,37 +20,44 @@ export function withAdminAuth(
     let { data: { user }, error } = await db.auth.getUser()
     dbg('cookieAuth', { userId: user?.id ?? null, err: error?.message ?? null })
 
-    // 1) 헤더에서 토큰 확보 (Authorization 또는 x-supabase-auth)
-    const h = req.headers
-    const hAuth = h.get('authorization') ?? h.get('Authorization') ?? ''
-    const hAlt = h.get('x-supabase-auth') ?? h.get('X-Supabase-Auth') ?? ''
-    let accessToken: string | null = null
+    const isJWT = (t?: string|null) =>
+      !!t && /^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$/.test(t)
 
-    const pickToken = (raw: string) => {
+    const pickToken = (raw: string|null) => {
       if (!raw) return null
-      if (/^Bearer\s+/i.test(raw)) return raw.replace(/^Bearer\s+/i, '').trim()
-      // 대체 헤더는 토큰이 그대로 온다고 가정
-      return raw.trim()
+      const v = raw.trim()
+      return /^Bearer\s+/i.test(v) ? v.replace(/^Bearer\s+/i,'').trim() : v
     }
 
-    if (!user || error) {
-      accessToken = pickToken(hAuth) || pickToken(hAlt)
-      dbg('headerToken', accessToken ? accessToken.slice(0, 12) + '…' : null)
+    // 1) 헤더에서 토큰 확보 (Authorization 또는 x-supabase-auth)
+    const authHeader = req.headers.get('authorization') || req.headers.get('Authorization')
+    const altHeader  = req.headers.get('x-supabase-auth') || req.headers.get('X-Supabase-Auth')
+    let token = pickToken(authHeader) || pickToken(altHeader)
 
-      if (accessToken) {
+    if (!user || error) {
+      if (token && !isJWT(token)) {
+        dbg('tokenFormat:bad', token?.slice(0,12))
+        return NextResponse.json({ ok:false, stage:'auth:tokenFormat', error:'invalid token format' }, { status: 401 })
+      }
+
+      if (token) {
+        dbg('headerToken', token.slice(0, 12) + '…')
         const tokenClient = createClient(URL, ANON, { auth: { persistSession: false, autoRefreshToken: false } })
-        const { data: tu, error: te } = await tokenClient.auth.getUser(accessToken)
+        const { data: tu, error: te } = await tokenClient.auth.getUser(token)
         dbg('getUserByToken', { userId: tu?.user?.id ?? null, err: te?.message ?? null })
 
-        if (!te && tu?.user) {
-          user = tu.user
-          error = null
-          db = createClient(URL, ANON, {
-            auth: { persistSession: false, autoRefreshToken: false },
-            global: { headers: { Authorization: `Bearer ${accessToken}` } },
-          })
-          dbg('dbBoundWithToken')
+        if (te || !tu?.user) {
+          dbg('getUser fail', te?.message)
+          return NextResponse.json({ ok:false, stage:'auth:getUser', error: te?.message || 'invalid token' }, { status: 401 })
         }
+
+        user = tu.user
+        error = null
+        db = createClient(URL, ANON, {
+          auth: { persistSession: false, autoRefreshToken: false },
+          global: { headers: { Authorization: `Bearer ${token}` } },
+        })
+        dbg('dbBoundWithToken')
       }
     }
 
