@@ -22,36 +22,10 @@ export const GET = (req: NextRequest) =>
       const limit = parseInt(searchParams.get('limit') || '20')
       const offset = (page - 1) * limit
 
-      // 협업 요청 조회 (인플루언서, 숙소, 호스트 정보 포함)
+      // 협업 요청 조회 (간단한 쿼리로 수정)
       let query = supabaseAdmin
         .from('influencer_collaboration_requests')
-        .select(`
-          *,
-          influencer:influencers!inner(
-            id,
-            name,
-            email,
-            phone,
-            instagram_handle,
-            follower_count,
-            content_category,
-            profile_image_url,
-            location
-          ),
-          accommodation:accommodations!inner(
-            id,
-            name,
-            location,
-            price_per_night
-          ),
-          host:hosts!inner(
-            id,
-            business_name,
-            name,
-            phone,
-            email
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
 
       // 상태 필터링

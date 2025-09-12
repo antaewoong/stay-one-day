@@ -164,7 +164,10 @@ export const POST = (req: NextRequest) =>
         email: email.trim(),
         phone: phone || null,
         password_hash: defaultPassword, // 임시로 저장
-        social_media_links: social_media_links || [],
+        instagram_handle: social_media_links?.find(link => link.platform === 'instagram')?.url || '',
+        youtube_channel: social_media_links?.find(link => link.platform === 'youtube')?.url || '',
+        tiktok_handle: social_media_links?.find(link => link.platform === 'tiktok')?.url || '',
+        blog_url: social_media_links?.find(link => link.platform === 'blog')?.url || '',
         follower_count: follower_count || 0,
         engagement_rate: engagement_rate || 0,
         content_category: content_category || [],
