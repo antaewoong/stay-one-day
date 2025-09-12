@@ -51,7 +51,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Stay One Day" />
         <meta name="mobile-web-app-capable" content="yes" />
         
-        {/* 노치/홈 인디케이터 대응 */}
+        {/* 노치/홈 인디케이터 대응 - 풀스크린 사진 표시 */}
         <meta name="viewport-fit" content="cover" />
         <style dangerouslySetInnerHTML={{ __html: `
           :root {
@@ -59,6 +59,33 @@ export default function RootLayout({
             --safe-area-inset-bottom: env(safe-area-inset-bottom, 0);
             --safe-area-inset-left: env(safe-area-inset-left, 0);
             --safe-area-inset-right: env(safe-area-inset-right, 0);
+          }
+          
+          /* 풀스크린 이미지 - 노치 영역까지 확장 */
+          .fullscreen-image {
+            margin-left: calc(-1 * env(safe-area-inset-left));
+            margin-right: calc(-1 * env(safe-area-inset-right));
+            margin-top: calc(-1 * env(safe-area-inset-top));
+            width: calc(100vw + env(safe-area-inset-left) + env(safe-area-inset-right));
+            min-height: calc(100vh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
+          }
+          
+          /* 컨텐츠는 safe area 내부에 */
+          .safe-area-content {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+          }
+          
+          /* iOS 16+ 지원 */
+          @supports (padding: max(0px)) {
+            .safe-area-content {
+              padding-top: max(env(safe-area-inset-top), 0px);
+              padding-bottom: max(env(safe-area-inset-bottom), 0px);
+              padding-left: max(env(safe-area-inset-left), 0px);
+              padding-right: max(env(safe-area-inset-right), 0px);
+            }
           }
         ` }} />
         
