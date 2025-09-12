@@ -12,6 +12,10 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔍 텔레그램 POST 요청 디버깅 시작')
     console.log('Authorization header:', request.headers.get('authorization'))
+    console.log('Environment check:', {
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT_SET',
+      serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT_SET'
+    })
     
     // 관리자 인증 확인
     const adminAuth = await validateAdminAuth(request)
@@ -20,17 +24,29 @@ export async function POST(request: NextRequest) {
     if (!adminAuth.isValid || !adminAuth.isAdmin) {
       console.log('❌ 인증 실패: isValid=', adminAuth.isValid, 'isAdmin=', adminAuth.isAdmin)
       return NextResponse.json(
-        { error: '관리자 권한이 필요합니다' },
+        { error: '관리자 권한이 필요합니다', debug: { adminAuth } },
         { status: 403 }
       )
     }
 
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+      console.log('📋 Request body:', body)
+    } catch (parseError) {
+      console.error('❌ JSON 파싱 실패:', parseError)
+      return NextResponse.json(
+        { error: '잘못된 요청 형식입니다', debug: { parseError: parseError instanceof Error ? parseError.message : 'Unknown parse error' } },
+        { status: 400 }
+      )
+    }
+    
     const { targetAdminEmail } = body
 
     if (!targetAdminEmail) {
+      console.log('❌ targetAdminEmail 누락:', body)
       return NextResponse.json(
-        { error: '관리자 이메일이 필요합니다' },
+        { error: '관리자 이메일이 필요합니다', debug: { receivedBody: body } },
         { status: 400 }
       )
     }
