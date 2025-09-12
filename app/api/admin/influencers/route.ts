@@ -100,8 +100,13 @@ export const POST = (req: NextRequest) =>
       collaboration_rate,
       preferred_collaboration_type,
       bio,
-      location
+      location,
+      profile_image_url
     } = body
+
+    function pickLink(links: any[] | undefined, platform: string) {
+      return links?.find(l => l?.platform === platform)?.url?.trim() ?? '';
+    }
 
     if (!name?.trim() || !email?.trim()) {
       return NextResponse.json(
@@ -164,10 +169,11 @@ export const POST = (req: NextRequest) =>
         email: email.trim(),
         phone: phone || null,
         password_hash: defaultPassword, // 임시로 저장
-        instagram_handle: social_media_links?.find(link => link.platform === 'instagram')?.url || '',
-        youtube_channel: social_media_links?.find(link => link.platform === 'youtube')?.url || '',
-        tiktok_handle: social_media_links?.find(link => link.platform === 'tiktok')?.url || '',
-        blog_url: social_media_links?.find(link => link.platform === 'blog')?.url || '',
+        instagram_handle: pickLink(social_media_links, 'instagram'),
+        youtube_channel: pickLink(social_media_links, 'youtube'),
+        tiktok_handle: pickLink(social_media_links, 'tiktok'),
+        blog_url: pickLink(social_media_links, 'blog'),
+        profile_image_url: profile_image_url || null,
         follower_count: follower_count || 0,
         engagement_rate: engagement_rate || 0,
         content_category: content_category || [],
