@@ -7,17 +7,36 @@ export default function SystemCheck() {
   const [authInfo, setAuthInfo] = useState<any>(null)
   const [err, setErr] = useState<string>('')
 
-  useEffect(() => { fetch('/api/_debug/supabase').then(r=>r.json()).then(setEnvInfo).catch(e=>setErr(String(e))) }, [])
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/_debug/supabase', { cache: 'no-store' })
+        const ct = res.headers.get('content-type') || ''
+        const body = ct.includes('application/json') ? await res.json() : await res.text()
+        setEnvInfo({ status: res.status, body })
+      } catch (e:any) {
+        setErr(String(e?.message || e))
+      }
+    })()
+  }, [])
 
   async function runAuthCheck() {
     try {
-      const sb = (window as any).__sod_supabase__ || (window as any).supabase || createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+      const sb = (window as any).__sod_supabase__ || (window as any).supabase || createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
       const { data: { session } } = await sb.auth.getSession()
-      const token = session?.access_token
-      const res = await fetch('/api/_debug/auth-check', { headers: { Authorization: `Bearer ${token||''}`, 'x-supabase-auth': token||'' } })
-      const json = await res.json()
-      setAuthInfo({ status: res.status, ...json })
-    } catch (e:any) { setErr(String(e?.message||e)) }
+      const token = session?.access_token || ''
+      const res = await fetch('/api/_debug/auth-check', {
+        headers: { Authorization: `Bearer ${token}`, 'x-supabase-auth': token },
+        cache: 'no-store'
+      })
+      const ct = res.headers.get('content-type') || ''
+      const body = ct.includes('application/json') ? await res.json() : await res.text()
+      setAuthInfo({ status: res.status, body })
+    } catch (e:any) {
+      setErr(String(e?.message || e))
+    }
   }
 
   return (

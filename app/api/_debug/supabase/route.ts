@@ -1,4 +1,5 @@
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 function projectRefFromUrl(u?: string | null) {
   try { return new URL(u!).host.split('.')[0] } catch { return null }
