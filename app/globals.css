@@ -2,15 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Prevent double scrollbars in admin/host layouts */
-html {
-  height: 100%;
+/* Base reset and safe area utilities */
+html, body { 
+  height: 100%; 
+  margin: 0; 
   overflow-x: hidden;
 }
 
-body {
-  height: 100%;
-  overflow-x: hidden;
+@supports (padding: env(safe-area-inset-top)) {
+  :root { 
+    --sat: env(safe-area-inset-top); 
+    --sar: env(safe-area-inset-right);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+  }
 }
 
 /* For admin and host routes, allow vertical scroll but prevent horizontal */
@@ -103,4 +108,11 @@ body {
   --card: 0 0% 100%;
   --card-foreground: 224 71.4% 4.1%;
   --radius: 0.5rem;
+}
+
+@layer utilities {
+  .safe-pt { padding-top: var(--sat, 0px); }
+  .safe-pr { padding-right: var(--sar, 0px); }
+  .safe-pb { padding-bottom: var(--sab, 0px); }
+  .safe-pl { padding-left: var(--sal, 0px); }
 }

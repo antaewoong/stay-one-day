@@ -34,7 +34,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { getFeaturedAccommodations, getAccommodations } from '@/lib/supabase/accommodations'
 import { createClient } from '@/lib/supabase/client'
 import { StarRating } from '@/components/ui/star-rating'
-import HeroDock from '@/components/HeroDock'
+import HeroSection from '@/components/home/HeroSection'
 import StayCard from '@/components/StayCard'
 import SectionContainer from '@/components/SectionContainer'
 
@@ -807,46 +807,6 @@ export default function HomePage() {
     <div className="fullscreen-container bg-white">
       {/* 전역 부드러운 스크롤 + 풀스크린 스타일 */}
       <style jsx global>{`
-        /* 풀스크린 노치 대응 */
-        html, body {
-          scroll-behavior: smooth;
-          -webkit-overflow-scrolling: touch;
-          /* 노치 및 홈 인디케이터 영역까지 화면 확장 */
-          padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-          background: #000; /* 노치 영역 배경색 */
-          min-height: 100vh;
-          min-height: -webkit-fill-available; /* iOS Safari 지원 */
-        }
-        
-        body {
-          overscroll-behavior: contain;
-          background: white; /* 실제 콘텐츠 배경 */
-          min-height: 100vh;
-          min-height: -webkit-fill-available;
-          margin: 0;
-        }
-        
-        /* 메인 컨테이너 풀스크린 최적화 */
-        .min-h-screen {
-          min-height: 100vh;
-          min-height: -webkit-fill-available;
-        }
-        
-        /* iOS PWA 지원 */
-        @media all and (display-mode: standalone) {
-          body {
-            padding-top: env(safe-area-inset-top);
-          }
-        }
-        
-        /* 상태바 영역 처리 */
-        @supports (padding: max(0px)) {
-          body {
-            padding-left: max(env(safe-area-inset-left), 0px);
-            padding-right: max(env(safe-area-inset-right), 0px);
-            padding-bottom: max(env(safe-area-inset-bottom), 0px);
-          }
-        }
         
         /* 가로 스크롤 컨테이너 */
         .scroll-container {
@@ -918,8 +878,8 @@ export default function HomePage() {
         }
       `}</style>
 
-      {/* 스테이폴리오 완벽 재현: 단일 검색창 + sticky 도킹 */}
-      <HeroDock slides={heroSlides} />
+      {/* 히어로 섹션 */}
+      <HeroSection slides={heroSlides} />
 
       {/* 추천 스테이 섹션 - 히어로 바로 뒤 */}
       <section className="py-12 md:py-16 bg-white">
