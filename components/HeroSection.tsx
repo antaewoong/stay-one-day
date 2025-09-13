@@ -73,11 +73,17 @@ const HeroSection = memo(function HeroSection({
 
   // 슬라이드 네비게이션 함수들
   const nextSlide = () => {
-    setCurrentSlide((currentSlide + 1) % heroSlides.length)
+    const slidesLength = (heroSlides || []).length
+    if (slidesLength > 0) {
+      setCurrentSlide((currentSlide + 1) % slidesLength)
+    }
   }
 
   const prevSlide = () => {
-    setCurrentSlide((currentSlide - 1 + heroSlides.length) % heroSlides.length)
+    const slidesLength = (heroSlides || []).length
+    if (slidesLength > 0) {
+      setCurrentSlide((currentSlide - 1 + slidesLength) % slidesLength)
+    }
   }
 
   // 터치 이벤트 핸들러
@@ -91,7 +97,7 @@ const HeroSection = memo(function HeroSection({
   }
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd || heroSlides.length <= 1) return
+    if (!touchStart || !touchEnd || (heroSlides || []).length <= 1) return
     
     const distance = touchStart - touchEnd
     const isLeftSwipe = distance > 50
@@ -120,7 +126,7 @@ const HeroSection = memo(function HeroSection({
         className="absolute inset-0"
         style={{ y: heroY, opacity: heroOpacity }}
       >
-        {heroSlides.map((slide, index) => (
+        {(heroSlides || []).map((slide, index) => (
           <div
             key={slide.id}
             className={`absolute inset-0 transition-all duration-1000 ${
@@ -364,7 +370,7 @@ const HeroSection = memo(function HeroSection({
                         transform: `translateY(-${currentSuggestionIndex * 24}px)`
                       }}
                     >
-                      {suggestions.map((suggestion, index) => (
+                      {(suggestions || []).map((suggestion, index) => (
                         <div key={index} className="h-6 flex items-center">
                           {searchLocation || suggestion}
                         </div>
@@ -398,14 +404,14 @@ const HeroSection = memo(function HeroSection({
           <div className="relative h-5 overflow-hidden mb-3">
             <div 
               style={{
-                transform: `translateY(-${currentEmotionalText * (100 / heroTexts.length)}%)`,
+                transform: `translateY(-${currentEmotionalText * (100 / (heroTexts || []).length)}%)`,
                 opacity: textOpacity,
-                height: `${heroTexts.length * 100}%`,
+                height: `${(heroTexts || []).length * 100}%`,
                 transition: 'all 1.5s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              {heroTexts.map((text, index) => (
-                <div key={`accent-${index}`} className="flex items-start justify-start" style={{ height: `${100 / heroTexts.length}%` }}>
+              {(heroTexts || []).map((text, index) => (
+                <div key={`accent-${index}`} className="flex items-start justify-start" style={{ height: `${100 / (heroTexts || []).length}%` }}>
                   <span className="text-sm sm:text-xs font-light tracking-[0.15em] text-white/70 uppercase transition-all duration-1000 ease-out" style={{ fontFamily: "'Pretendard', sans-serif", letterSpacing: '0.15em', lineHeight: '1.2' }}>
                     {text.accent}
                   </span>
@@ -418,13 +424,13 @@ const HeroSection = memo(function HeroSection({
           <div className="relative h-16 sm:h-18 md:h-20 overflow-hidden">
             <div 
               style={{
-                transform: `translateY(-${currentEmotionalText * (100 / heroTexts.length)}%)`,
-                height: `${heroTexts.length * 100}%`,
+                transform: `translateY(-${currentEmotionalText * (100 / (heroTexts || []).length)}%)`,
+                height: `${(heroTexts || []).length * 100}%`,
                 transition: 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              {heroTexts.map((text, index) => (
-                <div key={`combined-${index}`} className="flex flex-col justify-start" style={{ height: `${100 / heroTexts.length}%` }}>
+              {(heroTexts || []).map((text, index) => (
+                <div key={`combined-${index}`} className="flex flex-col justify-start" style={{ height: `${100 / (heroTexts || []).length}%` }}>
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-white drop-shadow-lg mb-2 transition-all duration-1000 ease-out" style={{ fontFamily: "'Pretendard', sans-serif", letterSpacing: '-0.01em', lineHeight: '1.2' }}>
                     {text.main}
                   </h1>
@@ -446,7 +452,7 @@ const HeroSection = memo(function HeroSection({
 
       {/* 슬라이드 인디케이터 */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
-        {heroSlides.map((_, index) => (
+        {(heroSlides || []).map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}

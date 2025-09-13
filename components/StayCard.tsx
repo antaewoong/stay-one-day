@@ -134,15 +134,6 @@ const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, load
               )}
             </div>
             
-            {/* 우측 상단 액션 버튼들 */}
-            <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-              <Button variant="secondary" size="sm" className="bg-white/95 backdrop-blur-sm hover:bg-white text-gray-700 hover:text-red-500 rounded-full w-9 h-9 p-0 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 ease-out" onClick={(e) => e.preventDefault()}>
-                <Heart className="w-4 h-4 transition-colors duration-300" />
-              </Button>
-              <Button variant="secondary" size="sm" className="bg-white/95 backdrop-blur-sm hover:bg-white text-gray-700 rounded-full w-9 h-9 p-0 shadow-lg hover:scale-110 transition-transform duration-200" onClick={(e) => e.preventDefault()}>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
 
             {/* 하단 빠른 정보 (호버시 나타남) */}
             <div className={`absolute bottom-0 left-0 right-0 ${variant === 'featured' ? 'p-3' : 'p-4'} transform translate-y-full group-hover:translate-y-0 transition-transform duration-500`}>
@@ -198,16 +189,6 @@ const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, load
                   <span>최대 {stay.capacity}명</span>
                 </div>
                 
-                {/* 가격 */}
-                <div className="flex items-baseline justify-between">
-                  <div>
-                    <span className="text-base font-bold text-gray-900">₩{stay.price.toLocaleString()}</span>
-                    <span className="text-sm sm:text-xs text-gray-500 ml-1 font-medium">/박</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <StarRating rating={stay.rating} readonly size="sm" showNumber />
-                  </div>
-                </div>
               </>
             ) : (
               <>
@@ -216,15 +197,6 @@ const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, load
                   <span>{stay.location}</span>
                   <span className="mx-2">·</span>
                   <span>최대 {stay.capacity}명</span>
-                </div>
-                <div className="flex items-baseline justify-between">
-                  <div>
-                    <span className="text-base font-bold text-gray-900">₩{stay.price.toLocaleString()}</span>
-                    <span className="text-xs text-gray-500 ml-1">/박</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <StarRating rating={stay.rating} readonly size="sm" showNumber />
-                  </div>
                 </div>
               </>
             )}

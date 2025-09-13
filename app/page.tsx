@@ -34,7 +34,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { getFeaturedAccommodations, getAccommodations } from '@/lib/supabase/accommodations'
 import { createClient } from '@/lib/supabase/client'
 import { StarRating } from '@/components/ui/star-rating'
-import HeroSection from '@/components/HeroSection'
+import HeroSection from '@/components/home/HeroSection'
 import StayCard from '@/components/StayCard'
 import SectionContainer from '@/components/SectionContainer'
 
@@ -135,8 +135,14 @@ export default function HomePage() {
         // 2. 평점 데이터가 로드된 후 관리자 설정과 히어로 텍스트 로드
         const [accommodationResponse, heroTextsResponse, heroSlidesResponse] = await Promise.all([
           fetch('/api/accommodations?limit=1000').catch(() => ({ ok: false })),
-          fetch('/api/site/hero-slides', { next: { revalidate: 60 } }).catch(() => ({ ok: false })),
-          fetch('/api/hero-slides', { next: { revalidate: 60 } }).catch(() => ({ ok: false }))
+          fetch('/api/site/hero-slides', { next: { revalidate: 60 } }).catch((e) => {
+            console.error('Hero slides fetch error:', e)
+            return { ok: false }
+          }),
+          fetch('/api/hero-slides', { next: { revalidate: 60 } }).catch((e) => {
+            console.error('Hero slides backup fetch error:', e)
+            return { ok: false }
+          })
         ])
         
         const response = accommodationResponse
@@ -181,7 +187,7 @@ export default function HomePage() {
                     ratingCount: ratingsMap[acc.id]?.count || 0,
                     reviews: 100,
                     badges: ["추천"],
-                    amenities: acc.amenities?.slice(0, 4) || []
+                    amenities: acc.accommodation_amenities?.slice(0, 4).map((amenity: any) => amenity.amenity_name) || []
                   }))
               }
               // 수동 선택된 숙소가 있는 경우
@@ -201,7 +207,7 @@ export default function HomePage() {
                     ratingCount: ratingsMap[acc.id]?.count || 0,
                     reviews: 100,
                     badges: ["추천"],
-                    amenities: acc.amenities?.slice(0, 4) || []
+                    amenities: acc.accommodation_amenities?.slice(0, 4).map((amenity: any) => amenity.amenity_name) || []
                   }))
               }
 
@@ -251,11 +257,25 @@ export default function HomePage() {
 
           // 히어로 슬라이드 로드 - 퍼블릭 API 사용
           if (heroSlidesResponse.ok && isActive) {
-            const heroSlidesResult = await heroSlidesResponse.json()
-            if (Array.isArray(heroSlidesResult) && heroSlidesResult.length > 0) {
-              setHeroSlides(heroSlidesResult)
+            try {
+              const heroSlidesResult = await heroSlidesResponse.json()
+              console.log('Hero slides API result:', heroSlidesResult)
+              // API 응답 형태 처리: { ok: true, data: [...] }
+              const slides = heroSlidesResult.data || heroSlidesResult || []
+              if (Array.isArray(slides) && slides.length > 0) {
+                console.log('Setting hero slides:', slides)
+                setHeroSlides(slides)
+              } else {
+                console.log('No slides data, setting empty array')
+                setHeroSlides([]) // 빈 배열로 초기화
+              }
+            } catch (error) {
+              console.error('Hero slides JSON parse error:', error)
+              setHeroSlides([]) // 에러 시 빈 배열
             }
           } else if (isActive) {
+            console.log('Hero slides response failed, setting empty array')
+            setHeroSlides([]) // 빈 배열로 초기화
             // 기본 히어로 슬라이드 (Stay Cheongju 기반)
             const defaultStay = accommodations.find((acc: any) => acc.name.includes('청주'))
             if (defaultStay) {
@@ -1356,10 +1376,10 @@ export default function HomePage() {
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                            {stay.amenities?.slice(0, 4).map((amenity: string) => (
-                              <div key={amenity} className="flex items-center">
+                            {stay.amenities?.slice(0, 4).map((amenity: any, index: number) => (
+                              <div key={index} className="flex items-center">
                                 <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2"></div>
-                                {amenity}
+                                {typeof amenity === 'string' ? amenity : amenity?.amenity_name || amenity?.name || '편의시설'}
                               </div>
                             ))}
                           </div>

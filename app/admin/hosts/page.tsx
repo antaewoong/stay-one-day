@@ -73,8 +73,8 @@ export default function HostsPage() {
       const result = await response.json()
       console.log('API에서 조회된 호스트 데이터:', result)
 
-      if (result.hosts) {
-        setHosts(result.hosts)
+      if (result.data) {
+        setHosts(result.data)
       } else {
         console.log('데이터가 없습니다')
         setHosts([])

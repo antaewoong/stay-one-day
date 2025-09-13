@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAdminAuth } from '@/middleware/withAdminAuth'
 import { createClient } from '@supabase/supabase-js'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export const GET = (req: NextRequest) =>

@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 // 관리자 비밀번호 변경 (server-role 사용: 서버 한정)
 // 주의: 서비스키는 서버에서만. 라우트 접근은 withAdminAuth로 추가 방어.
-export const POST = (req: NextRequest) => withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+export const POST = withAdminAuth(async (request: NextRequest, supabase: any, { userId: adminUserId, admin }: any) => {
   const { userId, userEmail, newPassword, userType } = await request.json()
   
   if (!userId && !userEmail) {
@@ -88,7 +88,7 @@ export const POST = (req: NextRequest) => withAdminAuth(req, async (request: Nex
   // 관리자 활동 로그 기록
   try {
     await admin.from('admin_activity_logs').insert({
-      admin_id: ctx.adminId,
+      admin_id: adminUserId,
       action: 'password_change',
       target_user_id: targetUserId,
       target_user_type: userType,

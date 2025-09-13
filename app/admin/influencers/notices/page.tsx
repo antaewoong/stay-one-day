@@ -145,6 +145,28 @@ export default function InfluencerNoticesPage() {
     }
   }
 
+  const deleteNotice = async (id: string, title: string) => {
+    if (!confirm(`'${title}' 공지사항을 삭제하시겠습니까?\n삭제된 공지사항은 복구할 수 없습니다.`)) {
+      return
+    }
+
+    try {
+      const result = await apiFetch(`/api/admin/influencer-notices?id=${id}`, {
+        method: 'DELETE'
+      })
+      
+      if (result.success) {
+        toast.success('공지사항이 삭제되었습니다')
+        loadNotices()
+      } else {
+        throw new Error(result.message || '삭제에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('공지사항 삭제 오류:', error)
+      toast.error('공지사항 삭제에 실패했습니다')
+    }
+  }
+
   const getNoticeTypeLabel = (type: string) => {
     switch (type) {
       case 'collaboration': return '협업'
@@ -332,6 +354,14 @@ export default function InfluencerNoticesPage() {
                           onClick={() => toggleNoticeStatus(notice.id, notice.is_active)}
                         >
                           {notice.is_active ? '비활성화' : '활성화'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => deleteNotice(notice.id, notice.title)}
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </TableCell>

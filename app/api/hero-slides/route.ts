@@ -12,7 +12,7 @@ export async function GET() {
     
     const { data, error } = await supabase
       .from('hero_slides')
-      .select('id, image_url, title, subtitle, cta_text, active, slide_order, accommodation_id')
+      .select('id, image_url, title, subtitle, cta_text, active, slide_order, badge, stats')
       .eq('active', true)
       .order('slide_order', { ascending: true })
     
@@ -23,14 +23,14 @@ export async function GET() {
     
     // Map to frontend expected format
     const mappedData = data?.map(slide => ({
-      id: slide.accommodation_id || slide.id, // 숙소 ID를 우선 사용
+      id: slide.id, // Use slide ID for navigation
       title: slide.title,
       subtitle: slide.subtitle,
       description: slide.subtitle || '', // fallback
       image: slide.image_url,
       cta: slide.cta_text || '예약하기',
-      badge: 'FEATURED',
-      stats: {
+      badge: slide.badge || 'FEATURED',
+      stats: slide.stats || {
         avgRating: '4.9',
         bookings: '1,200+',
         price: '₩150,000'

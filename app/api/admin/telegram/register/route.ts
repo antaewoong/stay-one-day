@@ -5,13 +5,12 @@ import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
-// GPT 제안: 미들웨어를 사용한 POST 핸들러
-export const POST = (req: NextRequest) =>
-  withAdminAuth(req, async (req: NextRequest, ctx: any) => {
+// POST 핸들러
+export const POST = withAdminAuth(async (request: NextRequest, db: any, ctx: any) => {
     try {
       console.log('✅ 관리자 인증 성공:', ctx)
       
-      const body = await req.json()
+      const body = await request.json()
       const { targetAdminEmail } = body
 
       if (!targetAdminEmail) {
@@ -53,7 +52,7 @@ export const POST = (req: NextRequest) =>
         .insert({
           token,
           admin_email: targetAdminEmail.toLowerCase(),
-          created_by_admin_id: ctx.adminId, // 미들웨어에서 제공된 관리자 ID
+          created_by_admin_id: ctx.admin?.auth_user_id, // 미들웨어에서 제공된 관리자 ID
           expires_at: expiresAt
         })
         .select()
@@ -67,7 +66,7 @@ export const POST = (req: NextRequest) =>
         )
       }
 
-      console.log(`✅ 텔레그램 등록 토큰 생성: ${targetAdminEmail} by ${ctx.adminEmail}`)
+      console.log(`✅ 텔레그램 등록 토큰 생성: ${targetAdminEmail} by ${ctx.admin?.email}`)
 
       return NextResponse.json({
         success: true,
@@ -93,9 +92,8 @@ export const POST = (req: NextRequest) =>
     }
   })
 
-// GPT 제안: 미들웨어를 사용한 GET 핸들러 (활성 세션 조회)
-export const GET = (req: NextRequest) =>
-  withAdminAuth(req, async (req: NextRequest, ctx: any) => {
+// GET 핸들러 (활성 세션 조회)
+export const GET = withAdminAuth(async (request: NextRequest, db: any, ctx: any) => {
     try {
       // Service role client로 활성 세션 조회
       const supabaseAdmin = createClient(

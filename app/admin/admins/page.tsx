@@ -75,18 +75,20 @@ export default function AdminAccountsPage() {
     try {
       setLoading(true)
       
-      // Try to load from database first
-      const { data, error } = await supabase
-        .from('admin_accounts')
-        .select('*')
-        .order('created_at', { ascending: false })
+      // API를 통해서 관리자 목록 조회
+      const result = await fetch('/api/admin/admins', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then(res => res.json())
 
-      if (error) {
-        console.error('관리자 목록 조회 실패:', error)
-        setAdmins(mockAdmins)
-      } else if (data && data.length > 0) {
-        setAdmins(data)
+      console.log('API에서 조회된 관리자 데이터:', result)
+
+      if (result.success && result.data) {
+        setAdmins(result.data)
       } else {
+        console.log('관리자 데이터가 없어서 목 데이터 사용')
         setAdmins(mockAdmins)
       }
     } catch (error) {

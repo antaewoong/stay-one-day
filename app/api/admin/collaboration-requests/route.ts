@@ -5,10 +5,9 @@ import { createClient } from '@supabase/supabase-js'
 export const dynamic = 'force-dynamic'
 
 // GET: 모든 협업 요청 조회 (관리자용)
-export const GET = (req: NextRequest) =>
-  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+export const GET = withAdminAuth(async (request: NextRequest, db: any, ctx: any) => {
     try {
-      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+      console.log('✅ 관리자 인증 성공:', ctx.admin)
       
       // Service role client 사용 (GPT 권장)
       const supabaseAdmin = createClient(
@@ -31,7 +30,7 @@ export const GET = (req: NextRequest) =>
             follower_count, engagement_rate, content_category, profile_image_url, location
           ),
           accommodations:accommodations!accommodation_id (
-            id, name, location, price_per_night, images
+            id, name, address, region, base_price, images
           ),
           hosts:hosts!host_id (
             id, business_name, representative_name, phone, email
@@ -87,8 +86,9 @@ export const GET = (req: NextRequest) =>
         accommodation: r.accommodations ?? {
           id: '',
           name: '정보없음',
-          location: '',
-          price_per_night: 0,
+          address: '',
+          region: '',
+          base_price: 0,
           images: []
         },
         host: r.hosts ?? {
@@ -115,10 +115,9 @@ export const GET = (req: NextRequest) =>
   })
 
 // PUT: 협업 요청 상태 업데이트
-export const PUT = (req: NextRequest) =>
-  withAdminAuth(req, async (request: NextRequest, ctx: any) => {
+export const PUT = withAdminAuth(async (request: NextRequest, db: any, ctx: any) => {
     try {
-      console.log('✅ 관리자 인증 성공:', ctx.adminEmail)
+      console.log('✅ 관리자 인증 성공:', ctx.admin)
       
       // Service role client 사용 (GPT 권장)
       const supabaseAdmin = createClient(
