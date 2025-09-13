@@ -39,10 +39,29 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   if (!res.ok) {
     const body = await res.text().catch(() => '')
     console.error('ADMIN 4xx/5xx >>>', path, body)
-    throw new Error(`HTTP ${res.status}`)
+
+    // API 에러 메시지 파싱 시도
+    try {
+      const errorData = JSON.parse(body)
+      return {
+        ok: false,
+        error: errorData.error || errorData.message || `HTTP ${res.status}`,
+        status: res.status
+      }
+    } catch {
+      return {
+        ok: false,
+        error: `HTTP ${res.status}`,
+        status: res.status
+      }
+    }
   }
-  
-  return res.json()
+
+  const data = await res.json()
+  return {
+    ok: true,
+    ...data
+  }
 }
 
 // 관리자 세션 안전하게 가져오기

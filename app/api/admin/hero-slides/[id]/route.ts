@@ -39,28 +39,45 @@ export const PUT = withAdminAuth(async (req, supabase, { userId, admin }) => {
   const { pathname } = new URL(req.url)
   const id = pathname.split('/').pop()
 
+  console.log('🔥 PUT 히어로 슬라이드 수정 시작 - ID:', id)
+
   if (!id) {
     return NextResponse.json({ ok: false, error: 'ID가 필요합니다.' }, { status: 400 })
   }
 
   const body = await req.json()
+  console.log('🔥 받은 데이터:', JSON.stringify(body, null, 2))
 
-  // Validate required fields
-  if (!body.image_url?.trim()) {
-    return NextResponse.json({ ok: false, error: '이미지 URL은 필수입니다.' }, { status: 400 })
+  // 업데이트할 필드만 포함 (빈 값은 제외)
+  const payload: any = {}
+
+  if (body.image_url?.trim()) {
+    payload.image_url = body.image_url.trim()
   }
 
-  if (!body.headline?.trim()) {
-    return NextResponse.json({ ok: false, error: '제목은 필수입니다.' }, { status: 400 })
+  if (body.headline?.trim()) {
+    payload.title = body.headline.trim()
   }
 
-  const payload = {
-    image_url: body.image_url.trim(),
-    title: body.headline.trim(),
-    subtitle: body.subheadline?.trim() ?? '',
-    cta_text: body.cta_text?.trim() ?? '',
-    active: !!body.is_active,
-    slide_order: Number(body.sort_order ?? 0),
+  if (body.subheadline !== undefined) {
+    payload.subtitle = body.subheadline?.trim() ?? ''
+  }
+
+  if (body.cta_text !== undefined) {
+    payload.cta_text = body.cta_text?.trim() ?? ''
+  }
+
+  if (body.is_active !== undefined) {
+    payload.active = !!body.is_active
+  }
+
+  if (body.sort_order !== undefined) {
+    payload.slide_order = Number(body.sort_order ?? 0)
+  }
+
+  // 업데이트할 내용이 없으면 에러
+  if (Object.keys(payload).length === 0) {
+    return NextResponse.json({ ok: false, error: '수정할 내용이 없습니다.' }, { status: 400 })
   }
 
   const { data, error } = await supabase

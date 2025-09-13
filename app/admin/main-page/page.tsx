@@ -167,7 +167,7 @@ export default function MainPageManagementPage() {
   const saveHeroSlides = async (newSlides: HeroSlide[]) => {
     try {
       setLoading(true)
-      
+
       const slidesToInsert = newSlides.map((slide, index) => ({
         title: slide.title,
         subtitle: slide.subtitle,
@@ -179,9 +179,9 @@ export default function MainPageManagementPage() {
         slide_order: index,
         active: slide.active
       }))
-      
+
       await apiFetch('/api/admin/hero-slides', {
-        method: 'POST',
+        method: 'PUT',
         body: JSON.stringify(slidesToInsert)
       })
       
