@@ -28,9 +28,19 @@ export const GET = withAdminAuth(async (_req, supabase, { userId, admin }) => {
 
 export const POST = withAdminAuth(async (req, supabase, { userId, admin }) => {
   const body = await req.json()
+
+  // Validate required fields
+  if (!body.image_url?.trim()) {
+    return NextResponse.json({ ok: false, error: '이미지 URL은 필수입니다.' }, { status: 400 })
+  }
+
+  if (!body.headline?.trim()) {
+    return NextResponse.json({ ok: false, error: '제목은 필수입니다.' }, { status: 400 })
+  }
+
   const payload = {
-    image_url: body.image_url?.trim(),
-    title: body.headline?.trim() ?? '',
+    image_url: body.image_url.trim(),
+    title: body.headline.trim(),
     subtitle: body.subheadline?.trim() ?? '',
     cta_text: body.cta_text?.trim() ?? '',
     active: !!body.is_active,
