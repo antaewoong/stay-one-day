@@ -16,12 +16,23 @@ export const GET = withAdminAuth(async (req, supabase, { userId, admin }) => {
 
   const { data, error } = await supabase
     .from('hero_slides')
-    .select('id,image_url,headline,subheadline,cta_text,cta_link,is_active,sort_order,created_at')
+    .select('id,image_url,title,subtitle,cta_text,active,slide_order,created_at')
     .eq('id', id)
     .single()
     
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true, userId, admin, data })
+  
+  // Map to expected field names
+  const mappedData = data ? {
+    ...data,
+    headline: data.title,
+    subheadline: data.subtitle,
+    is_active: data.active,
+    sort_order: data.slide_order,
+    cta_link: '/booking'
+  } : null
+  
+  return NextResponse.json({ ok: true, userId, admin, data: mappedData })
 })
 
 export const PUT = withAdminAuth(async (req, supabase, { userId, admin }) => {
@@ -35,12 +46,11 @@ export const PUT = withAdminAuth(async (req, supabase, { userId, admin }) => {
   const body = await req.json()
   const payload = {
     image_url: body.image_url?.trim(),
-    headline: body.headline?.trim() ?? '',
-    subheadline: body.subheadline?.trim() ?? '',
+    title: body.headline?.trim() ?? '',
+    subtitle: body.subheadline?.trim() ?? '',
     cta_text: body.cta_text?.trim() ?? '',
-    cta_link: body.cta_link?.trim() ?? '',
-    is_active: !!body.is_active,
-    sort_order: Number(body.sort_order ?? 0),
+    active: !!body.is_active,
+    slide_order: Number(body.sort_order ?? 0),
   }
 
   const { data, error } = await supabase
@@ -51,7 +61,18 @@ export const PUT = withAdminAuth(async (req, supabase, { userId, admin }) => {
     .single()
     
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 400 })
-  return NextResponse.json({ ok: true, data })
+  
+  // Map back to expected field names
+  const mappedData = data ? {
+    ...data,
+    headline: data.title,
+    subheadline: data.subtitle,
+    is_active: data.active,
+    sort_order: data.slide_order,
+    cta_link: '/booking'
+  } : null
+  
+  return NextResponse.json({ ok: true, data: mappedData })
 })
 
 export const DELETE = withAdminAuth(async (req, supabase, { userId, admin }) => {
