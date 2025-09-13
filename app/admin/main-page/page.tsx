@@ -168,22 +168,37 @@ export default function MainPageManagementPage() {
     try {
       setLoading(true)
 
-      const slidesToInsert = newSlides.map((slide, index) => ({
-        title: slide.title,
-        subtitle: slide.subtitle,
-        description: slide.description,
-        image_url: slide.image,
-        cta_text: slide.cta,
-        badge: slide.badge,
-        stats: slide.stats,
-        slide_order: index,
-        active: slide.active
-      }))
+      // 안전한 데이터 검증 및 전송
+      const slidesToInsert = newSlides.map((slide, index) => {
+        // 필수 필드 검증: image_url이 반드시 있어야 함
+        const imageUrl = slide.image || slide.image_url || ''
+        if (!imageUrl.trim()) {
+          throw new Error(`슬라이드 ${index + 1}번: 이미지가 필수입니다. 이미지를 업로드해주세요.`)
+        }
 
-      await apiFetch('/api/admin/hero-slides', {
+        return {
+          title: slide.title || '',
+          subtitle: slide.subtitle || '',
+          description: slide.description || '',
+          image_url: imageUrl,  // 반드시 값이 있음이 보장됨
+          cta_text: slide.cta || '',
+          badge: slide.badge || '',
+          stats: slide.stats || {},
+          slide_order: index,
+          active: slide.active ?? true
+        }
+      })
+
+      console.log('🔄 히어로 슬라이드 저장:', slidesToInsert.length, '개')
+
+      const result = await apiFetch('/api/admin/hero-slides', {
         method: 'PUT',
         body: JSON.stringify(slidesToInsert)
       })
+
+      if (!result.ok) {
+        throw new Error(result.error || '저장에 실패했습니다.')
+      }
       
       setHeroSlides(newSlides)
       await loadHeroSlides() // 다시 로드해서 동기화

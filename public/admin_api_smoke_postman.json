@@ -1,0 +1,351 @@
+{
+  "info": {
+    "name": "Admin API Smoke (Supabase Auth)",
+    "_postman_id": "f5f9b6f0-1d9a-4a71-9b27-7c0b9a1a1e01",
+    "description": "Logs into Supabase (GoTrue) then exercises key admin endpoints on your Next.js app.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "supabaseUrl",
+      "value": "https://YOUR_PROJECT.supabase.co"
+    },
+    {
+      "key": "anonKey",
+      "value": "YOUR_SUPABASE_ANON_KEY"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@example.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": "password"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const supabaseUrl = pm.variables.get('supabaseUrl');",
+          "const anonKey = pm.variables.get('anonKey');",
+          "const email = pm.variables.get('adminEmail');",
+          "const password = pm.variables.get('adminPassword');",
+          "",
+          "if (!supabaseUrl || !anonKey || !email || !password) {",
+          "  console.warn('⚠️ Missing Supabase credentials. Set supabaseUrl, anonKey, adminEmail, adminPassword');",
+          "}",
+          "",
+          "pm.sendRequest({",
+          "  url: `${supabaseUrl}/auth/v1/token?grant_type=password`,",
+          "  method: 'POST',",
+          "  header: { apikey: anonKey, 'Content-Type': 'application/json' },",
+          "  body: { mode: 'raw', raw: JSON.stringify({ email, password }) }",
+          "}, (err, res) => {",
+          "  if (err) {",
+          "    console.error('Login error:', err);",
+          "    return;",
+          "  }",
+          "  if (res.code >= 200 && res.code < 300) {",
+          "    const json = res.json();",
+          "    if (json && json.access_token) {",
+          "      pm.collectionVariables.set('accessToken', json.access_token);",
+          "    } else {",
+          "      console.error('No access_token in response:', json);",
+          "    }",
+          "  } else {",
+          "    console.error('Login failed with status', res.code, res.text());",
+          "  }",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "GET /api/admin/hosts",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/hosts?limit=5",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "hosts"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 2xx', function(){ pm.expect(pm.response.code).to.be.within(200,299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /api/admin/influencers",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/influencers?page=1&limit=5&status=all&category=all",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "influencers"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            },
+            {
+              "key": "status",
+              "value": "all"
+            },
+            {
+              "key": "category",
+              "value": "all"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 2xx', function(){ pm.expect(pm.response.code).to.be.within(200,299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /api/admin/influencer-notices",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/influencer-notices",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "influencer-notices"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 2xx', function(){ pm.expect(pm.response.code).to.be.within(200,299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /api/admin/telegram/register",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/telegram/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "telegram",
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 2xx', function(){ pm.expect(pm.response.code).to.be.within(200,299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /api/admin/hero-slides",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/hero-slides",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "hero-slides"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 2xx', function(){ pm.expect(pm.response.code).to.be.within(200,299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /api/admin/hero-slides (bulk text update)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/hero-slides",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "hero-slides"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"slides\": [{\"id\": \"{{slideId1}}\", \"title\": \"\\uc0c8 \\uc81c\\ubaa9\", \"subtitle\": \"\\uc0c8 \\uc18c\\uc81c\\ubaa9\", \"order\": 1}]}"
+        },
+        "description": "텍스트/순서만 수정. image_url은 선택값. {{slideId1}} 변수를 실제 DB id로 채우세요."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.variables.get('slideId1')) {",
+              "  console.warn('ℹ️ slideId1 미설정: 이 요청은 스킵(수동 실행 권장)');",
+              "  pm.test('Skipped (no slideId1)', function(){ pm.expect(true).to.be.true; });",
+              "} else {",
+              "  pm.test('Status 2xx', function(){ pm.expect(pm.response.code).to.be.within(200,299); });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /api/admin/hero-slides (create)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/hero-slides",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "hero-slides"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"image_url\": \"{{heroImageUrl}}\", \"title\": \"\\ud14c\\uc2a4\\ud2b8 \\uc2ac\\ub77c\\uc774\\ub4dc\", \"subtitle\": \"\\uc790\\ub3d9\\ud654 \\uc0dd\\uc131\", \"order\": 99, \"target_url\": \"/\"}"
+        },
+        "description": "이미지 신규 생성. {{heroImageUrl}} 없으면 실패하므로 기본은 꺼두세요."
+      }
+    }
+  ]
+}
