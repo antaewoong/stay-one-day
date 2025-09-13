@@ -34,7 +34,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { getFeaturedAccommodations, getAccommodations } from '@/lib/supabase/accommodations'
 import { createClient } from '@/lib/supabase/client'
 import { StarRating } from '@/components/ui/star-rating'
-import HeroSection from '@/components/home/HeroSection'
+import HeroDock from '@/components/HeroDock'
 import StayCard from '@/components/StayCard'
 import SectionContainer from '@/components/SectionContainer'
 
@@ -72,12 +72,6 @@ export default function HomePage() {
   const [isUserLoading, setIsUserLoading] = useState(true)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isUserMenuClosing, setIsUserMenuClosing] = useState(false)
-  const [showHeaderSearch, setShowHeaderSearch] = useState(false)
-  const [searchTransform, setSearchTransform] = useState({
-    translateY: 0,
-    scale: 1,
-    opacity: 1
-  })
   const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroTexts, setHeroTexts] = useState<any[]>([])
   const [currentEmotionalText, setCurrentEmotionalText] = useState(0)
@@ -784,64 +778,12 @@ export default function HomePage() {
     }
   }, [searchQuery, suggestions.length])
 
-  // 스테이폴리오 스타일: 검색창이 실제로 히어로에서 헤더로 이동하는 애니메이션
+  // 검색 모달 열기 이벤트
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY
-      const heroHeight = window.innerHeight * 0.45
-      const triggerPoint = heroHeight * 0.5 // 50% 지점에서 애니메이션 시작
-      
-      // 스크롤 진행률 (0~1)
-      const progress = Math.min(scrollY / triggerPoint, 1)
-      
-      // 헤더 배경 표시 여부
-      setShowHeaderSearch(progress > 0.8)
-      
-      const heroSearchBar = document.querySelector('.hero-search-bar') as HTMLElement
-      const heroLogo = document.querySelector('.hero-logo') as HTMLElement
-      const heroButtons = document.querySelector('.hero-buttons') as HTMLElement
-      
-      if (heroSearchBar) {
-        if (progress < 1) {
-          // 검색창을 fixed로 설정하고 실제로 위로 이동
-          heroSearchBar.style.position = 'fixed'
-          heroSearchBar.style.top = `${140 - (progress * 120)}px` // 140px에서 20px로 이동
-          heroSearchBar.style.left = '50%'
-          heroSearchBar.style.transform = `translateX(-50%) scale(${1 - progress * 0.1})`
-          heroSearchBar.style.zIndex = '50'
-          heroSearchBar.style.width = 'auto'
-          heroSearchBar.style.maxWidth = `${320 + (progress * 100)}px` // 약간 커짐
-          
-          // 검색창 스타일 변경
-          const searchContainer = heroSearchBar.querySelector('div') as HTMLElement
-          if (searchContainer && progress > 0.8) {
-            searchContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.98)'
-            searchContainer.style.backdropFilter = 'blur(20px)'
-            searchContainer.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)'
-          }
-        }
-      }
-      
-      // 로고와 버튼 페이드아웃
-      if (heroLogo) {
-        heroLogo.style.opacity = (1 - progress * 1.2).toString()
-        heroLogo.style.transform = `translateY(${progress * -10}px)`
-      }
-      
-      if (heroButtons) {
-        heroButtons.style.opacity = (1 - progress * 1.2).toString()
-        heroButtons.style.transform = `translateY(${progress * -10}px)`
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    
-    // 검색 모달 열기 이벤트
     const handleOpenSearchModal = () => setShowSearchModal(true)
     window.addEventListener('openSearchModal', handleOpenSearchModal)
     
     return () => {
-      window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('openSearchModal', handleOpenSearchModal)
     }
   }, [])
@@ -863,16 +805,6 @@ export default function HomePage() {
 
   return (
     <div className="fullscreen-container bg-white">
-      {/* 스테이폴리오 스타일: 스크롤시 나타나는 단순한 헤더 배경 */}
-      <div className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        showHeaderSearch ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-      }`}>
-        <div className="bg-white/95 backdrop-blur-lg border-b border-gray-100/50 shadow-sm">
-          <div className="container mx-auto px-4 py-3">
-            {/* 헤더 배경만 제공, 실제 콘텐츠는 히어로 검색창이 이동해서 채움 */}
-          </div>
-        </div>
-      </div>
       {/* 전역 부드러운 스크롤 + 풀스크린 스타일 */}
       <style jsx global>{`
         /* 풀스크린 노치 대응 */
@@ -986,8 +918,8 @@ export default function HomePage() {
         }
       `}</style>
 
-      {/* 스테이폴리오 스타일 - 배경 이미지 전체 영역 */}
-      <HeroSection slides={heroSlides} />
+      {/* 스테이폴리오 완벽 재현: 단일 검색창 + sticky 도킹 */}
+      <HeroDock slides={heroSlides} />
 
       {/* 추천 스테이 섹션 - 히어로 바로 뒤 */}
       <section className="py-12 md:py-16 bg-white">

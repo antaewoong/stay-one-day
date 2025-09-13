@@ -39,10 +39,30 @@ const nextConfig = {
       }
     ]
   },
-  // Next.js 개발모드의 eval 소스맵 회피
+  // Next.js 개발모드의 eval 소스맵 회피 및 감시 최적화
   webpack(config, { dev, isServer }) {
     if (dev && !isServer) {
       config.devtool = 'source-map';
+      // 감시 최적화
+      config.watchOptions = {
+        poll: 1000, // 1초 간격으로 폴링
+        ignored: [
+          '**/.next/**',
+          '**/node_modules/**',
+          '**/public/uploads/**',
+          '**/logs/**',
+          '**/.DS_Store',
+          '**/Thumbs.db',
+          '**/*.tmp',
+          '**/*.log',
+          '**/supabase/migrations/**',
+          '**/scripts/**',
+          '**/DEVELOPMENT_REPORT_*.md',
+          '**/SECURITY_*.md',
+          '**/TELEGRAM_*.md',
+          '**/*.sql',
+        ],
+      };
     }
     return config;
   },

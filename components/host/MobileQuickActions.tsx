@@ -138,11 +138,11 @@ export default function MobileQuickActions({
               className="h-24 flex flex-col items-center justify-center space-y-2 bg-white border-2 border-purple-100 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
               asChild
             >
-              <Link href="/host">
+              <Link href="/host/accommodations">
                 <div className="text-center">
-                  <MessageSquare className="w-7 h-7 text-purple-600 mx-auto" />
-                  <span className="text-xs font-bold text-purple-900 mt-1 block">리뷰관리</span>
-                  <span className="text-[10px] text-purple-700">신규 답변</span>
+                  <Building2 className="w-7 h-7 text-purple-600 mx-auto" />
+                  <span className="text-xs font-bold text-purple-900 mt-1 block">숙소관리</span>
+                  <span className="text-[10px] text-purple-700">사진/리뷰</span>
                 </div>
               </Link>
             </Button>

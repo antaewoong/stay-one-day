@@ -127,7 +127,7 @@ export default function HeroSection({ slides }: HeroSectionProps) {
         </Button>
       </div>
 
-      {/* 스테이폴리오 스타일 히어로 컨텐츠 */}
+      {/* 스테이폴리오 정확한 히어로 컨텐츠 */}
       <div className="absolute inset-0 flex flex-col">
         {/* 스테이폴리오 정확한 헤더 레이아웃 */}
         <div className="flex items-center justify-between pt-4 md:pt-6 pb-8 md:pb-12 px-4 md:px-8">
@@ -162,7 +162,8 @@ export default function HeroSection({ slides }: HeroSectionProps) {
         </div>
         
         {/* 스테이폴리오 검색창 - 정확한 크기와 위치 */}
-        <div className="hero-search-bar flex justify-center pb-4 md:pb-8 px-4 transition-all duration-500">
+        <div className="hero-search-bar flex justify-center pb-4 md:pb-8 px-4 transition-all duration-500" 
+             style={{ position: 'relative', zIndex: 1 }}>
           <div 
             className="bg-white/95 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer w-full max-w-sm md:max-w-md"
             onClick={() => {
@@ -186,7 +187,7 @@ export default function HeroSection({ slides }: HeroSectionProps) {
         {/* 스테이폴리오 스타일 - 텍스트를 하단으로 */}
         <div className="flex-1 flex items-end">
           {items.length > 0 && items[currentSlide] && (
-            <div className="text-left pb-16 max-w-lg">
+            <div className="text-left pb-16 max-w-lg px-4 md:px-8">
               <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight drop-shadow-2xl leading-tight">
                 {items[currentSlide]?.title || items[currentSlide]?.headline || '감성에서 머무는'}
               </h1>

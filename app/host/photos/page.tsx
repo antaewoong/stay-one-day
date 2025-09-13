@@ -21,7 +21,7 @@ import {
   Download,
   Star
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { hostGet } from '@/lib/host-api'
 
 interface AccommodationPhoto {
   id: string
@@ -62,131 +62,65 @@ export default function HostPhotosPage() {
 
   useEffect(() => {
     if (hostData) {
-      loadPhotos()
+      loadPhotosWithFilters()
     }
   }, [accommodationFilter, searchQuery, hostData])
 
   const loadHostData = async () => {
     try {
-      if (!hostData?.host_id) {
-        console.error('호스트 정보가 없습니다')
-        return
+      const response = await hostGet('/api/host/photos')
+      const result = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to fetch host photos')
       }
 
-      // 호스트 UUID 가져오기
-      const { data: hostIdData, error: hostError } = await createClient()
-        .from('hosts')
-        .select('id')
-        .eq('host_id', hostData.host_id)
-        .single()
-
-      if (hostError || !hostIdData) {
-        console.error('호스트 정보를 찾을 수 없습니다:', hostError)
-        setAccommodations([])
-        return
-      }
-
-      // 호스트의 숙소들 가져오기
-      const { data: accData, error: accError } = await createClient()
-        .from('accommodations')
-        .select('id, name, accommodation_type')
-        .eq('host_id', hostIdData.id)
-        .eq('status', 'active')
-
-      if (accError) {
-        console.error('숙소 데이터 로드 실패:', accError)
-        setAccommodations([])
+      if (result.ok) {
+        setAccommodations(result.data.accommodations || [])
+        setPhotos(result.data.photos || [])
       } else {
-        setAccommodations(accData || [])
+        throw new Error(result.message || 'Unknown error')
       }
 
     } catch (error) {
       console.error('호스트 데이터 로드 실패:', error)
       setAccommodations([])
+      setPhotos([])
     }
   }
 
-  const loadPhotos = async () => {
+  const loadPhotosWithFilters = async () => {
     try {
       setLoading(true)
       
-      if (!hostData?.host_id) {
-        console.error('호스트 정보가 없습니다')
-        return
+      const response = await hostGet('/api/host/photos')
+      const result = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to fetch host photos')
       }
 
-      // 호스트 UUID 가져오기
-      const { data: hostIdData, error: hostError } = await createClient()
-        .from('hosts')
-        .select('id')
-        .eq('host_id', hostData.host_id)
-        .single()
+      if (result.ok) {
+        let filteredPhotos = result.data.photos || []
 
-      if (hostError || !hostIdData) {
-        console.error('호스트 정보를 찾을 수 없습니다:', hostError)
-        setPhotos([])
-        return
+        // 숙소별 필터 적용
+        if (accommodationFilter !== 'all') {
+          filteredPhotos = filteredPhotos.filter(p => p.accommodation_id === accommodationFilter)
+        }
+
+        // 검색 필터 적용
+        if (searchQuery) {
+          filteredPhotos = filteredPhotos.filter(p => 
+            p.accommodation_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.file_name.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        }
+
+        setPhotos(filteredPhotos)
+      } else {
+        throw new Error(result.message || 'Unknown error')
       }
 
-      // 호스트의 숙소 ID들 가져오기
-      const { data: accData } = await createClient()
-        .from('accommodations')
-        .select('id')
-        .eq('host_id', hostIdData.id)
-        .eq('status', 'active')
-
-      if (!accData || accData.length === 0) {
-        setPhotos([])
-        return
-      }
-
-      const accommodationIds = accData.map(acc => acc.id)
-
-      // 숙소 이미지들 가져오기
-      let query = createClient()
-        .from('accommodation_images')
-        .select(`
-          *,
-          accommodations(name)
-        `)
-        .in('accommodation_id', accommodationIds)
-        .order('image_order')
-
-      // 숙소별 필터 적용
-      if (accommodationFilter !== 'all') {
-        query = query.eq('accommodation_id', accommodationFilter)
-      }
-
-      const { data: photosData, error: photosError } = await query
-
-      if (photosError) {
-        console.error('사진 데이터 로드 실패:', photosError)
-        setPhotos([])
-        return
-      }
-
-      // 데이터 변환
-      let transformedPhotos: AccommodationPhoto[] = (photosData || []).map(photo => ({
-        id: photo.id,
-        accommodation_id: photo.accommodation_id,
-        accommodation_name: photo.accommodations?.name || 'Unknown',
-        image_url: photo.image_url,
-        image_order: photo.image_order || 1,
-        file_name: photo.image_url?.split('/').pop() || 'unknown.jpg',
-        file_size: 0, // 실제로는 파일 크기 정보가 필요
-        uploaded_at: photo.created_at || new Date().toISOString(),
-        is_main: photo.image_order === 1
-      }))
-
-      // 검색 필터 적용
-      if (searchQuery) {
-        transformedPhotos = transformedPhotos.filter(p => 
-          p.accommodation_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.file_name.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      }
-
-      setPhotos(transformedPhotos)
     } catch (error) {
       console.error('사진 목록 로드 실패:', error)
       setPhotos([])
@@ -195,92 +129,6 @@ export default function HostPhotosPage() {
     }
   }
 
-  const getHostPhotos = (hostId: string): AccommodationPhoto[] => {
-    const photoDataMap: Record<string, AccommodationPhoto[]> = {
-      'host-1': [
-        {
-          id: '1',
-          accommodation_id: '1',
-          accommodation_name: '구공스테이 풀빌라',
-          image_url: '/images/90staycj/1.jpg',
-          image_order: 1,
-          file_name: 'poolvilla_main.jpg',
-          file_size: 2.5 * 1024 * 1024,
-          uploaded_at: '2024-01-15T10:30:00Z',
-          is_main: true
-        },
-        {
-          id: '2',
-          accommodation_id: '1',
-          accommodation_name: '구공스테이 풀빌라',
-          image_url: '/images/90staycj/2.jpg',
-          image_order: 2,
-          file_name: 'poolvilla_pool.jpg',
-          file_size: 3.2 * 1024 * 1024,
-          uploaded_at: '2024-01-15T10:35:00Z',
-          is_main: false
-        },
-        {
-          id: '3',
-          accommodation_id: '1',
-          accommodation_name: '구공스테이 풀빌라',
-          image_url: '/images/90staycj/3.jpg',
-          image_order: 3,
-          file_name: 'poolvilla_interior.jpg',
-          file_size: 2.8 * 1024 * 1024,
-          uploaded_at: '2024-01-15T10:40:00Z',
-          is_main: false
-        },
-        {
-          id: '4',
-          accommodation_id: '2',
-          accommodation_name: '구공스테이 독채',
-          image_url: '/images/90staycj/4.jpg',
-          image_order: 1,
-          file_name: 'private_house_main.jpg',
-          file_size: 2.1 * 1024 * 1024,
-          uploaded_at: '2024-01-16T14:20:00Z',
-          is_main: true
-        },
-        {
-          id: '5',
-          accommodation_id: '2',
-          accommodation_name: '구공스테이 독채',
-          image_url: '/images/90staycj/5.jpg',
-          image_order: 2,
-          file_name: 'private_house_living.jpg',
-          file_size: 2.9 * 1024 * 1024,
-          uploaded_at: '2024-01-16T14:25:00Z',
-          is_main: false
-        }
-      ],
-      'host-2': [
-        {
-          id: '6',
-          accommodation_id: '3',
-          accommodation_name: '스테이도고 펜션',
-          image_url: '/images/sample/pension1.jpg',
-          image_order: 1,
-          file_name: 'pension_exterior.jpg',
-          file_size: 1.8 * 1024 * 1024,
-          uploaded_at: '2024-01-20T09:15:00Z',
-          is_main: true
-        }
-      ]
-    }
-
-    return photoDataMap[hostId] || []
-  }
-
-  useEffect(() => {
-    if (hostData) {
-      const timeoutId = setTimeout(() => {
-        loadPhotos(hostData.host_id)
-      }, 300)
-
-      return () => clearTimeout(timeoutId)
-    }
-  }, [searchQuery, accommodationFilter, hostData])
 
   const handleImageUpload = async (files: FileList, accommodationId: string) => {
     try {
@@ -315,7 +163,7 @@ export default function HostPhotosPage() {
       if (validFiles.length > 0) {
         // 실제로는 Supabase Storage 업로드
         alert(`${validFiles.length}개의 이미지가 성공적으로 업로드되었습니다.`)
-        loadPhotos(hostData.host_id)
+        loadPhotosWithFilters()
       }
       
     } catch (error) {

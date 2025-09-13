@@ -2,9 +2,11 @@
 module.exports = {
   darkMode: ['class'],
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './lib/**/*.{js,ts,jsx,tsx,mdx}',
+    // pages 디렉토리는 사용하지 않으므로 제외
+    // public, node_modules, .next 등은 자동 제외됨
   ],
   theme: {
     container: {

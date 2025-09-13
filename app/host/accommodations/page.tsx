@@ -70,11 +70,11 @@ export default function HostAccommodationsPage() {
         throw new Error(result.error || 'API 호출 실패')
       }
       
-      if (result.success) {
+      if (result.ok) {
         setAccommodations(result.data || [])
         return
       } else {
-        throw new Error(result.error || '데이터 로드 실패')
+        throw new Error(result.message || '데이터 로드 실패')
       }
 
     } catch (error) {
@@ -109,10 +109,10 @@ export default function HostAccommodationsPage() {
       const response = await hostGet(`/api/host/accommodations?${params}`)
       const result = await response.json()
       
-      if (result.success) {
+      if (result.ok) {
         setAccommodations(result.data || [])
       } else {
-        throw new Error(result.error || '데이터 로드 실패')
+        throw new Error(result.message || '데이터 로드 실패')
       }
     } catch (error) {
       console.error('숙소 목록 로드 실패:', error)

@@ -1,117 +1,76 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
+import { withHostAuth } from '@/lib/auth/withHostAuth'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
+export const GET = withHostAuth(async ({ req, supabase, roleIds }) => {
   try {
-    // 세션 쿠키에서 호스트 인증 토큰 확인
-    const cookies = request.cookies
-    const hostAuth = cookies.get('hostAuth')?.value === 'true'
-    const sessionHostId = cookies.get('hostId')?.value
+    const hostId = roleIds.hostId!
 
-    if (!hostAuth || !sessionHostId) {
-      return NextResponse.json({ error: '인증이 필요합니다' }, { status: 401 })
+    // 오늘 날짜 구하기 (KST)
+    const today = new Date()
+    const todayKST = new Date(today.getTime() + (9 * 60 * 60 * 1000)) // UTC + 9
+    const todayString = todayKST.toISOString().split('T')[0]
+
+    // 오늘의 예약 통계 (accommodation을 통해 조인)
+    const { data: todayReservations, error: reservationError } = await supabase
+      .from('reservations')
+      .select(`
+        id, 
+        total_amount, 
+        status,
+        accommodation:accommodations!inner(host_id)
+      `)
+      .eq('accommodation.host_id', hostId)
+      .gte('checkin_date', todayString)
+      .lt('checkin_date', todayString + 'T23:59:59')
+
+    if (reservationError) {
+      console.error('예약 통계 조회 실패:', reservationError)
+      return NextResponse.json({ 
+        ok: false, 
+        code: 'QUERY_ERROR', 
+        message: reservationError.message 
+      }, { status: 500 })
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Supabase configuration missing')
-      return NextResponse.json(
-        { error: '서버 설정 오류입니다.' },
-        { status: 500 }
-      )
+    // 오늘의 문의 통계
+    const { data: todayInquiries, error: inquiryError } = await supabase
+      .from('inquiries')
+      .select('id, status')
+      .eq('user_type', 'host')
+      .eq('user_id', hostId)
+      .gte('created_at', todayString)
+      .lt('created_at', todayString + 'T23:59:59')
+
+    if (inquiryError) {
+      console.error('문의 통계 조회 실패:', inquiryError)
+      return NextResponse.json({ 
+        ok: false, 
+        code: 'QUERY_ERROR', 
+        message: inquiryError.message 
+      }, { status: 500 })
     }
 
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
-    const today = new Date().toISOString().split('T')[0]
-
-    try {
-      // 호스트 정보 가져오기 (세션 hostId와 일치 확인)
-      const { data: hostData, error: hostError } = await supabaseAdmin
-        .from('hosts')
-        .select('id, auth_user_id')
-        .eq('id', sessionHostId)
-        .single()
-
-      if (hostError || !hostData || !hostData.auth_user_id) {
-        return NextResponse.json(
-          { error: '호스트를 찾을 수 없습니다.' },
-          { status: 404 }
-        )
-      }
-
-      // 호스트의 숙소들 가져오기
-      const { data: accommodations } = await supabaseAdmin
-        .from('accommodations')
-        .select('id')
-        .eq('host_id', hostData.id)
-
-      if (!accommodations || accommodations.length === 0) {
-        return NextResponse.json({
-          success: true,
-          stats: {
-            checkins: 0,
-            checkouts: 0,
-            reservations: 0
-          }
-        })
-      }
-
-      const accommodationIds = accommodations.map(acc => acc.id)
-
-      // 병렬로 통계 데이터 가져오기
-      const [todayCheckins, todayCheckouts, todayReservations] = await Promise.all([
-        // 오늘의 체크인 예약
-        supabaseAdmin
-          .from('reservations')
-          .select('id')
-          .in('accommodation_id', accommodationIds)
-          .eq('checkin_date', today)
-          .eq('status', 'confirmed'),
-        
-        // 오늘의 체크아웃 예약
-        supabaseAdmin
-          .from('reservations')
-          .select('id')
-          .in('accommodation_id', accommodationIds)
-          .eq('checkout_date', today)
-          .eq('status', 'confirmed'),
-        
-        // 오늘의 신규 예약
-        supabaseAdmin
-          .from('reservations')
-          .select('id')
-          .in('accommodation_id', accommodationIds)
-          .gte('created_at', `${today}T00:00:00`)
-          .lt('created_at', `${today}T23:59:59`)
-      ])
-
-      return NextResponse.json({
-        success: true,
-        stats: {
-          checkins: todayCheckins.data?.length || 0,
-          checkouts: todayCheckouts.data?.length || 0,
-          reservations: todayReservations.data?.length || 0
-        }
-      })
-
-    } catch (error) {
-      console.error('Host stats error:', error)
-      return NextResponse.json(
-        { error: '통계 조회 중 오류가 발생했습니다.' },
-        { status: 500 }
-      )
+    // 통계 계산
+    const stats = {
+      today_reservations: todayReservations?.length || 0,
+      today_revenue: todayReservations?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || 0,
+      today_inquiries: todayInquiries?.length || 0,
+      pending_inquiries: todayInquiries?.filter(i => i.status === 'pending').length || 0
     }
+
+    return NextResponse.json({
+      ok: true,
+      data: stats
+    })
 
   } catch (error) {
-    console.error('Host stats API error:', error)
+    console.error('호스트 통계 API 에러:', error)
     return NextResponse.json(
-      { error: '서버 오류가 발생했습니다.' },
+      { ok: false, code: 'QUERY_ERROR', message: 'Failed to load host stats' },
       { status: 500 }
     )
   }
-}
+})

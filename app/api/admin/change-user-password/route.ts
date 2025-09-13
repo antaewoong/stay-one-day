@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 // 관리자 비밀번호 변경 (server-role 사용: 서버 한정)
 // 주의: 서비스키는 서버에서만. 라우트 접근은 withAdminAuth로 추가 방어.
-export const POST = withAdminAuth(async (request: NextRequest, supabase: any, { userId: adminUserId, admin }: any) => {
+export const POST = withAdminAuth(async (request: NextRequest, supabase: any, ctx: any) => {
   const { userId, userEmail, newPassword, userType } = await request.json()
   
   if (!userId && !userEmail) {
@@ -23,7 +23,7 @@ export const POST = withAdminAuth(async (request: NextRequest, supabase: any, { 
     }, { status: 400 })
   }
 
-  const admin = createClient(
+  const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY! // 서버 전용 (절대 클라 노출 금지)
   )
@@ -31,7 +31,7 @@ export const POST = withAdminAuth(async (request: NextRequest, supabase: any, { 
   // userId가 없으면 이메일로 사용자 조회
   let targetUserId = userId
   if (!targetUserId && userEmail) {
-    const { data: authUser, error: getUserError } = await admin.auth.admin.getUserByEmail(userEmail)
+    const { data: authUser, error: getUserError } = await supabaseAdmin.auth.admin.getUserByEmail(userEmail)
     
     if (getUserError || !authUser.user) {
       return NextResponse.json({ 
@@ -44,7 +44,7 @@ export const POST = withAdminAuth(async (request: NextRequest, supabase: any, { 
   }
 
   // Supabase Auth Admin API로 비밀번호 변경
-  const { data: updateResult, error } = await admin.auth.admin.updateUserById(targetUserId, { 
+  const { data: updateResult, error } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, { 
     password: newPassword 
   })
   
@@ -60,21 +60,21 @@ export const POST = withAdminAuth(async (request: NextRequest, supabase: any, { 
   try {
     switch (userType) {
       case 'host':
-        await admin.from('hosts').update({ 
+        await supabaseAdmin.from('hosts').update({ 
           password_hash: newPassword,
           updated_at: new Date().toISOString()
         }).eq('auth_user_id', targetUserId)
         tableUpdated = true
         break
       case 'admin':
-        await admin.from('admin_accounts').update({ 
+        await supabaseAdmin.from('admin_accounts').update({ 
           password_hash: newPassword,
           updated_at: new Date().toISOString()
         }).eq('auth_user_id', targetUserId)
         tableUpdated = true
         break
       case 'influencer':
-        await admin.from('influencers').update({ 
+        await supabaseAdmin.from('influencers').update({ 
           password_hash: newPassword,
           updated_at: new Date().toISOString()
         }).eq('email', updateResult.user.email)
@@ -87,8 +87,8 @@ export const POST = withAdminAuth(async (request: NextRequest, supabase: any, { 
 
   // 관리자 활동 로그 기록
   try {
-    await admin.from('admin_activity_logs').insert({
-      admin_id: adminUserId,
+    await supabaseAdmin.from('admin_activity_logs').insert({
+      admin_id: ctx.admin?.auth_user_id,
       action: 'password_change',
       target_user_id: targetUserId,
       target_user_type: userType,

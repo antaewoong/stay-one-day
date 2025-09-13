@@ -14,6 +14,20 @@ import { motion } from 'framer-motion'
 import { StarRating } from '@/components/ui/star-rating'
 import { memo } from 'react'
 
+interface BadgeData {
+  badge_id: string
+  badge_name: string
+  badge_label: string
+  color_scheme: string
+  background_color: string
+  text_color: string
+  border_color?: string
+  icon?: string
+  priority: number
+  expires_at?: string
+  badge_active: boolean
+}
+
 interface StayCardProps {
   stay: {
     id: string
@@ -28,6 +42,7 @@ interface StayCardProps {
     isHot?: boolean
     isNew?: boolean
     discount?: number
+    badges?: BadgeData[] // 새로운 뱃지 시스템
   }
   index?: number
   handleCardClick: (e: React.MouseEvent, id: string) => void
@@ -110,27 +125,55 @@ const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, load
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             )}
             
-            {/* 뱃지들 - 스테이폴리오 스타일 */}
-            <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-              {variant === 'featured' && (
-                <Badge className="bg-red-500/90 backdrop-blur-sm text-white border-0 shadow-sm font-medium text-xs px-3 py-1 rounded-full">
-                  PICK
-                </Badge>
-              )}
-              {stay.discount && (
-                <Badge className="bg-white/95 backdrop-blur-sm text-gray-900 border-0 shadow-sm font-semibold text-xs px-3 py-1 rounded-full">
-                  -{stay.discount}%
-                </Badge>
-              )}
-              {stay.isHot && (
-                <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 shadow-sm text-xs px-3 py-1 rounded-full">
-                  HOT
-                </Badge>
-              )}
-              {stay.isNew && (
-                <Badge className="bg-blue-500/90 backdrop-blur-sm text-white border-0 shadow-sm text-xs px-3 py-1 rounded-full">
-                  NEW
-                </Badge>
+            {/* 뱃지들 - 스테이폴리오 스타일 (새로운 시스템) */}
+            <div className="absolute top-4 left-4 flex flex-wrap gap-2 max-w-[calc(100%-2rem)]">
+              {/* 새로운 뱃지 시스템 사용 */}
+              {stay.badges && stay.badges.length > 0 ? (
+                stay.badges
+                  .filter(badge => badge.badge_active)
+                  .sort((a, b) => b.priority - a.priority) // 우선순위 높은 순
+                  .slice(0, 3) // 최대 3개까지만 표시
+                  .map((badge) => {
+                    // 동적 할인율 처리
+                    const displayText = badge.badge_name === 'DISCOUNT_PERCENT' && stay.discount 
+                      ? `-${stay.discount}%` 
+                      : badge.badge_label
+
+                    return (
+                      <Badge 
+                        key={badge.badge_id}
+                        className={`${badge.background_color} ${badge.text_color} backdrop-blur-sm border-0 shadow-sm font-medium text-xs px-3 py-1 rounded-full transition-all duration-300 hover:scale-105 ${
+                          badge.border_color ? `border ${badge.border_color}` : ''
+                        }`}
+                      >
+                        {displayText}
+                      </Badge>
+                    )
+                  })
+              ) : (
+                /* 기본 뱃지들 (하위 호환성) */
+                <>
+                  {variant === 'featured' && (
+                    <Badge className="bg-red-500/90 backdrop-blur-sm text-white border-0 shadow-sm font-medium text-xs px-3 py-1 rounded-full">
+                      PICK
+                    </Badge>
+                  )}
+                  {stay.discount && (
+                    <Badge className="bg-white/95 backdrop-blur-sm text-gray-900 border-0 shadow-sm font-semibold text-xs px-3 py-1 rounded-full">
+                      -{stay.discount}%
+                    </Badge>
+                  )}
+                  {stay.isHot && (
+                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 shadow-sm text-xs px-3 py-1 rounded-full">
+                      HOT
+                    </Badge>
+                  )}
+                  {stay.isNew && (
+                    <Badge className="bg-blue-500/90 backdrop-blur-sm text-white border-0 shadow-sm text-xs px-3 py-1 rounded-full">
+                      NEW
+                    </Badge>
+                  )}
+                </>
               )}
             </div>
             
