@@ -155,7 +155,7 @@ const HeroSection = memo(function HeroSection({
               <Link href="/" className="text-white hover:text-white/80 transition-colors p-2">
                 <Home className="w-5 h-5" />
               </Link>
-              <Link href="/" className="text-2xl font-light text-white tracking-tight">
+              <Link href="/" className="font-light text-white tracking-tight" style={{ fontSize: '3.5rem', lineHeight: '1' }}>
                 stay<span className="font-medium">oneday</span>
               </Link>
             </div>

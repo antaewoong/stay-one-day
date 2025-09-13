@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ChevronLeft, ChevronRight, Search, MapPin, CalendarDays, Users, Heart } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, Heart, Users } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface HeroSlide {
   id: string
@@ -37,53 +37,51 @@ function clamp(n: number, min = 0, max = 1) {
 }
 
 export default function HeroSection({ slides }: HeroSectionProps) {
-  // null-safe 처리
   const items = useMemo<HeroSlide[]>(() => (Array.isArray(slides) ? slides : []), [slides])
   
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [searchLocation, setSearchLocation] = useState('')
-  const [selectedDate, setSelectedDate] = useState('')
-  const [guestCount, setGuestCount] = useState(2)
-  
-  // 스테이폴리오 스크롤 애니메이션
-  const heroRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  const [p, setP] = useState(0); // 0 = 히어로 상태, 1 = 헤더 도킹
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const heroRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
 
-  // 초기화는 useEffect에서 처리
   useEffect(() => {
     if (items.length > 0) {
       setCurrentSlide(0)
     }
   }, [items.length])
 
-  // 스테이폴리오 스크롤 애니메이션 로직
   useEffect(() => {
-    const onScroll = () => {
-      const hero = heroRef.current, sticky = stickyRef.current;
-      if (!hero || !sticky) return;
+    const handleScroll = () => {
+      const hero = heroRef.current
+      const search = searchRef.current
+      if (!hero || !search) return
 
-      const h = hero.getBoundingClientRect();
-      const s = sticky.getBoundingClientRect();
-      
-      // 진행도 정의: 검색창 상단이 뷰포트 top에 가까워질수록 1
-      const startY = h.top + h.height * 0.40; // 히어로 40% 지점부터 축소 시작
-      const endY = 8; // 헤더 safe-top 여백
-      const raw = (startY - s.top) / Math.max(1, startY - endY);
-      setP(clamp(raw));
-    };
-    
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    
+      const heroHeight = hero.offsetHeight
+      // body의 scrollTop 사용 (실제 스크롤 컨테이너)
+      const scrollY = document.body.scrollTop || document.documentElement.scrollTop
+
+      // 스크롤 시작부터 애니메이션 시작
+      const progress = Math.min(scrollY / heroHeight, 1)
+
+      setScrollProgress(progress)
+
+      console.log('Scroll progress:', progress, 'ScrollY:', scrollY, 'Hero height:', heroHeight)
+    }
+
+    handleScroll() // 초기 실행
+
+    // body에 스크롤 이벤트 리스너 추가
+    document.body.addEventListener('scroll', handleScroll, { passive: true })
+    document.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleScroll)
+
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
+      document.body.removeEventListener('scroll', handleScroll)
+      document.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
+    }
+  }, [])
 
-  // 자동 슬라이드 전환
   useEffect(() => {
     if (items.length === 0) return
     
@@ -115,77 +113,77 @@ export default function HeroSection({ slides }: HeroSectionProps) {
 
   return (
     <div className="relative">
-      {/* 헤더 (투명 시작 → 도킹 후 배경) */}
-      <header className="sticky top-0 z-[60] safe-pt">
-        <div className={`h-14 transition-colors duration-200 ${p > 0.85 ? "bg-white/80 backdrop-blur border-b border-gray-100/50" : "bg-transparent"}`} />
-      </header>
+      {/* 완전 풀스크린 히어로 섹션 - 노치까지 확장 + 브레이크포인트별 높이 */}
+      <section
+        ref={heroRef}
+        className="relative bg-gray-900 min-h-[65vh] sm:min-h-[75vh] md:min-h-[85vh]"
+      >
+        <div className="absolute inset-0">
+          {items.map((slide, index) => {
+            const imageUrl = slide.image_url || slide.image || ''
+            if (!imageUrl) return null
+            
+            return (
+              <div
+                key={slide.id}
+                className={`absolute inset-0 transition-all duration-1000 ${
+                  index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+                }`}
+              >
+                {/* Next.js Image with LCP optimization + Art Direction */}
+                <Image
+                  src={imageUrl}
+                  alt={slide.title || slide.headline || '히어로 이미지'}
+                  fill
+                  className="object-cover object-center sm:object-top"
+                  style={{
+                    filter: 'contrast(1.15) brightness(1.05) saturate(1.1)',
+                    objectPosition: 'center center'
+                  }}
+                  priority={index === 0}
+                  quality={90}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
+                />
+                
+                {/* 그라디언트 오버레이 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-black/35 via-transparent to-black/15"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40"></div>
+              </div>
+            )
+          })}
+        </div>
 
-      {/* 히어로 섹션 */}
-      <section ref={heroRef} className="relative overflow-hidden bg-gray-900 min-h-[72svh]">
-      {/* 배경 슬라이드들 */}
-      <div className="absolute inset-0">
-        {items.map((slide, index) => {
-          const imageUrl = slide.image_url || slide.image || ''
-          return (
-            <div
-              key={slide.id}
-              className={`absolute inset-0 transition-all duration-1000 ${
-                index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-              }`}
-              style={{
-                backgroundImage: `linear-gradient(135deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.15)), url('${imageUrl}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                filter: 'contrast(1.15) brightness(1.05) saturate(1.1)',
-              }}
-            >
-              {/* 프리미엄 오버레이 - 스테이폴리오 스타일 명암비 강화 */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40"></div>
+        <div className="absolute inset-y-0 left-4 flex items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={prevSlide}
+            className="text-white hover:bg-white/10 rounded-full h-12 w-12 backdrop-blur-sm"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </Button>
+        </div>
+        <div className="absolute inset-y-0 right-4 flex items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={nextSlide}
+            className="text-white hover:bg-white/10 rounded-full h-12 w-12 backdrop-blur-sm"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </Button>
+        </div>
+
+        <div className="absolute inset-0 flex flex-col">
+          {/* 상단 좌측 로고 */}
+          <div className="absolute top-4 left-4 z-[200]">
+            <div className="text-white text-2xl md:text-4xl font-light tracking-wide drop-shadow-lg">
+              stay<span className="font-medium">oneday</span>
             </div>
-          )
-        })}
-      </div>
-
-      {/* 네비게이션 버튼들 */}
-      <div className="absolute inset-y-0 left-4 flex items-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={prevSlide}
-          className="text-white hover:bg-white/10 rounded-full h-12 w-12 backdrop-blur-sm"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </Button>
-      </div>
-      <div className="absolute inset-y-0 right-4 flex items-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={nextSlide}
-          className="text-white hover:bg-white/10 rounded-full h-12 w-12 backdrop-blur-sm"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </Button>
-      </div>
-
-      {/* 스테이폴리오 정확한 히어로 컨텐츠 */}
-      <div className="absolute inset-0 flex flex-col">
-        <div className="relative mx-auto max-w-5xl px-4 pt-20 pb-16">
-          {/* 로고: 스크롤하며 페이드아웃 */}
-          <div
-            className="text-white text-lg md:text-2xl font-light tracking-wide mb-8 will-change-opacity"
-            style={{ opacity: 1 - p, transition: "opacity 150ms ease-out" }}
-          >
-            stay<span className="font-medium">oneday</span>
           </div>
-          
-          {/* 우측 메뉴: 스크롤하며 페이드아웃 */}
-          <div 
-            className="absolute top-6 right-4 md:right-8 flex items-center will-change-opacity"
-            style={{ opacity: 1 - p, transition: "opacity 150ms ease-out" }}
-          >
-            {/* 데스크탑 텍스트 메뉴 */}
+
+          {/* 상단 우측 버튼들 */}
+          <div className="absolute top-4 right-4 z-[200] flex items-center">
             <div className="hidden md:flex items-center gap-8 text-white text-sm font-medium mr-8">
               <Link href="/spaces" className="hover:text-white/80 transition-colors">FIND STAY</Link>
               <Link href="/promotion" className="hover:text-white/80 transition-colors">PROMOTION</Link>
@@ -193,59 +191,93 @@ export default function HeroSection({ slides }: HeroSectionProps) {
               <Link href="/preorder" className="hover:text-white/80 transition-colors">PRE-ORDER</Link>
             </div>
             
-            {/* 우측 아이콘들 */}
             <div className="flex items-center gap-1 md:gap-2">
-              <button className="p-1.5 md:p-2 text-white hover:bg-white/10 rounded-full transition-colors">
-                <Heart className="w-4 h-4 md:w-5 md:h-5" />
+              <button className="p-1.5 md:p-2 text-white hover:bg-white/20 rounded-full transition-all duration-300 bg-black/10 backdrop-blur-sm border border-white/20 hover:border-white/40 shadow-lg">
+                <Heart className="w-4 h-4 md:w-5 md:h-5 drop-shadow-sm" />
               </button>
-              <button className="p-1.5 md:p-2 text-white hover:bg-white/10 rounded-full transition-colors">
-                <Users className="w-4 h-4 md:w-5 md:h-5" />
+              <button className="p-1.5 md:p-2 text-white hover:bg-white/20 rounded-full transition-all duration-300 bg-black/10 backdrop-blur-sm border border-white/20 hover:border-white/40 shadow-lg">
+                <Users className="w-4 h-4 md:w-5 md:h-5 drop-shadow-sm" />
               </button>
             </div>
           </div>
-          
-          {/* 검색창: 하나의 DOM이 sticky로 위로 '올라감' */}
-          <div ref={stickyRef} className="sticky z-[55] top-[calc(var(--sat,0px)+8px)]">
+
+          <div className="relative mx-auto w-full max-w-sm px-4 pt-20 pb-16">
             <div
-              className="will-change-transform transition-[border-radius,box-shadow] duration-150 mx-auto"
+              ref={searchRef}
+              className="z-40"
               style={{
-                transform: `scale(${1 - 0.18 * p})`,
-                borderRadius: `calc(22px - 10px * ${p})`,
-                boxShadow: p > 0.95 ? "0 8px 24px rgba(0,0,0,0.12)" : "0 2px 12px rgba(0,0,0,0.08)",
-                maxWidth: p > 0.6 ? '480px' : '600px',
-                transition: 'max-width 150ms ease-out'
+                position: scrollProgress > 0.08 ? 'fixed' : 'relative',
+                top: scrollProgress > 0.08 ? '0px' : 'auto',
+                left: scrollProgress > 0.08 ? '0px' : 'auto',
+                right: scrollProgress > 0.08 ? '0px' : 'auto',
+                transform: scrollProgress > 0.08
+                  ? 'none'
+                  : `translateY(${-scrollProgress * 120}px)`,
+                width: scrollProgress > 0.08
+                  ? scrollProgress < 0.2
+                    ? `${Math.min(384 + (scrollProgress - 0.08) * 1200, window.innerWidth)}px`
+                    : '100vw'
+                  : 'auto',
+                padding: scrollProgress > 0.08 ? '8px 16px' : '0',
+                zIndex: scrollProgress > 0.08 ? 100 : 40,
+                transition: 'none'
               }}
             >
-              <SearchBar compact={p > 0.6} />
+              <div
+                className={`${scrollProgress > 0.095
+                  ? 'max-w-4xl mx-auto bg-white/95 backdrop-blur-sm py-2.5 px-5 h-11 rounded-full'  // 헤더에서는 더 넓게
+                  : 'w-full bg-white/95 backdrop-blur-sm py-2.5 px-5 h-11 rounded-full'             // 처음 크기
+                } flex items-center gap-3 cursor-pointer hover:bg-white/98 transition-all duration-150 shadow-lg border-0 relative`}
+                onClick={() => {
+                  const event = new CustomEvent('openSearchModal');
+                  window.dispatchEvent(event);
+                }}
+              >
+                <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <div className="flex-1 text-left">
+                  <div className="text-gray-500 font-normal text-base">
+                    온전한 쉼, 완벽한 하루
+                  </div>
+                </div>
+
+                {/* 헤더에 붙었을 때 우측 버튼들을 점진적으로 표시 */}
+                {scrollProgress > 0.12 && (
+                  <div
+                    className="flex items-center gap-1 absolute right-3"
+                    style={{
+                      opacity: Math.min(1, (scrollProgress - 0.12) * 4),
+                      transform: `translateX(${Math.max(0, (0.2 - scrollProgress) * 200)}px)`
+                    }}
+                  >
+                    <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-300">
+                      <Heart className="w-4 h-4" />
+                    </button>
+                    <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-300">
+                      <Users className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        {/* 히어로 텍스트 - 하단에 배치 */}
-        <div className="absolute bottom-0 left-0 right-0">
-          {items.length > 0 && items[currentSlide] && (
-            <div 
-              className="text-left pb-16 max-w-lg px-4 md:px-8 will-change-opacity"
-              style={{ 
-                opacity: 1 - p * 1.5, 
-                transition: "opacity 150ms ease-out",
-                transform: `translateY(${p * 20}px)`
-              }}
-            >
-              <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight drop-shadow-2xl leading-tight">
-                {items[currentSlide]?.title || items[currentSlide]?.headline || '감성에서 머무는'}
-              </h1>
-              <h2 className="text-lg md:text-xl font-light text-white/90 mb-2 tracking-wide drop-shadow-lg">
-                {items[currentSlide]?.subtitle || items[currentSlide]?.subheadline || '아주 특별한 감성이 흘러'}
-              </h2>
-              <p className="text-sm md:text-base text-white/80 font-light tracking-wide drop-shadow-md">
-                특별한 공간에서의 완벽한 하루를 만나보세요
-              </p>
-            </div>
-          )}
+          <div className="absolute bottom-0 left-0 right-0">
+            {items.length > 0 && items[currentSlide] && (
+              <div className="text-left pb-16 max-w-lg px-4 md:px-8">
+                <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight drop-shadow-2xl leading-tight">
+                  {items[currentSlide]?.title || items[currentSlide]?.headline || '감성에서 머무는'}
+                </h1>
+                <h2 className="text-lg md:text-xl font-light text-white/90 mb-2 tracking-wide drop-shadow-lg">
+                  {items[currentSlide]?.subtitle || items[currentSlide]?.subheadline || '아주 특별한 감성이 흘러'}
+                </h2>
+                <p className="text-sm md:text-base text-white/80 font-light tracking-wide drop-shadow-md">
+                  특별한 공간에서의 완벽한 하루를 만나보세요
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* 슬라이드 인디케이터 */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {items.map((_, index) => (
           <button
@@ -263,28 +295,3 @@ export default function HeroSection({ slides }: HeroSectionProps) {
   )
 }
 
-// 스테이폴리오 스타일 SearchBar 컴포넌트
-function SearchBar({ compact }: { compact: boolean }) {
-  const handleOpenModal = () => {
-    const event = new CustomEvent('openSearchModal');
-    window.dispatchEvent(event);
-  };
-
-  return (
-    <div
-      className={`w-full bg-white/95 backdrop-blur-sm px-5 ${
-        compact ? "py-2 h-12" : "py-3 h-14"
-      } rounded-full flex items-center gap-3 cursor-pointer hover:bg-white/98 transition-all duration-150 shadow-lg`}
-      style={{ transition: "height 150ms ease-out, padding 150ms ease-out" }}
-      onClick={handleOpenModal}
-    >
-      <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
-      <div className="flex-1 text-left">
-        <div className={`text-gray-500 font-medium ${compact ? 'text-sm' : 'text-sm md:text-base'}`}>
-          <span className="md:hidden">검색</span>
-          <span className="hidden md:inline">어디든 검색하세요</span>
-        </div>
-      </div>
-    </div>
-  );
-}

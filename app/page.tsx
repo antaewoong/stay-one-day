@@ -882,75 +882,39 @@ export default function HomePage() {
       <HeroSection slides={heroSlides} />
 
       {/* 추천 스테이 섹션 - 히어로 바로 뒤 */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-light text-gray-900 tracking-tight">추천 스테이</h2>
-              <p className="text-gray-500 font-light mt-1">엄선된 프리미엄 숙소</p>
-            </div>
-            <Button variant="tertiary" asChild>
-              <Link href="/spaces" className="flex items-center transition-colors duration-300 group">
-                <span>더보기</span>
-                <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
-          </div>
-
-          <div 
-            ref={recommendedScrollRef}
-            className="overflow-x-auto overflow-y-hidden -mx-4 select-none scroll-container"
-            style={{
-              cursor: dragState.isDown ? 'grabbing' : 'grab',
-              scrollbarWidth: 'none', 
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
-              scrollBehavior: 'auto',
-              touchAction: 'pan-y pan-x' // 세로 스크롤 우선, 가로 스크롤도 허용
-            }}
-            onMouseDown={(e) => handleMouseDown(recommendedScrollRef, e)}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseLeave}
-            onTouchStart={(e) => handleTouchStart(recommendedScrollRef, e)}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onDragStart={(e) => e.preventDefault()}
-          >
-            <div className="flex space-x-4 pb-4 pl-4" style={{ width: 'max-content', paddingRight: '40vw' }}>
-              {loading ? (
-                // 로딩 스켈레톤
-                Array.from({ length: 4 }).map((_, index) => (
-                  <StayCard 
-                    key={index}
-                    stay={{} as any}
-                    handleCardClick={() => {}}
-                    loading={true}
-                  />
-                ))
-              ) : (
-                featuredStays.slice(0, 6).map((stay, index) => (
-                  <StayCard 
-                    key={stay.id}
-                    stay={stay}
-                    index={index}
-                    handleCardClick={handleCardClick}
-                    variant="featured"
-                    useNextImage={true}
-                  />
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+      <SectionContainer
+        title=""
+        subtitle=""
+        mainTitle="완벽한 하루를 위한"
+        secondTitle="추천 스테이"
+        detailDescription="엄선된 특별한 공간들"
+        bgColor="bg-white"
+        stays={featuredStays}
+        loading={loading}
+        scrollRef={recommendedScrollRef}
+        dragState={dragState}
+        handleMouseDown={handleMouseDown}
+        handleMouseMove={handleMouseMove}
+        handleMouseUp={handleMouseUp}
+        handleMouseLeave={handleMouseLeave}
+        handleTouchStart={handleTouchStart}
+        handleTouchMove={handleTouchMove}
+        handleTouchEnd={handleTouchEnd}
+        handleCardClick={handleCardClick}
+        useNextImage={true}
+        variant="featured"
+      />
 
 
       {/* 풀빌라 섹션 */}
       <SectionContainer
         id="poolvilla"
-        title="풀빌라"
-        subtitle="프라이빗 풀이 있는 럭셔리 공간"
+        title=""
+        subtitle=""
+        mainTitle="물 위에서 꿈꾸는"
+        secondTitle="풀빌라"
+        detailDescription="투명한 수면과 함께하는 특별한 시간"
+        sectionLabel="PRIVATE POOL"
         bgColor="bg-gray-50/50"
         stays={poolvillaStays}
         loading={loading}
@@ -970,8 +934,12 @@ export default function HomePage() {
       {/* 독채 섹션 */}
       <SectionContainer
         id="private"
-        title="독채"
-        subtitle="온전한 프라이버시를 위한 독채 공간"
+        title=""
+        subtitle=""
+        mainTitle="우리만의 프라이빗함"
+        secondTitle="독채 스테이"
+        detailDescription="온전히 우리만을 위한 독립된 공간"
+        sectionLabel="PRIVATE HOUSE"
         bgColor="bg-white"
         stays={privateStays}
         loading={loading}
@@ -991,8 +959,12 @@ export default function HomePage() {
       {/* 키즈 섹션 */}
       <SectionContainer
         id="kids"
-        title="키즈"
-        subtitle="아이들과 함께하는 안전하고 즐거운 공간"
+        title=""
+        subtitle=""
+        mainTitle="아이들의 웃음소리 가득한"
+        secondTitle="키즈 전용 스테이"
+        detailDescription="온 가족이 함께하는 안전하고 즐거운 시간"
+        sectionLabel="KIDS FRIENDLY"
         bgColor="bg-gray-50"
         stays={kidsStays}
         loading={loading}
@@ -1012,8 +984,12 @@ export default function HomePage() {
       {/* 파티 섹션 */}
       <SectionContainer
         id="party"
-        title="파티"
-        subtitle="특별한 모임과 파티를 위한 완벽한 공간"
+        title=""
+        subtitle=""
+        mainTitle="빛나는 순간으로 기억될"
+        secondTitle="파티 스테이"
+        detailDescription="소중한 사람들과 만드는 특별한 추억"
+        sectionLabel="PARTY & EVENT"
         bgColor="bg-white"
         stays={partyStays}
         loading={loading}
@@ -1035,8 +1011,9 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-light text-gray-900 tracking-tight">신규</h2>
-              <p className="text-gray-500 font-light mt-1">새롭게 추가된 특별한 공간들</p>
+              <h2 className="text-xl md:text-2xl font-normal text-gray-900 leading-tight mb-1">스테이 원데이</h2>
+              <h3 className="text-xl md:text-2xl font-normal text-gray-900 leading-tight mb-2">신규 스테이</h3>
+              <p className="text-sm text-gray-500 font-light max-w-xl leading-relaxed">막 오픈한 따끈따끈한 새로운 공간들</p>
             </div>
             <Button variant="tertiary" asChild>
               <Link href="/spaces" className="flex items-center transition-colors duration-300 group">

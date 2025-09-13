@@ -9,6 +9,15 @@ module.exports = {
     // public, node_modules, .next 등은 자동 제외됨
   ],
   theme: {
+    screens: {
+      'xs': '375px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+      'mobile': { 'max': '639px' }, // 모바일 전용
+    },
     container: {
       center: true,
       padding: '2rem',

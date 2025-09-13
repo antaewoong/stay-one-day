@@ -67,7 +67,6 @@ export default function RootLayout({
             margin-right: calc(-1 * env(safe-area-inset-right));
             margin-top: calc(-1 * env(safe-area-inset-top));
             width: calc(100vw + env(safe-area-inset-left) + env(safe-area-inset-right));
-            min-height: calc(100vh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
           }
           
           /* 컨텐츠는 safe area 내부에 */

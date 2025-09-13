@@ -116,3 +116,15 @@ html, body {
   .safe-pb { padding-bottom: var(--sab, 0px); }
   .safe-pl { padding-left: var(--sal, 0px); }
 }
+
+/* 검색창 도킹 애니메이션 */
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0px);
+  }
+}

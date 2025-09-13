@@ -184,7 +184,7 @@ const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, load
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-gray-600" />
-                    <span className={`text-sm font-medium ${variant === 'featured' ? 'text-gray-800' : ''}`}>최대 {stay.capacity}명</span>
+                    <span className={`text-sm font-medium ${variant === 'featured' ? 'text-gray-800' : ''}`}>2명~{stay.capacity}명</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <StarRating rating={stay.rating} readonly size="sm" showNumber />
@@ -220,26 +220,40 @@ const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, load
           <CardContent className="pt-3 px-4 pb-3">
             {variant === 'featured' ? (
               <>
-                {/* 제목 - 스테이폴리오 스타일 */}
-                <h3 className="font-bold text-gray-900 mb-1 line-clamp-1 text-lg sm:text-base leading-tight">
+                {/* 제목 - 스테이폴리오 스타일 (볼드 제거) */}
+                <h3 className="font-normal text-gray-900 mb-1 line-clamp-1 text-lg sm:text-base leading-tight">
                   {stay.name}
                 </h3>
                 
                 {/* 위치와 기본 정보 */}
-                <div className="flex items-center text-gray-500 text-base sm:text-sm mb-3 font-medium">
+                <div className="flex items-center text-gray-500 text-base sm:text-sm mb-2 font-normal">
                   <span>{stay.location}</span>
                   <span className="mx-2">·</span>
-                  <span>최대 {stay.capacity}명</span>
+                  <span>기준 2명 ~ 최대 {stay.capacity}명</span>
                 </div>
                 
+                {/* 가격 정보 */}
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-semibold text-gray-900">
+                    {stay.price.toLocaleString()}원
+                    <span className="text-sm font-normal text-gray-500 ml-1">/ 박</span>
+                  </span>
+                </div>
               </>
             ) : (
               <>
-                <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1 text-lg sm:text-base">{stay.name}</h3>
-                <div className="flex items-center text-gray-500 text-sm mb-3">
+                <h3 className="font-normal text-gray-900 mb-1 line-clamp-1 text-lg sm:text-base">{stay.name}</h3>
+                <div className="flex items-center text-gray-500 text-sm mb-2">
                   <span>{stay.location}</span>
                   <span className="mx-2">·</span>
-                  <span>최대 {stay.capacity}명</span>
+                  <span>기준 2명 ~ 최대 {stay.capacity}명</span>
+                </div>
+                {/* 가격 정보 */}
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-semibold text-gray-900">
+                    {stay.price.toLocaleString()}원
+                    <span className="text-sm font-normal text-gray-500 ml-1">/ 박</span>
+                  </span>
                 </div>
               </>
             )}

@@ -9,6 +9,11 @@ interface SectionContainerProps {
   id?: string
   title: string
   subtitle: string
+  emotionalText?: string
+  sectionLabel?: string
+  mainTitle?: string
+  secondTitle?: string
+  detailDescription?: string
   bgColor?: string
   stays: any[]
   loading: boolean
@@ -30,6 +35,11 @@ const SectionContainer = memo(function SectionContainer({
   id,
   title,
   subtitle,
+  emotionalText,
+  sectionLabel,
+  mainTitle,
+  secondTitle,
+  detailDescription,
   bgColor = 'bg-white',
   stays,
   loading,
@@ -47,18 +57,52 @@ const SectionContainer = memo(function SectionContainer({
   variant = 'default'
 }: SectionContainerProps) {
   return (
-    <section id={id} className={`py-16 md:py-20 ${bgColor}`}>
+    <section id={id} className={`py-10 md:py-12 ${bgColor}`}>
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-light text-gray-900 tracking-tight">{title}</h2>
-            <p className="text-gray-500 font-light mt-1">{subtitle}</p>
+        {/* 스테이폴리오 스타일 섹션 헤더 */}
+        {(mainTitle || emotionalText) && (
+          <div className="mb-6">
+            {mainTitle && secondTitle ? (
+              <div className="mb-1">
+                <h2 className="text-xl md:text-2xl font-normal text-gray-900 leading-tight">
+                  {mainTitle}
+                </h2>
+                <h3 className="text-xl md:text-2xl font-normal text-gray-900 leading-tight mb-2">
+                  {secondTitle}
+                </h3>
+              </div>
+            ) : emotionalText && (
+              <h2 className="text-xl md:text-2xl font-normal text-gray-900 mb-2 leading-tight">
+                {emotionalText}
+              </h2>
+            )}
+            {detailDescription && (
+              <p className="text-sm text-gray-500 font-light max-w-xl leading-relaxed">
+                {detailDescription}
+              </p>
+            )}
+            {!detailDescription && subtitle && (
+              <p className="text-sm text-gray-500 font-light max-w-xl leading-relaxed">
+                {subtitle}
+              </p>
+            )}
           </div>
-          <Link href="/spaces" className="text-gray-400 hover:text-gray-900 flex items-center transition-colors duration-300 group">
-            <span className="font-light">더보기</span>
-            <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
-        </div>
+        )}
+        
+        {title && (
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-xl md:text-2xl font-medium text-gray-900">{title}</h3>
+              {!emotionalText && (
+                <p className="text-gray-500 font-light mt-1">{subtitle}</p>
+              )}
+            </div>
+            <Link href="/spaces" className="text-gray-400 hover:text-gray-900 flex items-center transition-colors duration-300 group">
+              <span className="font-light">더보기</span>
+              <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </div>
+        )}
 
         <div 
           ref={scrollRef}
