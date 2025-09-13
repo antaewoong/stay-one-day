@@ -784,18 +784,66 @@ export default function HomePage() {
     }
   }, [searchQuery, suggestions.length])
 
-  // 스크롤 감지로 헤더 검색창 표시/숨김 (단순한 스테이폴리오 스타일)
+  // 스테이폴리오 스타일: 검색창이 실제로 히어로에서 헤더로 이동하는 애니메이션
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY
-      const heroHeight = window.innerHeight * 0.5 // 히어로 섹션 높이 (50vh)
+      const heroHeight = window.innerHeight * 0.45
+      const triggerPoint = heroHeight * 0.5 // 50% 지점에서 애니메이션 시작
       
-      // 히어로 섹션을 벗어나면 헤더에 검색창 표시
-      setShowHeaderSearch(scrollY > heroHeight - 100)
+      // 스크롤 진행률 (0~1)
+      const progress = Math.min(scrollY / triggerPoint, 1)
+      
+      // 헤더 배경 표시 여부
+      setShowHeaderSearch(progress > 0.8)
+      
+      const heroSearchBar = document.querySelector('.hero-search-bar') as HTMLElement
+      const heroLogo = document.querySelector('.hero-logo') as HTMLElement
+      const heroButtons = document.querySelector('.hero-buttons') as HTMLElement
+      
+      if (heroSearchBar) {
+        if (progress < 1) {
+          // 검색창을 fixed로 설정하고 실제로 위로 이동
+          heroSearchBar.style.position = 'fixed'
+          heroSearchBar.style.top = `${140 - (progress * 120)}px` // 140px에서 20px로 이동
+          heroSearchBar.style.left = '50%'
+          heroSearchBar.style.transform = `translateX(-50%) scale(${1 - progress * 0.1})`
+          heroSearchBar.style.zIndex = '50'
+          heroSearchBar.style.width = 'auto'
+          heroSearchBar.style.maxWidth = `${320 + (progress * 100)}px` // 약간 커짐
+          
+          // 검색창 스타일 변경
+          const searchContainer = heroSearchBar.querySelector('div') as HTMLElement
+          if (searchContainer && progress > 0.8) {
+            searchContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.98)'
+            searchContainer.style.backdropFilter = 'blur(20px)'
+            searchContainer.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)'
+          }
+        }
+      }
+      
+      // 로고와 버튼 페이드아웃
+      if (heroLogo) {
+        heroLogo.style.opacity = (1 - progress * 1.2).toString()
+        heroLogo.style.transform = `translateY(${progress * -10}px)`
+      }
+      
+      if (heroButtons) {
+        heroButtons.style.opacity = (1 - progress * 1.2).toString()
+        heroButtons.style.transform = `translateY(${progress * -10}px)`
+      }
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    
+    // 검색 모달 열기 이벤트
+    const handleOpenSearchModal = () => setShowSearchModal(true)
+    window.addEventListener('openSearchModal', handleOpenSearchModal)
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('openSearchModal', handleOpenSearchModal)
+    }
   }, [])
 
   if (isLoading) {
@@ -815,6 +863,16 @@ export default function HomePage() {
 
   return (
     <div className="fullscreen-container bg-white">
+      {/* 스테이폴리오 스타일: 스크롤시 나타나는 단순한 헤더 배경 */}
+      <div className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+        showHeaderSearch ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+      }`}>
+        <div className="bg-white/95 backdrop-blur-lg border-b border-gray-100/50 shadow-sm">
+          <div className="container mx-auto px-4 py-3">
+            {/* 헤더 배경만 제공, 실제 콘텐츠는 히어로 검색창이 이동해서 채움 */}
+          </div>
+        </div>
+      </div>
       {/* 전역 부드러운 스크롤 + 풀스크린 스타일 */}
       <style jsx global>{`
         /* 풀스크린 노치 대응 */
@@ -928,203 +986,6 @@ export default function HomePage() {
         }
       `}</style>
 
-      {/* 스크롤시 나타나는 배경 헤더 */}
-      <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        showHeaderSearch ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-      }`}>
-        <div className="bg-white shadow-lg border-b border-gray-200 h-16 flex items-center">
-          <div className="container mx-auto px-4 flex items-center justify-between">
-            {/* 왼쪽: 홈 버튼만 (로고 숨김) */}
-            <div className="flex items-center">
-              <Link href="/" className="text-gray-900 hover:text-gray-700 transition-colors p-2">
-                <Home className="w-5 h-5" />
-              </Link>
-            </div>
-            
-            {/* 중앙: 확대된 검색창 (스테이폴리오 스타일) */}
-            <div className="flex-1 max-w-4xl mx-8">
-              <div 
-                className="bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-full px-6 py-0.5 cursor-pointer transition-all duration-300 hover:shadow-md"
-                onClick={() => setShowSearchModal(true)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="text-base font-medium text-gray-700 truncate">
-                      {searchLocation || suggestions[currentSuggestionIndex] || "어디로 여행가시나요?"}
-                    </div>
-                  </div>
-                  <div className="bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 ml-4">
-                    <Search className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 오른쪽: 공유하기 + 위시리스트 + 마이페이지 */}
-            <div className="flex items-center gap-3">
-              <div
-                className="rounded-full p-2 cursor-pointer"
-                style={{ 
-                  color: '#111827 !important',
-                  backgroundColor: 'transparent !important',
-                  border: 'none',
-                  outline: 'none'
-                }}
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: 'Stay One Day',
-                      text: '완벽한 당일여행을 위한 숙소 플랫폼',
-                      url: window.location.href
-                    })
-                  } else {
-                    navigator.clipboard.writeText(window.location.href)
-                    alert('링크가 클립보드에 복사되었습니다!')
-                  }
-                }}
-              >
-                <Share2 className="w-5 h-5" style={{ 
-                  color: '#111827 !important',
-                  fill: 'none',
-                  stroke: '#111827',
-                  strokeWidth: '2'
-                }} />
-              </div>
-              <Link href="/wishlist">
-                <div className="rounded-full p-2 cursor-pointer" style={{ 
-                  color: '#111827 !important',
-                  backgroundColor: 'transparent !important',
-                  border: 'none',
-                  outline: 'none'
-                }}>
-                  <Heart className="w-5 h-5" style={{ 
-                    color: '#111827 !important',
-                    fill: 'none',
-                    stroke: '#111827',
-                    strokeWidth: '2'
-                  }} />
-                </div>
-              </Link>
-              <div className="relative" data-user-menu>
-                {isUserLoading ? (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-gray-900 hover:bg-gray-100 rounded-full p-2"
-                    disabled
-                  >
-                    <Users className="w-5 h-5" />
-                  </Button>
-                ) : user ? (
-                  <>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-gray-900 hover:bg-gray-100 rounded-full p-2"
-                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    >
-                      <Users className="w-5 h-5" />
-                    </Button>
-                    {isUserMenuOpen && (
-                      <>
-                        {/* 백드롭 오버레이 */}
-                        <div 
-                          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 animate-in fade-in duration-300"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        />
-                        
-                        {/* 슬라이드 사이드바 */}
-                        <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 ease-out">
-                          <div className="flex flex-col h-full">
-                            {/* 헤더 */}
-                            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                              <h2 className="text-lg font-semibold text-gray-900">마이페이지</h2>
-                              <button
-                                onClick={() => setIsUserMenuOpen(false)}
-                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                              >
-                                <X className="w-5 h-5" />
-                              </button>
-                            </div>
-
-                            {/* 사용자 정보 */}
-                            <div className="p-6 border-b border-gray-100">
-                              <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                                  <Users className="w-6 h-6 text-gray-600" />
-                                </div>
-                                <div>
-                                  <p className="text-base font-medium text-gray-900">
-                                    {user.user_metadata?.full_name || user.email?.split('@')[0] || '사용자'}
-                                  </p>
-                                  <p className="text-sm text-gray-500">{user.email}</p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* 메뉴 목록 */}
-                            <div className="flex-1 py-6">
-                              <nav className="space-y-2 px-6">
-                                <Link 
-                                  href="/profile" 
-                                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-all duration-200 hover:translate-x-1"
-                                  onClick={() => setIsUserMenuOpen(false)}
-                                >
-                                  <Users className="w-5 h-5" />
-                                  <span>프로필</span>
-                                </Link>
-                                <Link 
-                                  href="/wishlist" 
-                                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-all duration-200 hover:translate-x-1"
-                                  onClick={() => setIsUserMenuOpen(false)}
-                                >
-                                  <Heart className="w-5 h-5" />
-                                  <span>위시리스트</span>
-                                </Link>
-                                <Link 
-                                  href="/reservations" 
-                                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-all duration-200 hover:translate-x-1"
-                                  onClick={() => setIsUserMenuOpen(false)}
-                                >
-                                  <CalendarDays className="w-5 h-5" />
-                                  <span>예약 내역</span>
-                                </Link>
-                              </nav>
-                            </div>
-
-                            {/* 하단 로그아웃 버튼 */}
-                            <div className="p-6 border-t border-gray-100">
-                              <button
-                                onClick={handleSignOut}
-                                className="flex items-center space-x-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                                <span>로그아웃</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <Link href="/auth/login">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-gray-900 hover:bg-gray-100 rounded-full p-2"
-                    >
-                      <Users className="w-5 h-5" />
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       {/* 스테이폴리오 스타일 - 배경 이미지 전체 영역 */}
       <HeroSection slides={heroSlides} />
 

@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { ChevronLeft, ChevronRight, Search, MapPin, CalendarDays, Users, Heart } from 'lucide-react'
+import Link from 'next/link'
 
 interface HeroSlide {
   id: string
@@ -35,6 +37,9 @@ export default function HeroSection({ slides }: HeroSectionProps) {
   const items = useMemo<HeroSlide[]>(() => (Array.isArray(slides) ? slides : []), [slides])
   
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [searchLocation, setSearchLocation] = useState('')
+  const [selectedDate, setSelectedDate] = useState('')
+  const [guestCount, setGuestCount] = useState(2)
 
   // 초기화는 useEffect에서 처리
   useEffect(() => {
@@ -122,26 +127,76 @@ export default function HeroSection({ slides }: HeroSectionProps) {
         </Button>
       </div>
 
-      {/* 좌측 하단 텍스트 - 실제 슬라이드 데이터 */}
-      <div className="absolute inset-0 flex items-end justify-start cursor-pointer group">
-        <div className="text-left text-white px-8 pb-12 max-w-3xl transition-all duration-500 ease-out">
+      {/* 스테이폴리오 스타일 히어로 컨텐츠 */}
+      <div className="absolute inset-0 flex flex-col">
+        {/* 스테이폴리오 정확한 헤더 레이아웃 */}
+        <div className="flex items-center justify-between pt-4 md:pt-6 pb-8 md:pb-12 px-4 md:px-8">
+          {/* 좌측: 로고만 */}
+          <div className="flex items-center">
+            {/* 로고 - 크기 증가 */}
+            <div className="hero-logo text-white text-lg md:text-2xl font-light tracking-wide transition-all duration-500">
+              stay<span className="font-medium">oneday</span>
+            </div>
+          </div>
+          
+          {/* 우측 메뉴 - 스테이폴리오 정확한 간격과 위치 */}
+          <div className="hero-buttons flex items-center">
+            {/* 데스크탑 텍스트 메뉴 */}
+            <div className="hidden md:flex items-center gap-8 text-white text-sm font-medium mr-8">
+              <Link href="/spaces" className="hover:text-white/80 transition-colors">FIND STAY</Link>
+              <Link href="/promotion" className="hover:text-white/80 transition-colors">PROMOTION</Link>
+              <Link href="/journal" className="hover:text-white/80 transition-colors">JOURNAL</Link>
+              <Link href="/preorder" className="hover:text-white/80 transition-colors">PRE-ORDER</Link>
+            </div>
+            
+            {/* 우측 아이콘들 - 정확한 간격 */}
+            <div className="flex items-center gap-1 md:gap-2">
+              <button className="p-1.5 md:p-2 text-white hover:bg-white/10 rounded-full transition-colors">
+                <Heart className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+              <button className="p-1.5 md:p-2 text-white hover:bg-white/10 rounded-full transition-colors">
+                <Users className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {/* 스테이폴리오 검색창 - 정확한 크기와 위치 */}
+        <div className="hero-search-bar flex justify-center pb-4 md:pb-8 px-4 transition-all duration-500">
+          <div 
+            className="bg-white/95 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer w-full max-w-sm md:max-w-md"
+            onClick={() => {
+              // 검색 모달 열기 로직 
+              const event = new CustomEvent('openSearchModal')
+              window.dispatchEvent(event)
+            }}
+          >
+            <div className="flex items-center pl-5 pr-4 py-3">
+              <Search className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
+              <div className="flex-1 text-left">
+                <div className="text-sm text-gray-500 font-medium">
+                  <span className="md:hidden">검색</span>
+                  <span className="hidden md:inline">어디든 검색하세요</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 스테이폴리오 스타일 - 텍스트를 하단으로 */}
+        <div className="flex-1 flex items-end">
           {items.length > 0 && items[currentSlide] && (
-            <>
-
-              {/* 메인 제목 */}
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-light leading-tight tracking-tight mb-4 group-hover:scale-105 transition-transform duration-300">
-                <span className="block text-white/95">
-                  {items[currentSlide]?.title || items[currentSlide]?.headline || '제목 없음'}
-                </span>
+            <div className="text-left pb-16 max-w-lg">
+              <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight drop-shadow-2xl leading-tight">
+                {items[currentSlide]?.title || items[currentSlide]?.headline || '감성에서 머무는'}
               </h1>
-
-              {/* 서브 텍스트 */}
-              <p className="text-lg md:text-xl lg:text-2xl text-white/90 font-light tracking-wide leading-relaxed mb-8">
-                {items[currentSlide]?.subtitle || items[currentSlide]?.subheadline || ''}
+              <h2 className="text-lg md:text-xl font-light text-white/90 mb-2 tracking-wide drop-shadow-lg">
+                {items[currentSlide]?.subtitle || items[currentSlide]?.subheadline || '아주 특별한 감성이 흘러'}
+              </h2>
+              <p className="text-sm md:text-base text-white/80 font-light tracking-wide drop-shadow-md">
+                특별한 공간에서의 완벽한 하루를 만나보세요
               </p>
-
-
-            </>
+            </div>
           )}
         </div>
       </div>
