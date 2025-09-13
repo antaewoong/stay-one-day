@@ -147,7 +147,7 @@ export default function HomePage() {
           // API를 통해 관리자 설정 로드 (단순화)
           const [sectionsResponse, slidesResponse] = await Promise.all([
             fetch('/api/site/sections', { next: { revalidate: 60 } }).then(res => res.json()),
-            supabase.from('hero_slides').select('*').eq('active', true).order('sort_order', { ascending: true })
+            supabase.from('hero_slides').select('*').eq('active', true).order('slide_order', { ascending: true })
           ])
           
           if (!isActive) return
@@ -257,11 +257,13 @@ export default function HomePage() {
               id: slide.id,
               title: slide.title,
               subtitle: slide.subtitle,
-              description: slide.description,
+              description: slide.subtitle || '특별한 스테이를 경험하세요',
               image: slide.image_url,
-              cta: slide.cta_text,
-              badge: slide.badge,
-              stats: slide.stats
+              cta: slide.cta_text || '지금 예약하기',
+              badge: slide.badge || '추천',
+              stats: slide.stats || {},
+              order: slide.slide_order,
+              active: slide.active
             }))
             setHeroSlides(heroData)
           } else if (isActive) {
