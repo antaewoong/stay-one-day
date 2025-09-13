@@ -10,9 +10,9 @@ export async function GET() {
   const sb = createClient(URL, ANON, { auth: { persistSession: false } })
   const { data, error } = await sb
     .from('main_page_sections')
-    .select('id,title,slug,position,active')
+    .select('*')
     .eq('active', true)
-    .order('position', { ascending: true })
+    .order('section_id', { ascending: true })
 
   if (error) return NextResponse.json({ ok:false, error: error.message }, { status: 500 })
   return NextResponse.json({ ok:true, data }, { status: 200 })

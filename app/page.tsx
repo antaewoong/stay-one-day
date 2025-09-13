@@ -133,9 +133,10 @@ export default function HomePage() {
         }
 
         // 2. 평점 데이터가 로드된 후 관리자 설정과 히어로 텍스트 로드
-        const [accommodationResponse, heroTextsResponse] = await Promise.all([
+        const [accommodationResponse, heroTextsResponse, heroSlidesResponse] = await Promise.all([
           fetch('/api/accommodations?limit=1000').catch(() => ({ ok: false })),
-          fetch('/api/site/hero-slides', { next: { revalidate: 60 } }).catch(() => ({ ok: false }))
+          fetch('/api/site/hero-slides', { next: { revalidate: 60 } }).catch(() => ({ ok: false })),
+          fetch('/api/hero-slides', { next: { revalidate: 60 } }).catch(() => ({ ok: false }))
         ])
         
         const response = accommodationResponse
@@ -144,11 +145,8 @@ export default function HomePage() {
           const accommodations = result.data || []
           setAllAccommodations(accommodations)
 
-          // API를 통해 관리자 설정 로드 (단순화)
-          const [sectionsResponse, slidesResponse] = await Promise.all([
-            fetch('/api/site/sections', { next: { revalidate: 60 } }).then(res => res.json()),
-            supabase.from('hero_slides').select('*').eq('active', true).order('slide_order', { ascending: true })
-          ])
+          // API를 통해 관리자 설정 로드 (단순화) - 퍼블릭 API 사용
+          const sectionsResponse = await fetch('/api/site/sections', { next: { revalidate: 60 } }).then(res => res.json())
           
           if (!isActive) return
 
@@ -183,7 +181,7 @@ export default function HomePage() {
                     ratingCount: ratingsMap[acc.id]?.count || 0,
                     reviews: 100,
                     badges: ["추천"],
-                    amenities: acc.accommodation_amenities?.slice(0, 4).map((amenity: any) => amenity.amenity_name) || []
+                    amenities: acc.amenities?.slice(0, 4) || []
                   }))
               }
               // 수동 선택된 숙소가 있는 경우
@@ -203,7 +201,7 @@ export default function HomePage() {
                     ratingCount: ratingsMap[acc.id]?.count || 0,
                     reviews: 100,
                     badges: ["추천"],
-                    amenities: acc.amenities?.slice(0, 4).map((amenity: any) => amenity.name) || []
+                    amenities: acc.amenities?.slice(0, 4) || []
                   }))
               }
 
@@ -251,21 +249,12 @@ export default function HomePage() {
             }
           }
 
-          // 히어로 슬라이드 로드
-          if (slidesResponse.data && slidesResponse.data.length > 0 && isActive) {
-            const heroData = slidesResponse.data.map((slide: any) => ({
-              id: slide.id,
-              title: slide.title,
-              subtitle: slide.subtitle,
-              description: slide.subtitle || '특별한 스테이를 경험하세요',
-              image: slide.image_url,
-              cta: slide.cta_text || '지금 예약하기',
-              badge: slide.badge || '추천',
-              stats: slide.stats || {},
-              order: slide.slide_order,
-              active: slide.active
-            }))
-            setHeroSlides(heroData)
+          // 히어로 슬라이드 로드 - 퍼블릭 API 사용
+          if (heroSlidesResponse.ok && isActive) {
+            const heroSlidesResult = await heroSlidesResponse.json()
+            if (Array.isArray(heroSlidesResult) && heroSlidesResult.length > 0) {
+              setHeroSlides(heroSlidesResult)
+            }
           } else if (isActive) {
             // 기본 히어로 슬라이드 (Stay Cheongju 기반)
             const defaultStay = accommodations.find((acc: any) => acc.name.includes('청주'))
@@ -1117,25 +1106,7 @@ export default function HomePage() {
         </div>
       </div>
       {/* 스테이폴리오 스타일 - 배경 이미지 전체 영역 */}
-      <HeroSection
-        heroSlides={heroSlides}
-        heroTexts={heroTexts}
-        currentSlide={currentSlide}
-        setCurrentSlide={setCurrentSlide}
-        currentEmotionalText={currentEmotionalText}
-        textOpacity={textOpacity}
-        heroY={heroY}
-        heroOpacity={heroOpacity}
-        user={user}
-        isUserLoading={isUserLoading}
-        isUserMenuOpen={isUserMenuOpen}
-        setIsUserMenuOpen={setIsUserMenuOpen}
-        handleSignOut={handleSignOut}
-        suggestions={suggestions}
-        currentSuggestionIndex={currentSuggestionIndex}
-        searchLocation={searchLocation}
-        setShowSearchModal={setShowSearchModal}
-      />
+      <HeroSection slides={heroSlides} />
 
       {/* 추천 스테이 섹션 - 히어로 바로 뒤 */}
       <section className="py-12 md:py-16 bg-white">

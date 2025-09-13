@@ -3,12 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-
-interface EmotionalText {
-  main: string
-  sub: string
-  accent: string
-}
+import Link from 'next/link'
 
 interface HeroSlide {
   id: string
@@ -31,103 +26,8 @@ interface HeroSectionProps {
   slides: HeroSlide[]
 }
 
-const emotionalTexts: EmotionalText[] = [
-  {
-    main: "시간이 멈춰진 듯한",
-    sub: "완벽한 순간을 위한 특별한 공간",
-    accent: "Perfect Moments"
-  },
-  {
-    main: "자연이 선사하는",
-    sub: "마음을 울리는 감동의 스테이",
-    accent: "Nature's Gift"
-  },
-  {
-    main: "소중한 사람들과",
-    sub: "만들어가는 아름다운 추억",
-    accent: "Precious Time"
-  },
-  {
-    main: "일상의 경계를 넘어",
-    sub: "새로운 나를 발견하는 여행",
-    accent: "Beyond Ordinary"
-  },
-  {
-    main: "감성이 흘러넘치는",
-    sub: "당신만을 위한 프라이빗 세상",
-    accent: "Your Own World"
-  },
-  {
-    main: "여행의 끝에서 만나는",
-    sub: "진짜 휴식의 의미",
-    accent: "True Rest"
-  },
-  {
-    main: "마음속 깊이 새겨질",
-    sub: "잊을 수 없는 특별한 하루",
-    accent: "Unforgettable"
-  },
-  {
-    main: "도심 속에서 찾은",
-    sub: "나만의 작은 천국",
-    accent: "Urban Paradise"
-  },
-  {
-    main: "별빛이 내리는 밤",
-    sub: "꿈같은 순간이 시작되는 곳",
-    accent: "Starlit Dreams"
-  },
-  {
-    main: "바람에 실려오는",
-    sub: "자유로움이 가득한 공간",
-    accent: "Freedom Breeze"
-  },
-  {
-    main: "햇살이 머무는",
-    sub: "따뜻한 마음이 깃든 숙소",
-    accent: "Sunshine Stay"
-  },
-  {
-    main: "추억을 수놓는",
-    sub: "특별함이 살아있는 하루",
-    accent: "Memory Weaver"
-  },
-  {
-    main: "고요함 속에서 찾는",
-    sub: "진정한 나만의 시간",
-    accent: "Silent Sanctuary"
-  },
-  {
-    main: "감동이 머무는",
-    sub: "마음을 전하는 따뜻한 공간",
-    accent: "Heartfelt Haven"
-  },
-  {
-    main: "설렘이 시작되는",
-    sub: "새로운 이야기의 첫 페이지",
-    accent: "New Chapter"
-  },
-  {
-    main: "영감이 피어나는",
-    sub: "창의로움이 가득한 안식처",
-    accent: "Creative Refuge"
-  },
-  {
-    main: "온기가 전해지는",
-    sub: "사랑이 머무는 아늑한 보금자리",
-    accent: "Warm Embrace"
-  },
-  {
-    main: "꿈이 현실이 되는",
-    sub: "마법같은 순간들의 연속",
-    accent: "Dreams Come True"
-  }
-]
-
 export default function HeroSection({ slides }: HeroSectionProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [currentEmotionalText, setCurrentEmotionalText] = useState(0)
-  const [textOpacity, setTextOpacity] = useState(1)
 
   // 자동 슬라이드 전환
   useEffect(() => {
@@ -139,31 +39,6 @@ export default function HeroSection({ slides }: HeroSectionProps) {
 
     return () => clearInterval(interval)
   }, [slides.length])
-
-  // 감성 문구 자동 전환
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentEmotionalText((prev) => (prev + 1) % emotionalTexts.length)
-    }, 3500)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  // 부드러운 페이드 전환 효과
-  useEffect(() => {
-    const fadeOut = setTimeout(() => {
-      setTextOpacity(0.7)
-    }, 3000)
-    
-    const fadeIn = setTimeout(() => {
-      setTextOpacity(1)
-    }, 3200)
-
-    return () => {
-      clearTimeout(fadeOut)
-      clearTimeout(fadeIn)
-    }
-  }, [currentEmotionalText])
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length)
@@ -230,76 +105,64 @@ export default function HeroSection({ slides }: HeroSectionProps) {
         </Button>
       </div>
 
-      {/* 중앙 텍스트 - 스테이폴리오 스타일 감성 문구 */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div 
-          className="text-center text-white px-4 mt-16 max-w-4xl transition-all duration-500 ease-out"
-          style={{ 
-            opacity: textOpacity,
-            transform: `scale(${textOpacity === 1 ? 1 : 0.98})`
-          }}
-        >
-          {/* 영문 액센트 */}
-          <div className="relative h-8 overflow-hidden mb-4">
-            <div 
-              className="transition-all duration-1200 ease-in-out"
-              style={{
-                transform: `translateY(-${currentEmotionalText * 32}px)`,
-                opacity: textOpacity
-              }}
-            >
-              {emotionalTexts.map((text, index) => (
-                <div key={`accent-${index}`} className="h-8 flex items-center justify-center">
-                  <span className="text-sm md:text-base font-light tracking-[0.3em] text-white/70 uppercase">
-                    {text.accent}
+      {/* 중앙 텍스트 - 실제 슬라이드 데이터 */}
+      <Link 
+        href={`/spaces/${slides[currentSlide]?.id || ''}`}
+        className="absolute inset-0 flex items-center justify-center cursor-pointer group"
+      >
+        <div className="text-center text-white px-4 mt-16 max-w-4xl transition-all duration-500 ease-out">
+          {slides.length > 0 && (
+            <>
+              {/* 배지 */}
+              {slides[currentSlide]?.badge && (
+                <div className="mb-4">
+                  <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-sm px-4 py-1 rounded-full border border-white/30">
+                    {slides[currentSlide].badge}
                   </span>
                 </div>
-              ))}
-            </div>
-          </div>
+              )}
 
-          {/* 메인 제목 */}
-          <div className="relative h-20 md:h-24 overflow-hidden mb-3">
-            <div 
-              className="transition-all duration-1200 ease-in-out"
-              style={{
-                transform: `translateY(-${currentEmotionalText * 100}%)`,
-              }}
-            >
-              {emotionalTexts.map((text, index) => (
-                <div key={`main-${index}`} className="h-20 md:h-24 flex items-center justify-center">
-                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-light leading-tight tracking-tight">
-                    <span className="block text-white/95">{text.main}</span>
-                  </h1>
+              {/* 메인 제목 */}
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-light leading-tight tracking-tight mb-4 group-hover:scale-105 transition-transform duration-300">
+                <span className="block text-white/95">{slides[currentSlide]?.title}</span>
+              </h1>
+
+              {/* 서브 텍스트 */}
+              <p className="text-lg md:text-xl lg:text-2xl text-white/90 font-light tracking-wide leading-relaxed mb-8">
+                {slides[currentSlide]?.subtitle}
+              </p>
+
+              {/* CTA 버튼 */}
+              <div className="mt-8 flex justify-center">
+                <Button 
+                  className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border border-white/30 px-8 py-3 text-lg font-light rounded-full transition-all duration-300 hover:scale-105"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    window.location.href = `/spaces/${slides[currentSlide]?.id || ''}`
+                  }}
+                >
+                  {slides[currentSlide]?.cta || '지금 예약하기'}
+                </Button>
+              </div>
+
+              {/* 숙소 정보 (price, rating 등) */}
+              {slides[currentSlide]?.stats && (
+                <div className="mt-6 flex justify-center items-center gap-6 text-white/80 text-sm">
+                  {slides[currentSlide].stats.price && (
+                    <span>{slides[currentSlide].stats.price}</span>
+                  )}
+                  {slides[currentSlide].stats.avgRating && (
+                    <span>★ {slides[currentSlide].stats.avgRating}</span>
+                  )}
+                  {slides[currentSlide].stats.bookings && (
+                    <span>{slides[currentSlide].stats.bookings}</span>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 서브 텍스트 */}
-          <div className="relative h-12 md:h-16 overflow-hidden">
-            <div 
-              className="transition-all duration-1200 ease-in-out"
-              style={{
-                transform: `translateY(-${currentEmotionalText * 100}%)`,
-              }}
-            >
-              {emotionalTexts.map((text, index) => (
-                <div key={`sub-${index}`} className="h-12 md:h-16 flex items-center justify-center">
-                  <p className="text-lg md:text-xl lg:text-2xl text-white/90 font-light tracking-wide leading-relaxed">
-                    {text.sub}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 장식적인 라인 */}
-          <div className="mt-8 flex justify-center">
-            <div className="w-16 md:w-24 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
-          </div>
+              )}
+            </>
+          )}
         </div>
-      </div>
+      </Link>
 
       {/* 슬라이드 인디케이터 */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">

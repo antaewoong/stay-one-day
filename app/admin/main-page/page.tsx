@@ -481,9 +481,9 @@ export default function MainPageManagementPage() {
                           <p className="text-sm text-gray-600 mb-1">{slide.subtitle}</p>
                           <p className="text-xs text-gray-500 mb-3 line-clamp-2">{slide.description}</p>
                           <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span>평점: {slide.stats.avgRating}</span>
-                            <span>예약: {slide.stats.bookings}</span>
-                            <span>가격: {slide.stats.price}</span>
+                            <span>평점: {slide.stats?.avgRating || '4.8'}</span>
+                            <span>예약: {slide.stats?.bookings || '100+'}</span>
+                            <span>가격: {slide.stats?.price || '150,000원'}</span>
                           </div>
                         </div>
 
