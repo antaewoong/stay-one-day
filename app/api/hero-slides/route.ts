@@ -12,7 +12,7 @@ export async function GET() {
     
     const { data, error } = await supabase
       .from('hero_slides')
-      .select('id, image_url, title, subtitle, cta_text, active, slide_order, badge, stats')
+      .select('id, image_url, title, subtitle, description, cta_text, active, slide_order, badge, stats')
       .eq('active', true)
       .order('slide_order', { ascending: true })
     
@@ -26,7 +26,7 @@ export async function GET() {
       id: slide.id, // Use slide ID for navigation
       title: slide.title,
       subtitle: slide.subtitle,
-      description: slide.subtitle || '', // fallback
+      description: slide.description || '', // Use actual description field
       image: slide.image_url,
       cta: slide.cta_text || '예약하기',
       badge: slide.badge || 'FEATURED',

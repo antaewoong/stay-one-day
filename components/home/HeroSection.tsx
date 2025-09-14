@@ -269,9 +269,12 @@ export default function HeroSection({ slides }: HeroSectionProps) {
                 <h2 className="text-lg md:text-xl font-light text-white/90 mb-2 tracking-wide drop-shadow-lg">
                   {items[currentSlide]?.subtitle || items[currentSlide]?.subheadline || '아주 특별한 감성이 흘러'}
                 </h2>
-                <p className="text-sm md:text-base text-white/80 font-light tracking-wide drop-shadow-md">
-                  특별한 공간에서의 완벽한 하루를 만나보세요
-                </p>
+
+                {items[currentSlide]?.description && (
+                  <p className="text-sm md:text-base text-white/80 font-light tracking-wide drop-shadow-md">
+                    {items[currentSlide].description}
+                  </p>
+                )}
               </div>
             )}
           </div>

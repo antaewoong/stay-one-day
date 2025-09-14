@@ -15,7 +15,7 @@ const supabaseAdmin = createClient(
 export const GET = withAdminAuth(async (_req, supabase, { userId, admin }) => {
   const { data, error } = await supabase
     .from('hero_slides')
-    .select('id,image_url,title,subtitle,cta_text,active,slide_order,created_at')
+    .select('id,image_url,title,subtitle,description,cta_text,active,slide_order,created_at')
     .order('slide_order', { ascending: true })
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
 
@@ -68,6 +68,7 @@ export const PUT = withAdminAuth(async (req, supabase, { userId, admin }) => {
           image_url: imageUrl.trim(),
           title: slide.title || slide.headline || '',
           subtitle: slide.subtitle || slide.subheadline || '',
+          description: slide.description || '',
           cta_text: slide.cta_text || slide.cta || '',
           active: !!slide.active,
           slide_order: slide.slide_order ?? index,

@@ -54,10 +54,9 @@ export default function PartnerInquiryPage() {
                 stay<span className="font-medium">oneday</span>
               </span>
             </Link>
-            <Button 
+            <Button
               onClick={() => setIsModalOpen(true)}
-              className="text-white font-semibold px-6 py-3 rounded-xl transition-all hover:shadow-lg"
-              style={{ backgroundColor: 'var(--color-mint-500)' }}
+              className="bg-white text-black font-semibold px-6 py-3 rounded-xl transition-all hover:shadow-lg hover:bg-gray-100"
             >
               입점 문의하기
             </Button>
@@ -81,18 +80,13 @@ export default function PartnerInquiryPage() {
             <p className="text-lg md:text-xl mb-10 text-gray-600 leading-relaxed">
               비어있는 날을 수익으로 바꾸는 프리미엄 데이유즈 플랫폼
             </p>
-            <Button 
+            <Button
               onClick={() => setIsModalOpen(true)}
-              className="px-8 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl"
-              style={{
-                background: 'rgba(17, 24, 39, 0.9)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white'
-              }}
+              className="font-semibold px-12 py-4 text-xl rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl text-white"
+              style={{ backgroundColor: 'var(--color-mint-500)' }}
             >
               입점 문의하기
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="w-6 h-6 ml-3 text-white" />
             </Button>
           </div>
         </div>
@@ -140,6 +134,94 @@ export default function PartnerInquiryPage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Territory Protection Policy Section */}
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
+                <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-light mb-4 text-gray-900">
+              지역별 영업권 보장
+            </h2>
+            <p className="text-gray-600 leading-relaxed">
+              선입점 파트너사의 권익을 보호하는 상생 협력 정책을 운영합니다
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mr-4">
+                  <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900">영업권 보호 원칙</h3>
+              </div>
+              <div className="space-y-3 text-gray-600">
+                <div className="flex items-start">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                  <p className="text-sm leading-relaxed">
+                    반경 10KM(카카오맵 기준) 이내 추가 입점 문의 시 소정의 검토 절차를 진행합니다.
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                  <p className="text-sm leading-relaxed">
+                    동일 컨셉 또는 유사 유형의 스테이 입점 시 기입점 업체의 의견을 최우선으로 반영합니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mr-4">
+                  <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900">파트너 우선 정책</h3>
+              </div>
+              <div className="space-y-3 text-gray-600">
+                <div className="flex items-start">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                  <p className="text-sm leading-relaxed">
+                    선입점 파트너사에게는 지역 내 우선권과 특별한 마케팅 지원을 제공합니다.
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                  <p className="text-sm leading-relaxed">
+                    상호 존중과 협력을 바탕으로 지속 가능한 성장 파트너십을 구축합니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center py-8 px-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+            <div className="flex justify-center mb-4">
+              <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <p className="text-sm text-gray-700 mb-2 font-medium">
+              프리미엄 데이유즈 시장의 선도업체로 자리잡을 수 있는 기회입니다
+            </p>
+            <p className="text-xs text-gray-500">
+              지역별 제한된 파트너십으로 독점적 지위를 보장합니다
+            </p>
           </div>
         </div>
       </section>
@@ -559,18 +641,18 @@ export default function PartnerInquiryPage() {
             비어있는 공간을 수익으로 바꾸는 새로운 기회, 스테이 원데이와 함께하세요
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
+            <Button
               onClick={() => setIsModalOpen(true)}
-              className="text-black font-semibold px-8 py-4 text-lg rounded-xl transition-all hover:shadow-lg hover:scale-105"
-              style={{ backgroundColor: 'var(--color-mint-500)' }}
+              className="font-semibold px-8 py-4 text-lg rounded-xl transition-all hover:shadow-lg hover:scale-105 border border-white"
+              style={{ backgroundColor: '#ffffff !important', color: '#000000 !important' }}
             >
               입점 문의하기
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <ArrowRight className="w-5 h-5 ml-2" style={{ color: '#000000' }} />
             </Button>
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
                 <Mail className="w-5 h-5 mr-2" style={{ color: 'var(--color-gray-300)' }} />
-                <span style={{ color: 'var(--color-gray-300)' }}>hosting@stay-oneday.com</span>
+                <span style={{ color: 'var(--color-gray-300)' }}>info@nuklabs.com</span>
               </div>
             </div>
           </div>

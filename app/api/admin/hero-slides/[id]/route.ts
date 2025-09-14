@@ -16,7 +16,7 @@ export const GET = withAdminAuth(async (req, supabase, { userId, admin }) => {
 
   const { data, error } = await supabase
     .from('hero_slides')
-    .select('id,image_url,title,subtitle,cta_text,active,slide_order,created_at')
+    .select('id,image_url,title,subtitle,description,cta_text,active,slide_order,created_at')
     .eq('id', id)
     .single()
     
@@ -61,6 +61,10 @@ export const PUT = withAdminAuth(async (req, supabase, { userId, admin }) => {
 
   if (body.subheadline !== undefined) {
     payload.subtitle = body.subheadline?.trim() ?? ''
+  }
+
+  if (body.description !== undefined) {
+    payload.description = body.description?.trim() ?? ''
   }
 
   if (body.cta_text !== undefined) {

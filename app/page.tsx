@@ -1126,7 +1126,7 @@ export default function HomePage() {
                       <div className="flex items-baseline justify-between">
                         <div>
                           <span className="text-base font-bold text-gray-900">₩{stay.price.toLocaleString()}</span>
-                          <span className="text-xs text-gray-500 ml-1">/박</span>
+                          <span className="text-xs text-gray-500 ml-1">/1day</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <StarRating rating={stay.rating} readonly size="sm" showNumber />

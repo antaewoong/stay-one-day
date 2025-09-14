@@ -204,7 +204,7 @@ export default function InfluencerRequestPage() {
                   <SelectContent>
                     {accommodations.map(accommodation => (
                       <SelectItem key={accommodation.id} value={accommodation.id}>
-                        {accommodation.name} - {accommodation.location} (₩{accommodation.price_per_night?.toLocaleString()}/박)
+                        {accommodation.name} - {accommodation.location} (₩{accommodation.price_per_night?.toLocaleString()}/1day)
                       </SelectItem>
                     ))}
                   </SelectContent>

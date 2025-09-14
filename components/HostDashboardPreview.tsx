@@ -19,43 +19,43 @@ export default function HostDashboardPreview() {
 
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-blue-50 rounded-lg p-4">
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-blue-600 font-medium">이번 달 수익</p>
-              <p className="text-lg font-bold text-blue-700">₩2,850,000</p>
+              <p className="text-sm text-gray-600 font-medium">이번 달 수익</p>
+              <p className="text-lg font-bold text-gray-900">₩2,580,000</p>
             </div>
-            <DollarSign className="w-6 h-6 text-blue-500" />
+            <DollarSign className="w-6 h-6 text-gray-400" />
           </div>
         </div>
-        
-        <div className="bg-green-50 rounded-lg p-4">
+
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-green-600 font-medium">예약 건수</p>
-              <p className="text-lg font-bold text-green-700">15건</p>
+              <p className="text-sm text-gray-600 font-medium">예약 건수</p>
+              <p className="text-lg font-bold text-gray-900">7건</p>
             </div>
-            <Calendar className="w-6 h-6 text-green-500" />
+            <Calendar className="w-6 h-6 text-gray-400" />
           </div>
         </div>
-        
-        <div className="bg-purple-50 rounded-lg p-4">
+
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-purple-600 font-medium">평점</p>
-              <p className="text-lg font-bold text-purple-700">4.8</p>
+              <p className="text-sm text-gray-600 font-medium">평점</p>
+              <p className="text-lg font-bold text-gray-900">4.8</p>
             </div>
-            <Star className="w-6 h-6 text-purple-500" />
+            <Star className="w-6 h-6 text-gray-400" />
           </div>
         </div>
-        
-        <div className="bg-orange-50 rounded-lg p-4">
+
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-orange-600 font-medium">이용 고객</p>
-              <p className="text-lg font-bold text-orange-700">127명</p>
+              <p className="text-sm text-gray-600 font-medium">이용 고객</p>
+              <p className="text-lg font-bold text-gray-900">127명</p>
             </div>
-            <Users className="w-6 h-6 text-orange-500" />
+            <Users className="w-6 h-6 text-gray-400" />
           </div>
         </div>
       </div>
@@ -65,9 +65,9 @@ export default function HostDashboardPreview() {
         <h3 className="text-md font-semibold text-gray-900 mb-3">최근 예약</h3>
         <div className="space-y-2">
           {[
-            { date: '01/25', time: '15:00-23:00', guests: '8명', status: '확정', amount: '₩450,000' },
-            { date: '01/23', time: '15:00-23:00', guests: '6명', status: '완료', amount: '₩380,000' },
-            { date: '01/21', time: '15:00-23:00', guests: '12명', status: '완료', amount: '₩520,000' }
+            { date: '09/15', time: '15:00-23:00', guests: '8명', status: '확정', amount: '₩450,000' },
+            { date: '09/13', time: '15:00-23:00', guests: '6명', status: '완료', amount: '₩380,000' },
+            { date: '09/11', time: '15:00-23:00', guests: '12명', status: '완료', amount: '₩520,000' }
           ].map((booking, index) => (
             <div key={index} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg">
               <div className="flex items-center space-x-4">
@@ -91,14 +91,14 @@ export default function HostDashboardPreview() {
       {/* Revenue Chart Preview */}
       <div className="mb-6">
         <h3 className="text-md font-semibold text-gray-900 mb-3">월별 수익 현황</h3>
-        <div className="bg-gray-50 rounded-lg p-4 h-32 flex items-end justify-between">
+        <div className="bg-gray-50 rounded-lg p-4 h-32 flex items-end justify-between border border-gray-100">
           {[2.1, 1.8, 2.5, 2.8, 2.2, 3.1, 2.9].map((height, index) => (
             <div key={index} className="flex flex-col items-center">
-              <div 
-                className="w-8 bg-blue-500 rounded-t-sm mb-1" 
+              <div
+                className="w-8 bg-gray-400 rounded-t-sm mb-1"
                 style={{ height: `${height * 15}px` }}
               ></div>
-              <span className="text-xs text-gray-500">{index + 19}</span>
+              <span className="text-xs text-gray-500">{index + 5}월</span>
             </div>
           ))}
         </div>

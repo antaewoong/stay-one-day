@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { SingleImageUpload } from '@/components/ui/single-image-upload'
 import { apiFetch } from '@/lib/auth-helpers'
 import { 
@@ -28,6 +28,7 @@ interface HeroSlide {
   image_url: string
   headline: string
   subheadline: string
+  description?: string
   cta_text: string
   cta_link: string
   is_active: boolean
@@ -44,6 +45,7 @@ export default function AdminHeroSlidesPage() {
   const [newSlide, setNewSlide] = useState({
     headline: '',
     subheadline: '',
+    description: '',
     image_url: '',
     cta_text: '지금 예약하기',
     cta_link: '/booking',
@@ -92,6 +94,7 @@ export default function AdminHeroSlidesPage() {
         setNewSlide({
           headline: '',
           subheadline: '',
+          description: '',
           image_url: '',
           cta_text: '지금 예약하기',
           cta_link: '/booking',
@@ -247,6 +250,9 @@ export default function AdminHeroSlidesPage() {
                           </Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-1">{slide.subheadline}</p>
+                        {slide.description && (
+                          <p className="text-xs text-gray-500 mb-1">{slide.description}</p>
+                        )}
                         <p className="text-xs text-gray-500 mb-3">CTA: {slide.cta_text} → {slide.cta_link}</p>
                         <p className="text-xs text-gray-400">순서: {slide.sort_order}</p>
                       </div>
@@ -295,6 +301,9 @@ export default function AdminHeroSlidesPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>새 히어로 슬라이드 추가</DialogTitle>
+            <DialogDescription>
+              메인 페이지에 표시될 새로운 히어로 슬라이드를 추가합니다.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -318,6 +327,17 @@ export default function AdminHeroSlidesPage() {
                   autoComplete="off"
                 />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="description">설명</Label>
+              <Textarea
+                id="description"
+                value={newSlide.description}
+                onChange={(e) => setNewSlide({...newSlide, description: e.target.value})}
+                placeholder="슬라이드 설명 텍스트"
+                rows={3}
+              />
             </div>
 
             <SingleImageUpload
@@ -369,6 +389,9 @@ export default function AdminHeroSlidesPage() {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>슬라이드 편집</DialogTitle>
+              <DialogDescription>
+                선택한 히어로 슬라이드의 내용을 수정합니다.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -390,6 +413,17 @@ export default function AdminHeroSlidesPage() {
                     autoComplete="off"
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-description">설명</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingSlide.description || ''}
+                  onChange={(e) => setEditingSlide({...editingSlide, description: e.target.value})}
+                  placeholder="슬라이드 설명 텍스트"
+                  rows={3}
+                />
               </div>
 
               <SingleImageUpload

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Graph 테스트</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .og-test {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            background: #f9f9f9;
+        }
+        .og-preview {
+            border: 1px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 16px;
+            background: white;
+            max-width: 500px;
+            margin: 20px 0;
+        }
+        .og-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        .og-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1c1e21;
+            margin-bottom: 4px;
+        }
+        .og-description {
+            font-size: 14px;
+            color: #65676b;
+            margin-bottom: 8px;
+        }
+        .og-url {
+            font-size: 12px;
+            color: #8a8d91;
+            text-transform: uppercase;
+        }
+        code {
+            background: #f1f3f4;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔗 StayOneDay Open Graph 테스트</h1>
+
+    <div class="og-test">
+        <h2>1. 현재 설정된 메타 태그들</h2>
+        <p><strong>제목:</strong> 온전한 쉼, 완벽한 하루 | StayOneDay</p>
+        <p><strong>설명:</strong> 특별한 공간에서의 완벽한 하루를 만나보세요. 청주, 세종, 대전 지역 프리미엄 숙박 플랫폼.</p>
+        <p><strong>이미지:</strong> <code>https://images.unsplash.com/photo-1566073771259-6a8506099945</code></p>
+        <p><strong>도메인:</strong> <code>https://stayoneday.co.kr</code></p>
+    </div>
+
+    <div class="og-test">
+        <h2>2. 카카오톡/페이스북 미리보기 예상 모습</h2>
+        <div class="og-preview">
+            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=630&q=80" alt="StayOneDay" class="og-image">
+            <div class="og-title">온전한 쉼, 완벽한 하루 | StayOneDay</div>
+            <div class="og-description">특별한 공간에서의 완벽한 하루를 만나보세요. 청주, 세종, 대전 지역 프리미엄 숙박 플랫폼. 프라이빗 독채, 풀빌라, 감성 숙소를 합리적인 가격에 예약하세요.</div>
+            <div class="og-url">stayoneday.co.kr</div>
+        </div>
+    </div>
+
+    <div class="og-test">
+        <h2>3. Open Graph 검증 도구들</h2>
+        <p>다음 도구들로 Open Graph가 제대로 설정되었는지 확인할 수 있습니다:</p>
+        <ul>
+            <li><a href="https://developers.facebook.com/tools/debug/" target="_blank">Facebook Open Graph Debugger</a></li>
+            <li><a href="https://cards-dev.twitter.com/validator" target="_blank">Twitter Card Validator</a></li>
+            <li><a href="https://www.opengraph.xyz/" target="_blank">Open Graph Preview Tool</a></li>
+            <li><a href="https://www.heymeta.com/" target="_blank">Hey Meta</a></li>
+        </ul>
+
+        <p><strong>테스트 방법:</strong></p>
+        <ol>
+            <li>위 도구들 중 하나를 열어주세요</li>
+            <li><code>https://stayoneday.co.kr</code> (또는 배포된 실제 도메인) 입력</li>
+            <li>미리보기가 제대로 나타나는지 확인</li>
+        </ol>
+    </div>
+
+    <div class="og-test">
+        <h2>4. 카카오톡 테스트</h2>
+        <p>카카오톡에서 실제로 테스트하려면:</p>
+        <ol>
+            <li>카카오톡 대화방에 사이트 링크 입력</li>
+            <li>미리보기가 나타나는지 확인</li>
+            <li>만약 안 나타나면 캐시 문제일 수 있으니 몇 분 후 다시 시도</li>
+        </ol>
+    </div>
+
+    <script>
+        // 현재 시간 표시
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date().toLocaleString('ko-KR');
+            document.title += ` (${now})`;
+        });
+    </script>
+</body>
+</html>

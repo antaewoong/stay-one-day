@@ -271,7 +271,7 @@ export default function CollaborationAccommodationsPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <DollarSign className="w-4 h-4" />
-                            <span>{accommodation.base_price.toLocaleString()}원/박</span>
+                            <span>{accommodation.base_price.toLocaleString()}원/1day</span>
                           </div>
                         </div>
                       </div>

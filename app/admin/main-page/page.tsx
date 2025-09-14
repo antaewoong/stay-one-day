@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { 
@@ -768,6 +768,9 @@ export default function MainPageManagementPage() {
         <DialogContent className="max-w-2xl bg-white/95 backdrop-blur-sm border-white/20">
           <DialogHeader>
             <DialogTitle>새 히어로 슬라이드 추가</DialogTitle>
+            <DialogDescription>
+              메인 페이지에 표시될 새로운 히어로 슬라이드를 추가합니다.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -897,6 +900,9 @@ export default function MainPageManagementPage() {
           <DialogContent className="max-w-2xl bg-white">
             <DialogHeader>
               <DialogTitle>슬라이드 편집</DialogTitle>
+              <DialogDescription>
+                선택한 히어로 슬라이드의 내용을 수정합니다.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -916,6 +922,18 @@ export default function MainPageManagementPage() {
                     onChange={(e) => setEditingSlide({...editingSlide, subtitle: e.target.value})}
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-description">설명</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingSlide.description || ''}
+                  onChange={(e) => setEditingSlide({...editingSlide, description: e.target.value})}
+                  placeholder="슬라이드 설명 텍스트"
+                  rows={3}
+                  className="resize-none"
+                />
               </div>
 
               <div>
@@ -953,6 +971,9 @@ export default function MainPageManagementPage() {
           <DialogContent className="max-w-lg bg-white">
             <DialogHeader>
               <DialogTitle>섹션 편집</DialogTitle>
+              <DialogDescription>
+                메인 페이지 섹션의 설정을 수정합니다.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
