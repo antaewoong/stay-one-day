@@ -1,6 +1,6 @@
 export const runtime = 'edge'
 import { NextResponse } from 'next/server'
-import { getServiceClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 
 // GET /api/keywords/popular - 인기 키워드 조회
 export async function GET(req: Request) {
@@ -10,7 +10,12 @@ export async function GET(req: Request) {
     const limit = Number(searchParams.get('limit') ?? 20)
     const category = searchParams.get('category')
 
-    const supabase = getServiceClient()
+    // Edge 런타임 호환성을 위해 직접 클라이언트 생성
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false } }
+    )
 
     // Check if keyword_stats table exists, if not return dummy data
     const { data, error } = await supabase
