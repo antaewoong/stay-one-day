@@ -30,14 +30,13 @@ interface HeroSlide {
 
 interface HeroSectionProps {
   slides?: HeroSlide[]
-  loading?: boolean
 }
 
 function clamp(n: number, min = 0, max = 1) {
   return Math.max(min, Math.min(max, n));
 }
 
-export default function HeroSection({ slides, loading = false }: HeroSectionProps) {
+export default function HeroSection({ slides }: HeroSectionProps) {
   const items = useMemo<HeroSlide[]>(() => (Array.isArray(slides) ? slides : []), [slides])
   
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -100,7 +99,17 @@ export default function HeroSection({ slides, loading = false }: HeroSectionProp
   }
 
   if (items.length === 0) {
-    return null
+    return (
+      <section className="relative bg-gray-900 min-h-[65vh] sm:min-h-[75vh] md:min-h-[85vh] flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
+        <div className="relative text-center text-white">
+          <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-4">
+            stay<span className="font-medium">oneday</span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-200 font-light">온전한 쉼, 완벽한 하루</p>
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -108,7 +117,7 @@ export default function HeroSection({ slides, loading = false }: HeroSectionProp
       {/* 완전 풀스크린 히어로 섹션 - 노치까지 확장 + 브레이크포인트별 높이 */}
       <section
         ref={heroRef}
-        className="relative bg-gray-900 min-h-[72svh]"
+        className="relative bg-gray-900 min-h-[65vh] sm:min-h-[75vh] md:min-h-[85vh]"
       >
         <div className="absolute inset-0">
           {items.map((slide, index) => {
@@ -119,7 +128,9 @@ export default function HeroSection({ slides, loading = false }: HeroSectionProp
               <div
                 key={slide.id}
                 className={`absolute inset-0 transition-all duration-1000 ${
-                  index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+                  index === currentSlide
+                    ? 'opacity-100 scale-100'
+                    : 'opacity-0 scale-[0.65] md:scale-105'
                 }`}
               >
                 {/* Next.js Image with LCP optimization + Art Direction */}
@@ -198,14 +209,28 @@ export default function HeroSection({ slides, loading = false }: HeroSectionProp
               ref={searchRef}
               className="z-40"
               style={{
-                position: 'relative',
-                transform: `translateY(${-scrollProgress * 120}px)`,
-                opacity: Math.max(0.3, 1 - scrollProgress * 2),
+                position: scrollProgress > 0.08 ? 'fixed' : 'relative',
+                top: scrollProgress > 0.08 ? '0px' : 'auto',
+                left: scrollProgress > 0.08 ? '0px' : 'auto',
+                right: scrollProgress > 0.08 ? '0px' : 'auto',
+                transform: scrollProgress > 0.08
+                  ? 'none'
+                  : `translateY(${-scrollProgress * 120}px)`,
+                width: scrollProgress > 0.08
+                  ? scrollProgress < 0.2
+                    ? `${Math.min(384 + (scrollProgress - 0.08) * 1200, window.innerWidth)}px`
+                    : '100vw'
+                  : 'auto',
+                padding: scrollProgress > 0.08 ? '8px 16px' : '0',
+                zIndex: scrollProgress > 0.08 ? 100 : 40,
                 transition: 'none'
               }}
             >
               <div
-                className="w-full bg-white/95 backdrop-blur-sm py-2.5 px-5 h-11 rounded-full flex items-center gap-3 cursor-pointer hover:bg-white/98 transition-all duration-150 shadow-lg border-0 relative"
+                className={`${scrollProgress > 0.095
+                  ? 'max-w-4xl mx-auto bg-white/95 backdrop-blur-sm py-2.5 px-5 h-11 rounded-full'  // 헤더에서는 더 넓게
+                  : 'w-full bg-white/95 backdrop-blur-sm py-2.5 px-5 h-11 rounded-full'             // 처음 크기
+                } flex items-center gap-3 cursor-pointer hover:bg-white/98 transition-all duration-150 shadow-lg border-0 relative`}
                 onClick={() => {
                   const event = new CustomEvent('openSearchModal');
                   window.dispatchEvent(event);
@@ -214,10 +239,27 @@ export default function HeroSection({ slides, loading = false }: HeroSectionProp
                 <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 <div className="flex-1 text-left">
                   <div className="text-gray-500 font-normal text-base">
-                    어디로 떠나시나요?
+                    온전한 쉼, 완벽한 하루
                   </div>
                 </div>
 
+                {/* 헤더에 붙었을 때 우측 버튼들을 점진적으로 표시 */}
+                {scrollProgress > 0.12 && (
+                  <div
+                    className="flex items-center gap-1 absolute right-3"
+                    style={{
+                      opacity: Math.min(1, (scrollProgress - 0.12) * 4),
+                      transform: `translateX(${Math.max(0, (0.2 - scrollProgress) * 200)}px)`
+                    }}
+                  >
+                    <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-300">
+                      <Heart className="w-4 h-4" />
+                    </button>
+                    <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-300">
+                      <Users className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
