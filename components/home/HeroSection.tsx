@@ -64,8 +64,6 @@ export default function HeroSection({ slides }: HeroSectionProps) {
       const progress = Math.min(scrollY / heroHeight, 1)
 
       setScrollProgress(progress)
-
-      console.log('Scroll progress:', progress, 'ScrollY:', scrollY, 'Hero height:', heroHeight)
     }
 
     handleScroll() // 초기 실행

@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
@@ -16,6 +17,14 @@ export function serverSB(): SupabaseClient {
       remove: () => {},
     },
   })
+}
+
+// Service Role 클라이언트 (서명 URL 생성용)
+export function createServiceRoleClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 }
 
 // 레거시 호환을 위한 createClient (deprecated)

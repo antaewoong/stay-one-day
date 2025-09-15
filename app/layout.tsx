@@ -98,11 +98,11 @@ export default function RootLayout({
       <body className={notoSansKR.className}>
         {/* 🎯 Google Analytics 4 추적 */}
         <GoogleAnalytics />
-        
+
         <ClientLayout>
           {children}
         </ClientLayout>
-        
+
       </body>
     </html>
   )

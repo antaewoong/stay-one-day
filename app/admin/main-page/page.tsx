@@ -415,12 +415,12 @@ export default function MainPageManagementPage() {
                     const fileName = `hero_${Date.now()}_${index}.${fileExt}`
                     
                     const { data, error } = await supabase.storage
-                      .from('accommodation-images')
+                      .from('hero-slides')
                       .upload(fileName, file)
 
                     if (error) throw error
 
-                    const imageUrl = `https://fcmauibvdqbocwhloqov.supabase.co/storage/v1/object/public/accommodation-images/${fileName}`
+                    const imageUrl = `https://fcmauibvdqbocwhloqov.supabase.co/storage/v1/object/public/hero-slides/${fileName}`
                     
                     const slide = {
                       id: `slide-${Date.now()}-${index}`,
@@ -840,12 +840,12 @@ export default function MainPageManagementPage() {
                           const fileName = `hero_${Date.now()}.${fileExt}`
                           
                           const { data, error } = await supabase.storage
-                            .from('accommodation-images')
+                            .from('hero-slides')
                             .upload(fileName, file)
 
                           if (error) throw error
 
-                          const imageUrl = `https://fcmauibvdqbocwhloqov.supabase.co/storage/v1/object/public/accommodation-images/${fileName}`
+                          const imageUrl = `https://fcmauibvdqbocwhloqov.supabase.co/storage/v1/object/public/hero-slides/${fileName}`
                           setNewSlide({...newSlide, image: imageUrl})
                         } catch (error) {
                           console.error('이미지 업로드 실패:', error)

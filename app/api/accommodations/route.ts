@@ -110,8 +110,42 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '숙소 조회에 실패했습니다.' }, { status: 500 })
     }
 
+    // cover_images 동적으로 생성 및 처리
+    const processedAccommodations = accommodations?.map(accommodation => {
+      let coverImage = null
+      let coverImages = null
+
+      // covers/ 폴더에서 커버 이미지 URL 생성
+      if (accommodation.id) {
+        const baseUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/accommodation-images/covers/${accommodation.id}`
+        coverImages = {
+          thumbnail: `${baseUrl}/cover_thumbnail.webp`,
+          medium: `${baseUrl}/cover_medium.webp`,
+          large: `${baseUrl}/cover_large.webp`
+        }
+        // 썸네일을 기본 커버 이미지로 사용
+        coverImage = coverImages.thumbnail
+      }
+
+      // 커버 이미지가 없으면 첫 번째 이미지 사용 (fallback)
+      if (!coverImage && accommodation.images && accommodation.images.length > 0) {
+        const firstImage = Array.isArray(accommodation.images) ? accommodation.images[0] : accommodation.images
+        coverImage = firstImage
+      }
+
+      return {
+        ...accommodation,
+        // 프론트엔드에서 사용할 커버 이미지 (하위호환성 유지)
+        image: coverImage,
+        // 커버 이미지들 (다양한 크기) - 동적 생성
+        cover_images: coverImages,
+        // 원본 이미지들은 그대로 유지
+        images: accommodation.images
+      }
+    })
+
     return NextResponse.json({
-      data: accommodations,
+      data: processedAccommodations,
       pagination: {
         page,
         limit,

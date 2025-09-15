@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
+import {
   Building2,
   Calendar,
   ClipboardList,
@@ -23,7 +23,9 @@ import {
   Target,
   MapPin,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Zap,
+  Video
 } from 'lucide-react'
 
 interface MenuItem {
@@ -48,12 +50,6 @@ const menuGroups: MenuGroup[] = [
         title: '메인 대시보드',
         href: '/host',
         icon: <BarChart3 className="w-4 h-4" />
-      },
-      {
-        title: 'Group KPI',
-        href: '/host/group-kpi',
-        icon: <Target className="w-4 h-4" />,
-        badge: 'NEW'
       }
     ]
   },
@@ -114,6 +110,12 @@ const menuGroups: MenuGroup[] = [
     defaultOpen: true,
     items: [
       {
+        title: '마케팅 스튜디오',
+        href: '/host/marketing-studio',
+        icon: <Zap className="w-4 h-4" />,
+        badge: 'NEW'
+      },
+      {
         title: '마케팅 분석',
         href: '/host/marketing',
         icon: <TrendingUp className="w-4 h-4" />
@@ -127,6 +129,12 @@ const menuGroups: MenuGroup[] = [
         title: '네이버 플레이스',
         href: '/host/naver-place-optimization',
         icon: <MapPin className="w-4 h-4" />
+      },
+      {
+        title: 'Runway AI 영상 관리',
+        href: '/host/runway',
+        icon: <Video className="w-4 h-4" />,
+        badge: 'AI'
       }
     ]
   },

@@ -32,7 +32,7 @@ export async function GET() {
 
     const mapped = (data ?? []).map(x => ({
       id: x.id,
-      image_url: x.image_url,
+      image_url: x.image_url?.replace(/\s+/g, ''),
       headline: x.title,
       subheadline: x.subtitle,
       cta_text: x.cta_text ?? '지금 예약하기',

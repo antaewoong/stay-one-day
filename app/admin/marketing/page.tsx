@@ -432,33 +432,44 @@ export default function AdminMarketingPage() {
 
   const fetchLocationData = async (supabase: any) => {
     try {
-      // 실제 API에서 위치 데이터 조회
+      // 실제 API에서 위치 데이터 조회 (인증 토큰 포함)
+      const authHeaders: HeadersInit = {}
+
+      // Supabase 세션에서 토큰 가져오기
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.access_token) {
+        authHeaders['Authorization'] = `Bearer ${session.access_token}`
+      }
+
       const response = await fetch(`/api/analytics/sessions?range=${dateRange}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...authHeaders
         }
       })
-      
+
       if (!response.ok) {
-        throw new Error('위치 데이터 조회 실패')
+        console.warn(`위치 데이터 API 응답 오류: ${response.status}`)
+        setLocationData([])
+        return
       }
-      
+
       const data = await response.json()
-      
-      if (data.locationData && data.locationData.length > 0) {
+
+      if (data?.locationData && Array.isArray(data.locationData) && data.locationData.length > 0) {
         const formattedData = data.locationData.map((item: any) => ({
-          region: item.region,
-          city: item.city,
-          sessions: item.sessions,
-          users: item.users,
-          conversion_rate: parseFloat(item.conversion_rate),
+          region: item.region || '알 수 없음',
+          city: item.city || '알 수 없음',
+          sessions: item.sessions || 0,
+          users: item.users || 0,
+          conversion_rate: parseFloat(item.conversion_rate || '0'),
           top_accommodation: item.top_accommodation || '데이터 없음',
           avg_booking_value: item.avg_booking_value || 0
         }))
         setLocationData(formattedData)
       } else {
-        // 데이터가 없을 경우 빈 배열
+        console.log('위치 데이터가 없어 빈 배열로 설정')
         setLocationData([])
       }
     } catch (error) {
@@ -469,24 +480,35 @@ export default function AdminMarketingPage() {
 
   const fetchUserJourneys = async (supabase: any) => {
     try {
-      // 실제 API에서 사용자 여정 데이터 조회
+      // 실제 API에서 사용자 여정 데이터 조회 (인증 토큰 포함)
+      const authHeaders: HeadersInit = {}
+
+      // Supabase 세션에서 토큰 가져오기
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.access_token) {
+        authHeaders['Authorization'] = `Bearer ${session.access_token}`
+      }
+
       const response = await fetch(`/api/analytics/journey?range=${dateRange}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...authHeaders
         }
       })
-      
+
       if (!response.ok) {
-        throw new Error('사용자 여정 데이터 조회 실패')
+        console.warn(`사용자 여정 API 응답 오류: ${response.status}`)
+        setUserJourneys([])
+        return
       }
-      
+
       const data = await response.json()
-      
-      if (data.journeyData && data.journeyData.length > 0) {
+
+      if (data?.journeyData && Array.isArray(data.journeyData) && data.journeyData.length > 0) {
         setUserJourneys(data.journeyData)
       } else {
-        // 데이터가 없을 경우 빈 배열
+        console.log('사용자 여정 데이터가 없어 빈 배열로 설정')
         setUserJourneys([])
       }
     } catch (error) {

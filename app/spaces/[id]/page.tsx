@@ -364,17 +364,35 @@ export default function AccommodationDetailPage() {
   const loadAccommodationData = async () => {
     try {
       setLoading(true)
-      
-      const response = await fetch(`/api/accommodations/${params.id}`)
-      const result = await response.json()
-      
-      if (!response.ok) {
-        setError(result.error || '숙소 정보를 불러올 수 없습니다.')
+
+      // 숙소 기본 정보와 서명 URL을 병렬로 가져오기
+      const [accommodationResponse, imagesResponse] = await Promise.all([
+        fetch(`/api/accommodations/${params.id}`),
+        fetch(`/api/accommodations/${params.id}/images`)
+      ])
+
+      const accommodationResult = await accommodationResponse.json()
+
+      if (!accommodationResponse.ok) {
+        setError(accommodationResult.error || '숙소 정보를 불러올 수 없습니다.')
         return
       }
-      
-      setAccommodation(result.data)
-      
+
+      // 서명 URL 결과 처리
+      let signedImages: string[] = []
+      if (imagesResponse.ok) {
+        const imagesResult = await imagesResponse.json()
+        signedImages = imagesResult.images?.map((img: any) => img.signed_url).filter(Boolean) || []
+      }
+
+      // 서명 URL이 있으면 사용하고, 없으면 원본 URL 사용
+      const accommodationData = {
+        ...accommodationResult.data,
+        images: signedImages.length > 0 ? signedImages : accommodationResult.data.images
+      }
+
+      setAccommodation(accommodationData)
+
     } catch (error) {
       console.error('숙소 데이터 로드 실패:', error)
       setError('숙소 정보를 불러올 수 없습니다.')

@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
-  ChevronDown, 
-  ChevronRight, 
+import {
+  ChevronDown,
+  ChevronRight,
   Bell,
   MessageCircle,
   Building2,
@@ -21,7 +21,9 @@ import {
   Type,
   Star,
   TrendingUp,
-  Bot
+  Bot,
+  Zap,
+  Video
 } from 'lucide-react'
 
 interface MenuItem {
@@ -88,8 +90,9 @@ const menuItems: MenuItem[] = [
     title: '마케팅 분석',
     icon: <TrendingUp className="w-4 h-4" />,
     children: [
+      { title: '마케팅 애널리틱스', href: '/admin/marketing-analytics', icon: <Zap className="w-3 h-3" /> },
       { title: '마케팅 분석', href: '/admin/marketing', icon: <></> },
-      { title: 'Group KPI', href: '/admin/group-kpi', icon: <></> }
+      { title: 'Runway AI 영상 관리', href: '/admin/runway', icon: <Video className="w-3 h-3" /> }
     ]
   },
   {

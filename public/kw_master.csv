@@ -1,0 +1,84 @@
+﻿slug,display_name,category,priority,is_active
+kids-cafe,키즈카페,family,10,True
+kids-pool,키즈풀,family,10,True
+family-restaurant,가족 식사,family,20,True
+mom-child-trip,모자여행,family,30,True
+family-trip,가족 여행,family,30,True
+elementary-birthday,초등 생일파티,family,30,True
+kindergarten-birthday,유치원 생일파티,family,30,True
+baby-shower,베이비샤워,family,40,True
+first-birthday,돌잔치,family,20,True
+parents-60th,환갑 식당,family,25,True
+parents-70th,칠순 식당,family,30,True
+playroom,놀이방,family,40,True
+kids-zone,키즈존,family,40,True
+stroller-friendly,유모차 가능,family,50,True
+family-photo,가족 사진,family,60,True
+pool-villa,풀빌라,party,5,True
+emotional-stay,감성스테이,party,15,True
+venue-rental,공간대여,party,10,True
+party-room,파티룸,party,10,True
+private-party,프라이빗 파티,party,20,True
+bridal-party,브라이덜 파티,party,10,True
+birthday-party,생일파티,party,15,True
+surprise-party,서프라이즈 파티,party,30,True
+couple-meeting,커플 모임,party,25,True
+married-couple-meeting,부부모임,party,25,True
+class-meeting,반모임,party,15,True
+alumni-meeting,동창회,party,20,True
+peer-meeting,동기모임,party,15,True
+account-club,계모임,party,15,True
+moms-club,자모모임,party,20,True
+friends-gathering,친구 모임,party,25,True
+photo-party,포토 파티,party,40,True
+proposal,프러포즈,party,25,True
+honeymoon,허니문,party,30,True
+workshop-venue,워크샵 장소,business,10,True
+team-meeting,팀미팅,business,10,True
+camp-meeting,캠미팅 장소,business,15,True
+offsite,오프사이트,business,15,True
+seminar-room,세미나실,business,20,True
+conference-room,회의실 대여,business,20,True
+corporate-retreat,기업 리트릿,business,25,True
+training-room,교육장 대여,business,25,True
+year-end-party,송년회,business,30,True
+after-work-dinner,회식 장소,business,25,True
+day-trip,당일여행,travel,10,True
+swimming-pool,수영장,travel,10,True
+spa,스파,travel,15,True
+open-air-bath,노천탕,travel,20,True
+bbq,바비큐,travel,15,True
+campfire,캠프파이어,travel,20,True
+riverside,계곡,travel,15,True
+valley-picnic,계곡 피크닉,travel,10,True
+lake-view,호수뷰,travel,20,True
+mountain-view,마운틴뷰,travel,20,True
+city-view,시티뷰,travel,25,True
+sunset-view,선셋뷰,travel,25,True
+pet-friendly,반려동물 동반,travel,20,True
+parking,주차 가능,travel,40,True
+near-subway,지하철 인접,travel,45,True
+near-tourist,관광지 인접,travel,35,True
+photo-spot,포토스팟,travel,30,True
+healing-stay,힐링 스테이,travel,20,True
+quiet-stay,조용한 스테이,travel,30,True
+romantic-stay,로맨틱 스테이,travel,25,True
+kids-friendly-stay,키즈 프렌들리,travel,20,True
+private-pool,프라이빗 풀,travel,10,True
+indoor-pool,실내 수영장,travel,15,True
+heated-pool,온수 풀,travel,15,True
+cafe-tour,카페 투어,travel,25,True
+boardgame,보드게임,travel,30,True
+karaoke,노래방,travel,35,True
+projector,프로젝터,travel,35,True
+beam-screen,빔스크린,travel,40,True
+gardening,가드닝,travel,45,True
+picnic-set,피크닉 세트,travel,25,True
+brunch,브런치,travel,30,True
+late-checkout,레이트 체크아웃,travel,40,True
+early-checkin,얼리 체크인,travel,40,True
+pickup,픽업 서비스,travel,45,True
+breakfast,조식 제공,travel,30,True
+kids-safety,키즈 안전시설,travel,25,True
+sterilized-laundry,고온 살균 세탁,travel,20,True
+hypoallergenic,항균 관리,travel,25,True

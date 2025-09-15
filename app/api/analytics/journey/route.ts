@@ -57,20 +57,27 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const dateRange = searchParams.get('range') || '7d'
     
-    // 관리자 권한 확인
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: '인증 필요' }, { status: 401 })
-    }
+    // 관리자 권한 확인 (임시로 주석 처리하고 빈 데이터 반환)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        console.log('User not authenticated, returning empty data')
+        return NextResponse.json({ journeyData: [] })
+      }
 
-    const { data: admin } = await supabase
-      .from('admins')
-      .select('id')
-      .eq('user_id', user.id)
-      .single()
+      const { data: userRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single()
 
-    if (!admin) {
-      return NextResponse.json({ error: '관리자 권한 필요' }, { status: 403 })
+      if (!userRole || userRole.role !== 'admin') {
+        console.log('User not admin, returning empty data')
+        return NextResponse.json({ journeyData: [] })
+      }
+    } catch (authError) {
+      console.log('Auth error, returning empty data:', authError)
+      return NextResponse.json({ journeyData: [] })
     }
 
     // 날짜 범위 계산

@@ -27,7 +27,7 @@ export async function GET() {
       title: slide.title,
       subtitle: slide.subtitle,
       description: slide.description || '', // Use actual description field
-      image: slide.image_url,
+      image: slide.image_url?.replace(/\s+/g, ''),
       cta: slide.cta_text || '예약하기',
       badge: slide.badge || 'FEATURED',
       stats: slide.stats || {

@@ -39,13 +39,12 @@ const nextConfig = {
       }
     ]
   },
-  // Next.js 개발모드의 eval 소스맵 회피 및 감시 최적화
+  // 감시 최적화만 적용 (devtool 설정 제거)
   webpack(config, { dev, isServer }) {
     if (dev && !isServer) {
-      config.devtool = 'source-map';
-      // 감시 최적화
+      // devtool 설정 제거 - Next.js 기본값 사용
       config.watchOptions = {
-        poll: 1000, // 1초 간격으로 폴링
+        poll: 1000,
         ignored: [
           '**/.next/**',
           '**/node_modules/**',
@@ -57,9 +56,7 @@ const nextConfig = {
           '**/*.log',
           '**/supabase/migrations/**',
           '**/scripts/**',
-          '**/DEVELOPMENT_REPORT_*.md',
-          '**/SECURITY_*.md',
-          '**/TELEGRAM_*.md',
+          '**/*.md',
           '**/*.sql',
         ],
       };
