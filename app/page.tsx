@@ -72,7 +72,30 @@ export default function HomePage() {
   const [isUserLoading, setIsUserLoading] = useState(true)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isUserMenuClosing, setIsUserMenuClosing] = useState(false)
-  const [heroSlides, setHeroSlides] = useState<any[]>([])
+  // 즉시 보이는 기본 슬라이드 (API 로드 전)
+  const [heroSlides, setHeroSlides] = useState<any[]>([
+    {
+      id: '1',
+      title: '스테이청주',
+      subtitle: '사계절 온수풀로 즐기는 프라이빗 스테이',
+      image_url: 'https://fcmauibvdqbocwhloqov.supabase.co/storage/v1/object/public/hero-slides/hero/1757792106119/bbd3520b010d6fb8.jpg',
+      active: true
+    },
+    {
+      id: '2',
+      title: '피코키즈 스테이',
+      subtitle: '아이들과 웃음 가득한 하루',
+      image_url: 'https://fcmauibvdqbocwhloqov.supabase.co/storage/v1/object/public/hero-slides/hero/1757792272959/4d600a80aef2ca4b.jpeg',
+      active: true
+    },
+    {
+      id: '3',
+      title: '소소한옥',
+      subtitle: '한옥에서 보내는 단 하루의 시간여행',
+      image_url: 'https://fcmauibvdqbocwhloqov.supabase.co/storage/v1/object/public/hero-slides/hero_1757875403199.jpeg',
+      active: true
+    }
+  ])
   const [heroTexts, setHeroTexts] = useState<any[]>([])
   const [currentEmotionalText, setCurrentEmotionalText] = useState(0)
 
@@ -125,15 +148,11 @@ export default function HomePage() {
           setAccommodationRatings(ratingsMap)
         }
 
-        // 2. 평점 데이터가 로드된 후 관리자 설정과 히어로 텍스트 로드
-        const [accommodationResponse, heroTextsResponse, heroSlidesResponse] = await Promise.all([
+        // 2. 평점 데이터가 로드된 후 관리자 설정과 히어로 슬라이드 로드
+        const [accommodationResponse, heroSlidesResponse] = await Promise.all([
           fetch('/api/accommodations?limit=1000').catch(() => ({ ok: false })),
-          fetch('/api/site/hero-slides', { next: { revalidate: 60 } }).catch((e) => {
+          fetch('/api/site/hero-slides', { cache: 'no-store' }).catch((e) => {
             console.error('Hero slides fetch error:', e)
-            return { ok: false }
-          }),
-          fetch('/api/hero-slides', { next: { revalidate: 60 } }).catch((e) => {
-            console.error('Hero slides backup fetch error:', e)
             return { ok: false }
           })
         ])
@@ -248,45 +267,16 @@ export default function HomePage() {
             }
           }
 
-          // 히어로 슬라이드 로드 - 퍼블릭 API 사용
+          // 히어로 슬라이드 즉시 로드
           if (heroSlidesResponse.ok && isActive) {
             try {
               const heroSlidesResult = await heroSlidesResponse.json()
-              console.log('Hero slides API result:', heroSlidesResult)
-              // API 응답 형태 처리: { ok: true, data: [...] }
-              const slides = heroSlidesResult.data || heroSlidesResult || []
+              const slides = heroSlidesResult.data || []
               if (Array.isArray(slides) && slides.length > 0) {
-                console.log('Setting hero slides:', slides)
                 setHeroSlides(slides)
-              } else {
-                console.log('No slides data, setting empty array')
-                setHeroSlides([]) // 빈 배열로 초기화
               }
             } catch (error) {
-              console.error('Hero slides JSON parse error:', error)
-              setHeroSlides([]) // 에러 시 빈 배열
-            }
-          } else if (isActive) {
-            console.log('Hero slides response failed, setting empty array')
-            setHeroSlides([]) // 빈 배열로 초기화
-            // 기본 히어로 슬라이드 (Stay Cheongju 기반)
-            const defaultStay = accommodations.find((acc: any) => acc.name.includes('청주'))
-            if (defaultStay) {
-              const heroData = [{
-                id: defaultStay.id,
-                title: defaultStay.name,
-                subtitle: `${defaultStay.region} ${defaultStay.accommodation_type}`,
-                description: `${defaultStay.name}에서 특별한 휴식을 만끽하세요`,
-                image: defaultStay.images?.[0] || '',
-                cta: "지금 예약하기",
-                badge: "추천",
-                stats: { 
-                  avgRating: "4.8", 
-                  bookings: "100+", 
-                  price: `${defaultStay.base_price?.toLocaleString() || '180,000'}원` 
-                }
-              }]
-              setHeroSlides(heroData)
+              console.error('Hero slides error:', error)
             }
           }
 
