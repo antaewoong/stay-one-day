@@ -60,7 +60,7 @@ export default function HomePage() {
   const [kidsStays, setKidsStays] = useState<any[]>([])
   const [partyStays, setPartyStays] = useState<any[]>([])
   const [newStays, setNewStays] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [dataLoadTimeout, setDataLoadTimeout] = useState<NodeJS.Timeout | null>(null)
   const [allAccommodations, setAllAccommodations] = useState<any[]>([])
   const [searchLocation, setSearchLocation] = useState('')
