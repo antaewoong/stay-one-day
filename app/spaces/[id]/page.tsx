@@ -378,17 +378,17 @@ export default function AccommodationDetailPage() {
         return
       }
 
-      // 서명 URL 결과 처리
-      let signedImages: string[] = []
+      // 공개 URL 결과 처리 (성능 최적화)
+      let publicImages: string[] = []
       if (imagesResponse.ok) {
         const imagesResult = await imagesResponse.json()
-        signedImages = imagesResult.images?.map((img: any) => img.signed_url).filter(Boolean) || []
+        publicImages = imagesResult.images?.map((img: any) => img.public_url || img.original_url).filter(Boolean) || []
       }
 
-      // 서명 URL이 있으면 사용하고, 없으면 원본 URL 사용
+      // 공개 URL이 있으면 사용하고, 없으면 원본 URL 사용
       const accommodationData = {
         ...accommodationResult.data,
-        images: signedImages.length > 0 ? signedImages : accommodationResult.data.images
+        images: publicImages.length > 0 ? publicImages : accommodationResult.data.images
       }
 
       setAccommodation(accommodationData)

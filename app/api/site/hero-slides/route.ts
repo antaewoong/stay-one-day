@@ -21,7 +21,7 @@ export async function GET() {
     const supabase = createClient(url, anonKey)
     const { data, error } = await supabase
       .from('hero_slides')
-      .select('id,image_url,title,subtitle,cta_text,active,slide_order,created_at')
+      .select('id,image_url,title,subtitle,description,cta_text,active,slide_order,created_at')
       .eq('active', true)
       .order('slide_order', { ascending: true })
 
@@ -35,6 +35,7 @@ export async function GET() {
       image_url: x.image_url?.replace(/\s+/g, ''),
       title: x.title,
       subtitle: x.subtitle,
+      description: x.description,
       headline: x.title,
       subheadline: x.subtitle,
       cta_text: x.cta_text ?? '지금 예약하기',

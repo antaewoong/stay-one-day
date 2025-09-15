@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getKeywordTargetingSystem } from '@/lib/keyword-targeting'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/keywords?query=키즈 - 키워드 검색/자동완성
 export async function GET(req: NextRequest) {
   try {

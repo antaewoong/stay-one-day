@@ -47,7 +47,7 @@ export default function HomePage() {
   const [viewMode, setViewMode] = useState('grid')
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0)
   const [suggestions, setSuggestions] = useState(['풀빌라', '청주', '세종', '대전', '천안', '애견풀빌라'])
@@ -72,48 +72,36 @@ export default function HomePage() {
   const [isUserLoading, setIsUserLoading] = useState(true)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isUserMenuClosing, setIsUserMenuClosing] = useState(false)
-  // 즉시 보이는 기본 슬라이드 (API 로드 전)
-  const [heroSlides, setHeroSlides] = useState<any[]>([
-    {
-      id: '1',
-      title: '스테이청주',
-      subtitle: '사계절 온수풀로 즐기는 프라이빗 스테이',
-      image_url: 'https://fcmauibvdqbocwhloqov.supabase.co/storage/v1/object/public/hero-slides/hero/1757792106119/bbd3520b010d6fb8.jpg',
-      active: true
-    },
-    {
-      id: '2',
-      title: '피코키즈 스테이',
-      subtitle: '아이들과 웃음 가득한 하루',
-      image_url: 'https://fcmauibvdqbocwhloqov.supabase.co/storage/v1/object/public/hero-slides/hero/1757792272959/4d600a80aef2ca4b.jpeg',
-      active: true
-    },
-    {
-      id: '3',
-      title: '소소한옥',
-      subtitle: '한옥에서 보내는 단 하루의 시간여행',
-      image_url: 'https://fcmauibvdqbocwhloqov.supabase.co/storage/v1/object/public/hero-slides/hero_1757875403199.jpeg',
-      active: true
-    }
-  ])
+  const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroTexts, setHeroTexts] = useState<any[]>([])
   const [currentEmotionalText, setCurrentEmotionalText] = useState(0)
 
 
-  // 평점 데이터와 관리자 설정 순차 로드 (최적화: 한 번만 실행)
+  // 우선순위별 데이터 로드: 1) 히어로 슬라이드 먼저, 2) 나머지 데이터
   useEffect(() => {
-    let isActive = true // cleanup을 위한 플래그
-    
-    const loadAllData = async () => {
-      if (!isActive) return
-      
-      // 500ms 타임아웃 설정 - 빠른 응답을 위해
-      const timeoutId = setTimeout(() => {
-        if (isActive) {
-          setLoading(false)
+    let isActive = true
+
+    // 최우선: 히어로 슬라이드 즉시 로드
+    const loadHeroSlides = async () => {
+      try {
+        const response = await fetch('/api/site/hero-slides', { cache: 'no-store' })
+        if (response.ok && isActive) {
+          const result = await response.json()
+          const slides = result.data || []
+          if (Array.isArray(slides) && slides.length > 0) {
+            setHeroSlides(slides)
+          }
         }
-      }, 500)
-      
+      } catch (error) {
+        console.error('Hero slides load failed:', error)
+      }
+    }
+
+    loadHeroSlides() // 즉시 실행
+
+    const loadOtherData = async () => {
+      if (!isActive) return
+
       try {
         // 1. 평점 데이터 먼저 로드
         const { data: reviewsData, error: reviewError } = await supabase
@@ -148,14 +136,8 @@ export default function HomePage() {
           setAccommodationRatings(ratingsMap)
         }
 
-        // 2. 평점 데이터가 로드된 후 관리자 설정과 히어로 슬라이드 로드
-        const [accommodationResponse, heroSlidesResponse] = await Promise.all([
-          fetch('/api/accommodations?limit=1000').catch(() => ({ ok: false })),
-          fetch('/api/site/hero-slides', { cache: 'no-store' }).catch((e) => {
-            console.error('Hero slides fetch error:', e)
-            return { ok: false }
-          })
-        ])
+        // 2. 평점 데이터가 로드된 후 관리자 설정 로드
+        const accommodationResponse = await fetch('/api/accommodations?limit=1000').catch(() => ({ ok: false }))
         
         const response = accommodationResponse
         if (response.ok && isActive) {
@@ -267,44 +249,23 @@ export default function HomePage() {
             }
           }
 
-          // 히어로 슬라이드 즉시 로드
-          if (heroSlidesResponse.ok && isActive) {
-            try {
-              const heroSlidesResult = await heroSlidesResponse.json()
-              const slides = heroSlidesResult.data || []
-              if (Array.isArray(slides) && slides.length > 0) {
-                setHeroSlides(slides)
-              }
-            } catch (error) {
-              console.error('Hero slides error:', error)
-            }
-          }
-
-          // 히어로 텍스트 로드
-          if (heroTextsResponse.ok && isActive) {
-            const heroTextsResult = await heroTextsResponse.json()
-            if (heroTextsResult.data && heroTextsResult.data.length > 0) {
-              const textData = heroTextsResult.data.map((text: any) => ({
-                accent: text.english_phrase,
-                main: text.main_text,
-                sub: text.sub_text
-              }))
-              setHeroTexts(textData)
-            }
-          }
         }
       } catch (error) {
         console.error('데이터 로드 실패:', error)
       } finally {
-        clearTimeout(timeoutId)
         if (isActive) {
           setLoading(false)
         }
       }
     }
 
-    loadAllData()
-    
+    // 히어로 슬라이드 우선 로드 후, 다른 데이터 로드
+    setTimeout(() => {
+      if (isActive) {
+        loadOtherData()
+      }
+    }, 100) // 히어로 슬라이드 로드 후 100ms 후에 다른 데이터 로드
+
     return () => {
       isActive = false // cleanup
     }
@@ -752,10 +713,6 @@ export default function HomePage() {
     }
   }, [])
 
-  // 초기 로딩 상태 해제 (한 번만 실행)
-  useEffect(() => {
-    setTimeout(() => setIsLoading(false), 100)
-  }, [])
 
   // 추천 검색어 자동 스크롤 (항상 실행)
   useEffect(() => {
