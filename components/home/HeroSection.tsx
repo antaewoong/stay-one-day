@@ -100,10 +100,13 @@ export default function HeroSection({ slides }: HeroSectionProps) {
 
   if (items.length === 0) {
     return (
-      <section className="relative bg-gray-100 flex items-center justify-center" style={{ height: '45vh' }}>
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-600 mb-4">히어로 슬라이드 로딩중...</h1>
-          <p className="text-gray-500">관리자 페이지에서 슬라이드를 추가해보세요</p>
+      <section className="relative bg-gray-900 min-h-[65vh] sm:min-h-[75vh] md:min-h-[85vh] flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
+        <div className="relative text-center text-white">
+          <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-4">
+            stay<span className="font-medium">oneday</span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-200 font-light">온전한 쉼, 완벽한 하루</p>
         </div>
       </section>
     )
