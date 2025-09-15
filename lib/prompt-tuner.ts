@@ -449,3 +449,8 @@ function generateFallbackAnalysis(data: any): any {
     improvement_points: ['자연스러운 색감', '편안한 템포', '가족 친화적 요소']
   }
 }
+
+// Export shim for build compatibility
+export function tunePromptsFromTrendSignals() {
+  return null
+}

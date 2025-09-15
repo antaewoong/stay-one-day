@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseOnEdge } from '@/lib/supabase-edge'
 
-export default function adminMiddleware(handler: Function) {
+function adminMiddleware(handler: Function) {
   return async function(req: NextRequest, context?: any) {
     const { supabase } = createSupabaseOnEdge(req)
 
@@ -32,3 +32,6 @@ export default function adminMiddleware(handler: Function) {
     return handler(req, context)
   }
 }
+
+export default adminMiddleware
+export { adminMiddleware as withAdminAuth }

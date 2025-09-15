@@ -386,3 +386,8 @@ function getWeekStartDate(): Date {
 
   return weekStart
 }
+
+// Export shim for build compatibility
+export function collectTrendsFromPlatforms() {
+  return null
+}

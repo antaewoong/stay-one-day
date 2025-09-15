@@ -305,3 +305,8 @@ export function getYouTubeClient(): YouTubeApiClient {
 }
 
 export type { YouTubeTrendData, YouTubeVideo }
+
+// Export shim
+export function getYouTubeApiClient() {
+  return null
+}

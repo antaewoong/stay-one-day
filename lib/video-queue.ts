@@ -365,3 +365,8 @@ redisConnection.on('error', (err) => {
 redisConnection.on('close', () => {
   console.log('[REDIS] 연결 종료됨')
 })
+
+// Export shim for build compatibility
+export function createVideoJob() {
+  return null
+}

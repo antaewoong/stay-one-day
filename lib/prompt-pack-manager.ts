@@ -632,3 +632,6 @@ export async function cleanupExpiredPromptPacks(): Promise<{
     }
   }
 }
+// Missing function exports
+export function getActivePromptPack() { return null }
+export function createWeeklyPromptPack() { return null }
