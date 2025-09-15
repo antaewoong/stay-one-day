@@ -84,13 +84,12 @@ export default function HomePage() {
     const loadAllData = async () => {
       if (!isActive) return
       
-      // 2초 타임아웃 설정 - Vercel에서 로딩이 무한정 걸리는 문제 방지
+      // 500ms 타임아웃 설정 - 빠른 응답을 위해
       const timeoutId = setTimeout(() => {
         if (isActive) {
-          console.warn('Data loading timeout - proceeding with default state')
           setLoading(false)
         }
-      }, 2000)
+      }, 500)
       
       try {
         // 1. 평점 데이터 먼저 로드
@@ -765,7 +764,7 @@ export default function HomePage() {
 
   // 초기 로딩 상태 해제 (한 번만 실행)
   useEffect(() => {
-    setTimeout(() => setIsLoading(false), 2000)
+    setTimeout(() => setIsLoading(false), 100)
   }, [])
 
   // 추천 검색어 자동 스크롤 (항상 실행)

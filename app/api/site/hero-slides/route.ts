@@ -5,7 +5,7 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 60
+export const revalidate = 10
 
 export async function GET() {
   // ENV 가드: 없으면 500 대신 친절 메시지
