@@ -660,18 +660,20 @@ export default function AccommodationDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* 이미지 갤러리 */}
             <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
-              {accommodation.images && accommodation.images.length > 0 && 
+              {accommodation.images && accommodation.images.length > 0 &&
                 accommodation.images[currentImageIndex] &&
                 typeof accommodation.images[currentImageIndex] === 'string' &&
                 (accommodation.images[currentImageIndex].startsWith('http') || accommodation.images[currentImageIndex].startsWith('/')) ? (
                 <>
-                  <OptimizedImage
-                    src={accommodation.images[currentImageIndex]}
-                    alt={accommodation.name}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
+                  <div className="relative w-full h-full">
+                    <OptimizedImage
+                      src={accommodation.images[currentImageIndex]}
+                      alt={accommodation.name}
+                      fill
+                      className="object-cover transition-opacity duration-300 ease-in-out"
+                      priority
+                    />
+                  </div>
                   
                   {accommodation.images.length > 1 && (
                     <>
@@ -680,17 +682,17 @@ export default function AccommodationDetailPage() {
                           const validImages = accommodation.images?.filter(img => img && typeof img === 'string' && (img.startsWith('http') || img.startsWith('/'))) || []
                           setCurrentImageIndex(prev => prev === 0 ? validImages.length - 1 : prev - 1)
                         }}
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full"
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full transition-all duration-200 hover:scale-110 shadow-md hover:shadow-lg"
                       >
                         <ArrowLeft className="w-4 h-4" />
                       </button>
-                      
+
                       <button
                         onClick={() => {
                           const validImages = accommodation.images?.filter(img => img && typeof img === 'string' && (img.startsWith('http') || img.startsWith('/'))) || []
                           setCurrentImageIndex(prev => prev === validImages.length - 1 ? 0 : prev + 1)
                         }}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full transition-all duration-200 hover:scale-110 shadow-md hover:shadow-lg"
                       >
                         <ArrowLeft className="w-4 h-4 rotate-180" />
                       </button>
@@ -700,8 +702,8 @@ export default function AccommodationDetailPage() {
                           <button
                             key={index}
                             onClick={() => setCurrentImageIndex(index)}
-                            className={`w-2 h-2 rounded-full ${
-                              index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                            className={`w-2 h-2 rounded-full transition-all duration-300 hover:scale-125 ${
+                              index === currentImageIndex ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/75'
                             }`}
                           />
                         ))}
