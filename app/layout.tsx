@@ -30,12 +30,18 @@ export default function RootLayout({
         {/* JSON-LD 구조화 데이터 */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd.organization) }}
-        />
+          id="organization-jsonld"
+          suppressHydrationWarning={true}
+        >
+          {JSON.stringify(jsonLd.organization)}
+        </script>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd.website) }}
-        />
+          id="website-jsonld"
+          suppressHydrationWarning={true}
+        >
+          {JSON.stringify(jsonLd.website)}
+        </script>
         
         {/* 성능 최적화 리소스 힌트 */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />

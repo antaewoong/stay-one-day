@@ -26,23 +26,27 @@ export function GoogleAnalytics() {
           console.warn('GA4 script failed to load:', e)
         }}
       />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
+      <Script
+        id="google-analytics"
+        strategy="afterInteractive"
+        onLoad={() => {
           try {
             window.dataLayer = window.dataLayer || [];
-            function gtag(){
-              dataLayer.push(arguments);
+            function gtag(...args: any[]) {
+              window.dataLayer.push(args);
             }
+            window.gtag = gtag;
             gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}', {
+            gtag('config', GA_MEASUREMENT_ID, {
               anonymize_ip: true,
               send_page_view: false
             });
+            console.log('GA4 initialized successfully');
           } catch (error) {
             console.warn('GA4 initialization failed:', error);
           }
-        `}
-      </Script>
+        }}
+      />
     </>
   )
 }
