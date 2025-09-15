@@ -116,14 +116,18 @@ export default function InfluencerDashboard() {
     try {
       console.log('📊 대시보드 데이터 로드 시작, influencerId:', influencerId)
       
-      // 현재 협업 기간 정보 로드 (Supabase에서 직접)
+      // 현재 협업 기간 정보 로드 (현재 날짜 기준으로 가장 가까운 활성 기간)
+      const currentDate = new Date().toISOString()
       const { data: periodData, error: periodError } = await supabase
         .from('collaboration_periods')
         .select('*')
         .eq('is_open', true)
-        .order('created_at', { ascending: false })
+        .lte('application_start_date', currentDate)
+        .gte('application_end_date', currentDate)
+        .order('year', { ascending: true })
+        .order('month', { ascending: true })
         .limit(1)
-        .single()
+        .maybeSingle()
 
       if (!periodError && periodData) {
         setCurrentPeriod(periodData)

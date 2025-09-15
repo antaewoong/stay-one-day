@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { 
@@ -23,8 +24,67 @@ export default function UserHeader() {
   const [searchLocation, setSearchLocation] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
   const [guestCount, setGuestCount] = useState(2)
+  const [selectedStayType, setSelectedStayType] = useState('')
 
   const supabase = createClient()
+  const router = useRouter()
+
+  // 검색 처리 함수
+  const handleSearch = () => {
+    const searchParams = new URLSearchParams()
+
+    if (searchLocation) {
+      searchParams.set('location', searchLocation)
+    }
+    if (selectedDate) {
+      searchParams.set('date', selectedDate)
+    }
+    if (guestCount) {
+      searchParams.set('guests', guestCount.toString())
+    }
+    if (selectedStayType) {
+      searchParams.set('type', selectedStayType)
+    }
+
+    // 검색 모달 닫기
+    setShowSearchModal(false)
+
+    // spaces 페이지로 이동
+    router.push(`/spaces?${searchParams.toString()}`)
+  }
+
+  // 목적지 목록
+  const destinations = [
+    { id: 'jeju', name: '제주도', category: 'island' },
+    { id: 'busan', name: '부산', category: 'coastal' },
+    { id: 'sokcho', name: '속초', category: 'coastal' },
+    { id: 'gyeongju', name: '경주', category: 'historical' },
+    { id: 'jeonju', name: '전주', category: 'cultural' },
+    { id: 'gangneung', name: '강릉', category: 'coastal' },
+    { id: 'yeosu', name: '여수', category: 'coastal' },
+    { id: 'tongyeong', name: '통영', category: 'coastal' },
+    { id: 'andong', name: '안동', category: 'cultural' },
+    { id: 'damyang', name: '담양', category: 'nature' },
+    { id: 'boseong', name: '보성', category: 'nature' },
+    { id: 'gapyeong', name: '가평', category: 'nature' },
+    { id: 'nami', name: '남이섬', category: 'nature' },
+    { id: 'chuncheon', name: '춘천', category: 'nature' },
+    { id: 'pocheon', name: '포천', category: 'nature' }
+  ]
+
+  // 스테이 형태 목록
+  const stayTypes = [
+    { id: 'pension', name: '펜션', icon: '🏡' },
+    { id: 'pool_villa', name: '풀빌라', icon: '🏊' },
+    { id: 'glamping', name: '글램핑', icon: '🏕️' },
+    { id: 'hanok', name: '한옥', icon: '🏛️' },
+    { id: 'hotel', name: '호텔', icon: '🏨' },
+    { id: 'resort', name: '리조트', icon: '🏖️' },
+    { id: 'guesthouse', name: '게스트하우스', icon: '🏠' },
+    { id: 'camping', name: '캠핑', icon: '⛺' },
+    { id: 'cabin', name: '통나무집', icon: '🪵' },
+    { id: 'container', name: '컨테이너하우스', icon: '📦' }
+  ]
 
   // 사용자 인증 상태 확인
   useEffect(() => {
@@ -306,7 +366,15 @@ export default function UserHeader() {
                   size="sm"
                   className="px-4"
                   onClick={() => {
-                    console.log('검색 실행:', { searchLocation, selectedDate, guestCount })
+                    // URL에 검색 파라미터 추가하여 숙소 목록 페이지로 이동
+                    const params = new URLSearchParams()
+                    if (searchLocation) params.set('location', searchLocation)
+                    if (selectedDate) params.set('date', selectedDate)
+                    if (guestCount) params.set('guests', guestCount.toString())
+                    if (selectedStayType) params.set('type', selectedStayType)
+
+                    const searchUrl = `/spaces?${params.toString()}`
+                    window.location.href = searchUrl
                     setShowSearchModal(false)
                   }}
                 >
@@ -325,14 +393,14 @@ export default function UserHeader() {
 
             {/* 검색 폼 */}
             <div className="p-6">
-              {/* 장소 입력 */}
+              {/* 목적지 선택 */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-800 mb-3">
                   목적지
                 </label>
-                <div className="relative">
-                  <Input 
-                    placeholder="지역을 입력해주세요"
+                <div className="relative mb-3">
+                  <Input
+                    placeholder="지역을 입력하거나 아래에서 선택해주세요"
                     value={searchLocation}
                     onChange={(e) => setSearchLocation(e.target.value)}
                     className="pl-4 pr-12 py-3 h-12 rounded-2xl border border-gray-200 focus:border-gray-400 focus:ring-0 text-base placeholder:text-gray-400 transition-colors"
@@ -345,6 +413,46 @@ export default function UserHeader() {
                       <X className="w-4 h-4" />
                     </button>
                   )}
+                </div>
+
+                {/* 인기 목적지 목록 */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {destinations.slice(0, 9).map((dest) => (
+                    <button
+                      key={dest.id}
+                      onClick={() => setSearchLocation(dest.name)}
+                      className={`p-3 text-sm font-medium rounded-xl border transition-all ${
+                        searchLocation === dest.name
+                          ? 'bg-blue-50 border-blue-200 text-blue-700'
+                          : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {dest.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 스테이 형태 선택 */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-800 mb-3">
+                  스테이 형태
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {stayTypes.slice(0, 8).map((type) => (
+                    <button
+                      key={type.id}
+                      onClick={() => setSelectedStayType(selectedStayType === type.id ? '' : type.id)}
+                      className={`flex items-center gap-2 p-3 text-sm font-medium rounded-xl border transition-all ${
+                        selectedStayType === type.id
+                          ? 'bg-blue-50 border-blue-200 text-blue-700'
+                          : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span className="text-lg">{type.icon}</span>
+                      <span>{type.name}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -395,6 +503,25 @@ export default function UserHeader() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* 검색 버튼 */}
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setShowSearchModal(false)}
+                  className="flex-1 py-3 h-12 text-base font-medium rounded-2xl border border-gray-200 hover:bg-gray-50"
+                >
+                  취소
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSearch}
+                  className="flex-1 py-3 h-12 text-base font-medium rounded-2xl bg-black text-white hover:bg-gray-800"
+                >
+                  검색하기
+                </Button>
               </div>
             </div>
           </div>

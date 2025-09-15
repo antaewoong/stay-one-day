@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -69,8 +70,9 @@ interface Accommodation {
   images?: string[]
 }
 
-export default function SpacesPage() {
+function SpacesContent() {
   const supabase = createClient()
+  const searchParams = useSearchParams()
   const [accommodations, setAccommodations] = useState<Accommodation[]>([])
   const [searchData, setSearchData] = useState({
     location: '',
@@ -217,13 +219,36 @@ export default function SpacesPage() {
     }
   ]
 
+  // URL 파라미터에서 검색 조건을 읽어오는 useEffect
   useEffect(() => {
-    loadAccommodations(searchData.location)
-  }, [filters.sortBy, filters.capacity, filters.collection])
+    const location = searchParams.get('location') || ''
+    const date = searchParams.get('date') || ''
+    const guests = searchParams.get('guests') || '2'
+    const stayType = searchParams.get('type') || ''
+
+    // 검색 데이터 업데이트
+    setSearchData(prev => ({
+      ...prev,
+      location,
+      date,
+      guests
+    }))
+
+    // 스테이 형태 필터 업데이트
+    if (stayType) {
+      setFilters(prev => ({
+        ...prev,
+        category: stayType
+      }))
+    }
+
+    // 검색 실행
+    loadAccommodations(location)
+  }, [searchParams])
 
   useEffect(() => {
-    loadAccommodations()
-  }, [])
+    loadAccommodations(searchData.location)
+  }, [filters.sortBy, filters.capacity, filters.collection, filters.category])
 
   // 필터된 숙소 목록
   const filteredAccommodations = accommodations.filter(acc => {
@@ -695,5 +720,32 @@ export default function SpacesPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SpacesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-4 py-12">
+          <div className="animate-pulse space-y-8">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-24 bg-gray-200 rounded-lg"></div>
+            <div className="flex gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-12 bg-gray-200 rounded-full w-24"></div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-80 bg-gray-200 rounded-lg"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <SpacesContent />
+    </Suspense>
   )
 }

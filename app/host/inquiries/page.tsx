@@ -57,32 +57,32 @@ export default function HostInquiriesPage() {
   const loadInquiries = async (hostId: string) => {
     try {
       setLoading(true)
-      
-      let url = `/api/inquiries?userId=${hostId}&limit=100`
-      
+
+      let url = `/api/host/inquiries?limit=100`
+
       if (statusFilter !== 'all') {
         url += `&status=${statusFilter}`
       }
-      
-      const response = await fetch(url)
+
+      const response = await hostGet(url)
       const result = await response.json()
       
       if (result.success && result.data) {
         const mappedInquiries = result.data.map((inquiry: any) => ({
           id: inquiry.id,
-          guest_name: inquiry.inquirer_name,
-          guest_phone: inquiry.inquirer_phone || '',
-          guest_email: inquiry.inquirer_email,
-          accommodation_name: inquiry.accommodation_name,
+          guest_name: inquiry.contact_name,
+          guest_phone: inquiry.contact_phone || '',
+          guest_email: inquiry.contact_email,
+          accommodation_name: '',
           subject: inquiry.title,
           message: inquiry.content,
           status: inquiry.status,
           priority: inquiry.priority || 'medium',
           created_at: inquiry.created_at,
-          reply: inquiry.inquiry_replies && inquiry.inquiry_replies.length > 0 
-            ? inquiry.inquiry_replies[inquiry.inquiry_replies.length - 1].content 
+          reply: inquiry.inquiry_replies && inquiry.inquiry_replies.length > 0
+            ? inquiry.inquiry_replies[inquiry.inquiry_replies.length - 1].content
             : undefined,
-          reply_date: inquiry.inquiry_replies && inquiry.inquiry_replies.length > 0 
+          reply_date: inquiry.inquiry_replies && inquiry.inquiry_replies.length > 0
             ? inquiry.inquiry_replies[inquiry.inquiry_replies.length - 1].created_at
             : undefined
         }))

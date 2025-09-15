@@ -28,8 +28,26 @@ function withHostAuth(handler: Function) {
       })
     }
 
-    // 원래 핸들러 실행
-    return handler(req, context)
+    // 호스트 정보 조회 (역할이 host인 경우)
+    let hostId = null
+    if (userRole.role === 'host') {
+      const { data: hostData } = await supabase
+        .from('hosts')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      hostId = hostData?.id
+    }
+
+    // 원래 핸들러 실행 (roleIds 객체와 함께)
+    return handler({
+      req,
+      supabase,
+      roleIds: { hostId },
+      user,
+      userRole: userRole.role
+    })
   }
 }
 

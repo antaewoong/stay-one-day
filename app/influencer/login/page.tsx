@@ -61,19 +61,19 @@ export default function InfluencerLoginPage() {
 
       console.log('✅ 사용자 인증 성공:', data.user.id)
 
-      // influencers 테이블에서 인플루언서 정보 조회 (RLS 정책에 의해 자동으로 본인만 조회됨)
+      // influencers 테이블에서 인플루언서 정보 조회 (auth_user_id로 조회)
       const { data: influencer, error: influencerError } = await supabase
         .from('influencers')
         .select('*')
-        .eq('email', data.user.email)
+        .eq('auth_user_id', data.user.id)
         .eq('status', 'active')
         .single()
 
       console.log('👤 인플루언서 정보 조회 결과:', { influencer: influencer?.name || 'null', error: influencerError?.message })
 
       if (influencerError || !influencer) {
-        console.error('인플루언서 정보 조회 실패')
-        setError('인플루언서 정보를 찾을 수 없습니다.')
+        console.error('인플루언서 정보 조회 실패:', influencerError)
+        setError('인플루언서 정보를 찾을 수 없습니다. 관리자에게 문의해주세요.')
         await supabase.auth.signOut()
         setLoading(false)
         return

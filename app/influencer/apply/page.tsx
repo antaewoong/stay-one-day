@@ -198,6 +198,13 @@ export default function InfluencerApplyPage() {
         return
       }
 
+      // 유료 협업인 경우 총 비용 계산
+      let totalCost = null
+      if (formData.request_type === 'paid') {
+        // 기본적으로 숙소의 base_price 사용 (1박 기준)
+        totalCost = selectedAccommodation.base_price
+      }
+
       // 중복 신청 확인
       const applicationStart = new Date(currentPeriod.application_start_date)
       const applicationEnd = new Date(currentPeriod.application_end_date)

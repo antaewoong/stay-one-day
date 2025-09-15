@@ -900,11 +900,6 @@ export default function HostCalendarPage() {
                             열기
                           </Badge>
                         )}
-                        {day.isCustomPrice && (
-                          <Badge className="text-[10px] sm:text-xs bg-yellow-100 text-yellow-800 px-0.5 sm:px-1 py-0">
-                            커스텀
-                          </Badge>
-                        )}
                       </div>
                     </div>
                   

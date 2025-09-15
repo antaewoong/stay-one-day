@@ -115,11 +115,20 @@ export const GET = withAdminAuth(async (request: NextRequest, db: any, ctx: any)
         )
       }
 
+      // 필드명을 카멜케이스로 변환
+      const formattedSessions = sessions?.map(session => ({
+        chatId: session.chat_id,
+        email: session.admin_email,
+        permissions: session.permissions || [],
+        createdAt: session.created_at,
+        lastActivity: session.last_activity || session.created_at
+      })) || []
+
       return NextResponse.json({
         success: true,
         data: {
           totalSessions: sessions?.length || 0,
-          sessions: sessions || []
+          sessions: formattedSessions
         }
       })
 
@@ -131,3 +140,76 @@ export const GET = withAdminAuth(async (request: NextRequest, db: any, ctx: any)
       )
     }
   })
+
+// DELETE 핸들러 (세션 종료)
+export const DELETE = withAdminAuth(async (request: NextRequest, db: any, ctx: any) => {
+  try {
+    const url = new URL(request.url)
+    const chatId = url.searchParams.get('chatId')
+    const emergency = url.searchParams.get('emergency')
+
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    if (emergency === 'true') {
+      // 모든 세션 종료
+      const { error } = await supabaseAdmin
+        .from('telegram_sessions')
+        .update({ is_active: false })
+        .eq('is_active', true)
+
+      if (error) {
+        console.error('모든 세션 종료 실패:', error)
+        return NextResponse.json(
+          { error: '모든 세션 종료에 실패했습니다' },
+          { status: 500 }
+        )
+      }
+
+      console.log(`✅ 모든 텔레그램 세션 종료 by ${ctx.admin?.email}`)
+
+      return NextResponse.json({
+        success: true,
+        message: '모든 세션이 종료되었습니다'
+      })
+
+    } else if (chatId) {
+      // 특정 세션 종료
+      const { error } = await supabaseAdmin
+        .from('telegram_sessions')
+        .update({ is_active: false })
+        .eq('chat_id', parseInt(chatId))
+        .eq('is_active', true)
+
+      if (error) {
+        console.error('세션 종료 실패:', error)
+        return NextResponse.json(
+          { error: '세션 종료에 실패했습니다' },
+          { status: 500 }
+        )
+      }
+
+      console.log(`✅ 텔레그램 세션 종료: ${chatId} by ${ctx.admin?.email}`)
+
+      return NextResponse.json({
+        success: true,
+        message: '세션이 종료되었습니다'
+      })
+
+    } else {
+      return NextResponse.json(
+        { error: 'chatId 또는 emergency 파라미터가 필요합니다' },
+        { status: 400 }
+      )
+    }
+
+  } catch (error) {
+    console.error('텔레그램 세션 종료 실패:', error)
+    return NextResponse.json(
+      { error: '서버 오류가 발생했습니다' },
+      { status: 500 }
+    )
+  }
+})

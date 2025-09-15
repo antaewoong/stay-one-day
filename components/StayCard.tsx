@@ -3,10 +3,28 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  Users, 
-  Heart, 
-  ArrowRight
+import {
+  Users,
+  Heart,
+  ArrowRight,
+  Wifi,
+  Car,
+  Utensils,
+  Waves,
+  Baby,
+  Snowflake,
+  Tv,
+  Coffee,
+  Bath,
+  Trees,
+  ParkingCircle,
+  ChefHat,
+  Gamepad2,
+  Dumbbell,
+  Wind,
+  Mountain,
+  Sparkles,
+  Home
 } from 'lucide-react'
 import Link from 'next/link'
 import OptimizedImage from '@/components/optimized-image'
@@ -49,6 +67,84 @@ interface StayCardProps {
   loading?: boolean
   useNextImage?: boolean
   variant?: 'default' | 'featured'
+}
+
+// 편의시설 아이콘 매핑 함수 (Stay-OneDay 톤앤매너 적용)
+const getAmenityIcon = (amenity: string) => {
+  const amenityLower = amenity.toLowerCase()
+
+  // Wi-Fi 관련 - 민트 톤
+  if (amenityLower.includes('wifi') || amenityLower.includes('인터넷') || amenityLower.includes('무선')) {
+    return { icon: Wifi, color: 'text-[#00D4B3]', bgColor: 'bg-[#00D4B3]/10' }
+  }
+
+  // 주차 관련 - 네이비 톤
+  if (amenityLower.includes('주차') || amenityLower.includes('parking')) {
+    return { icon: Car, color: 'text-[#0B1A34]', bgColor: 'bg-[#0B1A34]/10' }
+  }
+
+  // 수영장 관련 - 민트 톤
+  if (amenityLower.includes('수영장') || amenityLower.includes('풀') || amenityLower.includes('pool') || amenityLower.includes('워터')) {
+    return { icon: Waves, color: 'text-[#00D4B3]', bgColor: 'bg-[#00D4B3]/10' }
+  }
+
+  // 바베큐 관련 - 골드 톤
+  if (amenityLower.includes('바베큐') || amenityLower.includes('bbq') || amenityLower.includes('그릴')) {
+    return { icon: ChefHat, color: 'text-[#C7A756]', bgColor: 'bg-[#C7A756]/10' }
+  }
+
+  // 키즈 관련 - 골드 톤
+  if (amenityLower.includes('키즈') || amenityLower.includes('아이') || amenityLower.includes('어린이') || amenityLower.includes('유아')) {
+    return { icon: Baby, color: 'text-[#C7A756]', bgColor: 'bg-[#C7A756]/10' }
+  }
+
+  // 에어컨 관련 - 민트 톤
+  if (amenityLower.includes('에어컨') || amenityLower.includes('냉방') || amenityLower.includes('에어컨디셔너')) {
+    return { icon: Snowflake, color: 'text-[#00D4B3]', bgColor: 'bg-[#00D4B3]/10' }
+  }
+
+  // TV 관련 - 네이비 톤
+  if (amenityLower.includes('tv') || amenityLower.includes('텔레비전') || amenityLower.includes('티비')) {
+    return { icon: Tv, color: 'text-[#16305E]', bgColor: 'bg-[#16305E]/10' }
+  }
+
+  // 커피 관련 - 골드 톤
+  if (amenityLower.includes('커피') || amenityLower.includes('카페') || amenityLower.includes('coffee')) {
+    return { icon: Coffee, color: 'text-[#C7A756]', bgColor: 'bg-[#C7A756]/10' }
+  }
+
+  // 욕조/스파 관련 - 민트 톤
+  if (amenityLower.includes('욕조') || amenityLower.includes('스파') || amenityLower.includes('자쿠지') || amenityLower.includes('온수')) {
+    return { icon: Bath, color: 'text-[#00D4B3]', bgColor: 'bg-[#00D4B3]/10' }
+  }
+
+  // 정원/자연 관련 - 네이비 톤
+  if (amenityLower.includes('정원') || amenityLower.includes('자연') || amenityLower.includes('숲') || amenityLower.includes('산')) {
+    return { icon: Trees, color: 'text-[#0B1A34]', bgColor: 'bg-[#0B1A34]/10' }
+  }
+
+  // 게임 관련 - 네이비 톤
+  if (amenityLower.includes('게임') || amenityLower.includes('오락') || amenityLower.includes('플스') || amenityLower.includes('xbox')) {
+    return { icon: Gamepad2, color: 'text-[#16305E]', bgColor: 'bg-[#16305E]/10' }
+  }
+
+  // 피트니스 관련 - 골드 톤
+  if (amenityLower.includes('헬스') || amenityLower.includes('운동') || amenityLower.includes('피트니스') || amenityLower.includes('gym')) {
+    return { icon: Dumbbell, color: 'text-[#C7A756]', bgColor: 'bg-[#C7A756]/10' }
+  }
+
+  // 펜션/독채 관련 - 네이비 톤
+  if (amenityLower.includes('독채') || amenityLower.includes('펜션') || amenityLower.includes('프라이빗')) {
+    return { icon: Home, color: 'text-[#0B1A34]', bgColor: 'bg-[#0B1A34]/10' }
+  }
+
+  // 전망/뷰 관련 - 그레이 톤
+  if (amenityLower.includes('전망') || amenityLower.includes('뷰') || amenityLower.includes('view') || amenityLower.includes('오션')) {
+    return { icon: Mountain, color: 'text-[#666666]', bgColor: 'bg-[#666666]/10' }
+  }
+
+  // 기본 아이콘 - 그레이 톤
+  return { icon: Sparkles, color: 'text-[#666666]', bgColor: 'bg-[#666666]/10' }
 }
 
 const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, loading = false, useNextImage = true, variant = 'default' }: StayCardProps) {
@@ -194,23 +290,29 @@ const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, load
                   </div>
                 </div>
                 {stay.amenities && stay.amenities.length > 0 && (
-                  <div className={variant === 'featured' ? "flex items-center gap-2 flex-wrap" : "grid grid-cols-2 gap-2 text-xs text-gray-600"}>
+                  <div className={variant === 'featured' ? "flex items-center gap-2 flex-wrap" : "grid grid-cols-2 gap-1.5 text-xs"}>
                     {variant === 'featured' ? (
-                      stay.amenities.filter((amenity: string) => 
-                        amenity && !['주차', '무료주차', 'Wi-Fi', 'WiFi', '인터넷'].includes(amenity)
-                      ).slice(0, 4).map((amenity: string, idx: number) => (
-                        <div key={idx} className="flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 flex-shrink-0" />
-                          <span className="text-xs text-gray-700 truncate max-w-[70px]">{amenity}</span>
-                        </div>
-                      ))
+                      stay.amenities.filter((amenity: string) =>
+                        amenity && amenity.trim().length > 0
+                      ).slice(0, 4).map((amenity: string, idx: number) => {
+                        const { icon: IconComponent, color, bgColor } = getAmenityIcon(amenity)
+                        return (
+                          <div key={idx} className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${bgColor} transition-all hover:scale-105`}>
+                            <IconComponent className={`w-3 h-3 ${color} flex-shrink-0`} />
+                            <span className="text-xs text-gray-700 truncate max-w-[60px]">{amenity}</span>
+                          </div>
+                        )
+                      })
                     ) : (
-                      stay.amenities.slice(0, 4).map((amenity: string) => (
-                        <div key={amenity} className="flex items-center">
-                          <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2"></div>
-                          {amenity}
-                        </div>
-                      ))
+                      stay.amenities.slice(0, 4).map((amenity: string, idx: number) => {
+                        const { icon: IconComponent, color, bgColor } = getAmenityIcon(amenity)
+                        return (
+                          <div key={idx} className={`flex items-center gap-1.5 px-2 py-1 rounded-lg ${bgColor} transition-all hover:scale-105`}>
+                            <IconComponent className={`w-3.5 h-3.5 ${color} flex-shrink-0`} />
+                            <span className="text-xs text-gray-700 truncate">{amenity}</span>
+                          </div>
+                        )
+                      })
                     )}
                   </div>
                 )}
@@ -224,14 +326,32 @@ const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, load
                 <h3 className="font-normal text-gray-900 mb-1 line-clamp-1 text-lg sm:text-base leading-tight">
                   {stay.name}
                 </h3>
-                
+
                 {/* 위치와 기본 정보 */}
                 <div className="flex items-center text-gray-500 text-base sm:text-sm mb-2 font-normal">
                   <span>{stay.location}</span>
                   <span className="mx-2">·</span>
                   <span>기준 2명 ~ 최대 {stay.capacity}명</span>
                 </div>
-                
+
+                {/* 주요 편의시설 미리보기 */}
+                {stay.amenities && stay.amenities.length > 0 && (
+                  <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                    {stay.amenities.slice(0, 3).map((amenity: string, idx: number) => {
+                      const { icon: IconComponent, color } = getAmenityIcon(amenity)
+                      return (
+                        <div key={idx} className="flex items-center gap-1">
+                          <IconComponent className={`w-3 h-3 ${color}`} />
+                          <span className="text-xs text-gray-600">{amenity}</span>
+                        </div>
+                      )
+                    })}
+                    {stay.amenities.length > 3 && (
+                      <span className="text-xs text-gray-400">+{stay.amenities.length - 3}개</span>
+                    )}
+                  </div>
+                )}
+
                 {/* 가격 정보 */}
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-semibold text-gray-900">
@@ -248,6 +368,25 @@ const StayCard = memo(function StayCard({ stay, index = 0, handleCardClick, load
                   <span className="mx-2">·</span>
                   <span>기준 2명 ~ 최대 {stay.capacity}명</span>
                 </div>
+
+                {/* 주요 편의시설 미리보기 */}
+                {stay.amenities && stay.amenities.length > 0 && (
+                  <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                    {stay.amenities.slice(0, 4).map((amenity: string, idx: number) => {
+                      const { icon: IconComponent, color } = getAmenityIcon(amenity)
+                      return (
+                        <div key={idx} className="flex items-center gap-1">
+                          <IconComponent className={`w-3 h-3 ${color}`} />
+                          <span className="text-xs text-gray-600 truncate max-w-[60px]">{amenity}</span>
+                        </div>
+                      )
+                    })}
+                    {stay.amenities.length > 4 && (
+                      <span className="text-xs text-gray-400">+{stay.amenities.length - 4}</span>
+                    )}
+                  </div>
+                )}
+
                 {/* 가격 정보 */}
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-semibold text-gray-900">

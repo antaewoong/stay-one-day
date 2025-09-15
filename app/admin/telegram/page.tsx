@@ -314,11 +314,11 @@ export default function TelegramBotManagePage() {
                       <div className="text-sm text-gray-600 space-y-1">
                         <p className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          생성: {new Date(session.createdAt).toLocaleString('ko-KR')}
+                          생성: {session.createdAt ? new Date(session.createdAt).toLocaleString('ko-KR') : 'Invalid Date'}
                         </p>
                         <p className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          마지막 활동: {new Date(session.lastActivity).toLocaleString('ko-KR')}
+                          마지막 활동: {session.lastActivity ? new Date(session.lastActivity).toLocaleString('ko-KR') : 'Invalid Date'}
                         </p>
                         
                         {(session.permissions || []).length > 0 && (

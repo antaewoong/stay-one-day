@@ -55,6 +55,7 @@ export default function HostPage() {
   const [recentReviews, setRecentReviews] = useState<any[]>([])
   const [hostData, setHostData] = useState<any>(null)
   const [dashboardData, setDashboardData] = useState<any>(null)
+  const [latestNotice, setLatestNotice] = useState<any>(null)
 
   useEffect(() => {
     console.log('🚀 호스트 페이지 useEffect 실행됨!')
@@ -70,6 +71,7 @@ export default function HostPage() {
           console.log('파싱된 호스트 데이터:', parsedData)
           setHostData(parsedData)
           loadDashboardData(parsedData.id)
+          loadLatestNotice()
           return
         }
 
@@ -190,6 +192,19 @@ export default function HostPage() {
     }
   }
 
+  const loadLatestNotice = async () => {
+    try {
+      const response = await hostGet('/api/host/notices?limit=1&important=true')
+      const result = await response.json()
+
+      if (result.success && result.data.length > 0) {
+        setLatestNotice(result.data[0])
+      }
+    } catch (error) {
+      console.error('최신 공지사항 로드 실패:', error)
+    }
+  }
+
 
   if (loading) {
     return (
@@ -286,6 +301,37 @@ export default function HostPage() {
           </Button>
         </div>
       </div>
+
+      {/* 공지사항 배너 - 중요 공지만 표시 */}
+      {latestNotice && (
+        <div className="px-4 lg:px-8 pb-4">
+          <Card className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Bell className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <h3 className="font-medium text-blue-900">{latestNotice.title}</h3>
+                    <p className="text-sm text-blue-700 mt-1">
+                      {latestNotice.content.length > 100
+                        ? `${latestNotice.content.substring(0, 100)}...`
+                        : latestNotice.content}
+                    </p>
+                    <p className="text-xs text-blue-600 mt-2">
+                      {new Date(latestNotice.created_at).toLocaleDateString('ko-KR')}
+                    </p>
+                  </div>
+                </div>
+                <Link href="/host/notices">
+                  <Button variant="outline" size="sm" className="border-blue-200 text-blue-700 hover:bg-blue-100">
+                    전체보기
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* 통계 카드 - PC에서만 표시 */}
       <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-4 lg:px-8 pb-4">
@@ -448,15 +494,15 @@ export default function HostPage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" className="w-full justify-start text-sm h-11 border-emerald-200 text-emerald-700 hover:bg-emerald-50 shadow-sm">
-                <Link href="/host/rooms">
+                <Link href="/host/calendar">
                   <Settings className="w-4 h-4 mr-3" />
-                  객실 관리 (방막기/방열기)
+                  달력 관리 (방막기/방열기)
                 </Link>
               </Button>
               <Button asChild variant="outline" className="w-full justify-start text-sm h-11 border-emerald-200 text-emerald-700 hover:bg-emerald-50 shadow-sm">
-                <Link href="/host/amenities">
+                <Link href="/host/settings">
                   <Plus className="w-4 h-4 mr-3" />
-                  편의시설 관리
+                  설정 관리
                 </Link>
               </Button>
             </CardContent>
@@ -484,9 +530,9 @@ export default function HostPage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" className="w-full justify-start text-sm h-11 border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm">
-                <Link href="/host/reservations/new">
+                <Link href="/host/inquiries">
                   <Phone className="w-4 h-4 mr-3" />
-                  전화 예약 등록
+                  문의 관리
                 </Link>
               </Button>
               <Button asChild variant="outline" className="w-full justify-start text-sm h-11 border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm">
@@ -514,19 +560,19 @@ export default function HostPage() {
             </CardHeader>
             <CardContent className="p-4 space-y-3">
               <Button asChild variant="outline" className="w-full justify-start text-sm h-11 border-amber-200 text-amber-700 hover:bg-amber-50 shadow-sm">
-                <Link href="/host/analytics">
+                <Link href="/host/revenue">
                   <TrendingUp className="w-4 h-4 mr-3" />
                   수익 분석
                 </Link>
               </Button>
               <Button asChild variant="outline" className="w-full justify-start text-sm h-11 border-amber-200 text-amber-700 hover:bg-amber-50 shadow-sm">
-                <Link href="/host/settlements">
+                <Link href="/host/bookings">
                   <DollarSign className="w-4 h-4 mr-3" />
-                  정산 관리
+                  예약 관리
                 </Link>
               </Button>
               <Button asChild variant="outline" className="w-full justify-start text-sm h-11 border-amber-200 text-amber-700 hover:bg-amber-50 shadow-sm">
-                <Link href="/host/pricing">
+                <Link href="/host/dashboard/pricing">
                   <Edit className="w-4 h-4 mr-3" />
                   요금 관리
                 </Link>
