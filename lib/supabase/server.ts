@@ -21,6 +21,11 @@ export function serverSB(): SupabaseClient {
 
 // Service Role 클라이언트 (서명 URL 생성용)
 export function createServiceRoleClient() {
+  // 브라우저 가드: Service Role 키가 클라이언트로 번들링되는 것을 방지
+  if (typeof window !== 'undefined') {
+    throw new Error('Do not import server supabase client on the client')
+  }
+
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!

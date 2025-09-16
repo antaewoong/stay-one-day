@@ -4,6 +4,7 @@
  */
 
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
+import { unstable_cache } from 'next/cache'
 import HomeClient from './home-client'
 import HeroServer from './hero-server'
 
@@ -41,17 +42,25 @@ async function getHomePageData() {
       })
     }
 
-    // 2. 숙소 데이터 로드 (직접 Supabase에서)
+    // 2. 숙소 데이터 로드 (직접 Supabase에서) - 최소 필요 컬럼만
     const { data: accommodationsData, error: accommodationsError } = await supabase
       .from('accommodations')
       .select(`
-        *,
+        id,
+        name,
+        images,
+        region,
+        accommodation_type,
+        accommodation_types,
+        base_price,
+        max_capacity,
+        base_capacity,
         accommodation_amenities (
           amenity_name
         )
       `)
       .eq('status', 'active')
-      .limit(1000)
+      .limit(100)
 
     let allAccommodations: any[] = []
     if (!accommodationsError && accommodationsData) {
@@ -193,8 +202,18 @@ async function getHomePageData() {
   }
 }
 
+// 캐시된 데이터 로딩 함수 (5분 캐시)
+const getCachedHomePageData = unstable_cache(
+  getHomePageData,
+  ['home-page-data'],
+  {
+    revalidate: 300, // 5분
+    tags: ['home-data', 'accommodations', 'sections']
+  }
+)
+
 export default async function HomeServer() {
-  const homeData = await getHomePageData()
+  const homeData = await getCachedHomePageData()
 
   return (
     <>
