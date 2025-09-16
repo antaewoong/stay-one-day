@@ -60,7 +60,7 @@ async function getHomePageData() {
 
     // 3. 사이트 섹션 설정 로드 (직접 Supabase에서)
     const { data: sectionsData, error: sectionsError } = await supabase
-      .from('site_sections')
+      .from('main_page_sections')
       .select('*')
       .eq('active', true)
 
