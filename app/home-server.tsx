@@ -3,13 +3,13 @@
  * CSR에서 SSR로 데이터 처리 이동
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import HomeClient from './home-client'
 import HeroServer from './hero-server'
 
 // 서버 사이드에서 데이터 로딩
 async function getHomePageData() {
-  const supabase = createClient()
+  const supabase = createServiceRoleClient()
 
   try {
     // 1. 평점 데이터 로드
