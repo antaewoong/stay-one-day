@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useEffect } from 'react'
+import { useAuthSession } from '@/lib/auth/useAuthSession'
 import { useRouter } from 'next/navigation'
+import { buildSearchUrl } from '@/lib/utils/buildSearchParams'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -32,13 +33,16 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 export default function Header() {
+  // 통합 인증 훅 사용
+  const { user, role: userRole, isLoading, signOut } = useAuthSession()
+
+  // UI 상태
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [user, setUser] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [userRole, setUserRole] = useState<'user' | 'host' | 'admin'>('user')
+
+  // 검색 파라미터 상태
   const [selectedRegion, setSelectedRegion] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedGuests, setSelectedGuests] = useState('4')
@@ -46,7 +50,7 @@ export default function Header() {
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
   const [isFavorite, setIsFavorite] = useState(false)
-  const supabase = createClient()
+
   const router = useRouter()
   const pathname = usePathname()
 
@@ -74,86 +78,29 @@ export default function Header() {
     }
   }, [isUserMenuOpen])
 
-  // 사용자 역할 체크 함수 메모화
-  const checkUserRole = useCallback((email: string) => {
-    const mainAdminEmails = ['admin@stayoneday.com', 'manager@stayoneday.com']
-    const hostEmails = ['host1@example.com', 'host2@example.com', 'test@test.com']
-    
-    if (mainAdminEmails.includes(email)) {
-      return 'admin'
-    } else if (hostEmails.includes(email)) {
-      return 'host'
-    }
-    return 'user'
-  }, [])
-
-  useEffect(() => {
-    let mounted = true
-    
-    // 초기 세션 확인
-    const initializeAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        
-        if (!mounted) return
-        
-        setUser(session?.user || null)
-        if (session?.user?.email) {
-          setUserRole(checkUserRole(session.user.email) as 'user' | 'host' | 'admin')
-        }
-        setIsLoading(false)
-      } catch (error) {
-        if (mounted) {
-          setUser(null)
-          setIsLoading(false)
-        }
-      }
-    }
-
-    initializeAuth()
-
-    // 인증 상태 변경 감지
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return
-      
-      setUser(session?.user || null)
-      
-      if (session?.user?.email) {
-        setUserRole(checkUserRole(session.user.email) as 'user' | 'host' | 'admin')
-      } else {
-        setUserRole('user')
-      }
-      
-      setIsLoading(false)
-    })
-
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
-  }, [checkUserRole])
-
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    await signOut()
     router.push('/')
   }
 
   const handleSearch = () => {
-    // 검색 파라미터를 URL에 추가하여 spaces 페이지로 이동
-    const searchParams = new URLSearchParams()
-    
-    if (selectedRegion) searchParams.append('region', selectedRegion)
-    if (selectedDate) searchParams.append('date', selectedDate)
-    if (selectedGuests) searchParams.append('guests', selectedGuests)
-    if (selectedCategories.length > 0) searchParams.append('categories', selectedCategories.join(','))
-    if (minPrice) searchParams.append('minPrice', minPrice)
-    if (maxPrice) searchParams.append('maxPrice', maxPrice)
-    
+    // 검색 필터 객체 생성
+    const filters = {
+      region: selectedRegion,
+      date: selectedDate,
+      guests: selectedGuests,
+      categories: selectedCategories,
+      minPrice,
+      maxPrice,
+      isFavorite
+    }
+
     // 검색 모달 닫기
     setIsSearchOpen(false)
-    
+
     // 검색 결과 페이지로 이동
-    router.push(`/spaces?${searchParams.toString()}`)
+    const searchUrl = buildSearchUrl(filters)
+    router.push(searchUrl)
   }
 
   const handleCategoryToggle = (category: string) => {

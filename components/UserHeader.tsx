@@ -5,52 +5,50 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { 
-  Search, 
-  Heart, 
-  Users, 
-  Home, 
-  Share2, 
+import {
+  Search,
+  Heart,
+  Users,
+  Home,
+  Share2,
   X,
-  CalendarDays 
+  CalendarDays
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { useAuthSession } from '@/lib/auth/useAuthSession'
+import { buildSearchUrl } from '@/lib/utils/buildSearchParams'
 
 export default function UserHeader() {
-  const [user, setUser] = useState<any>(null)
-  const [isUserLoading, setIsUserLoading] = useState(true)
+  // 통합 인증 훅 사용
+  const { user, isLoading: isUserLoading, signOut } = useAuthSession()
+
+  // UI 상태
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [showSearchModal, setShowSearchModal] = useState(false)
+
+  // 검색 파라미터 상태
   const [searchLocation, setSearchLocation] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
   const [guestCount, setGuestCount] = useState(2)
   const [selectedStayType, setSelectedStayType] = useState('')
 
-  const supabase = createClient()
   const router = useRouter()
 
   // 검색 처리 함수
   const handleSearch = () => {
-    const searchParams = new URLSearchParams()
-
-    if (searchLocation) {
-      searchParams.set('location', searchLocation)
-    }
-    if (selectedDate) {
-      searchParams.set('date', selectedDate)
-    }
-    if (guestCount) {
-      searchParams.set('guests', guestCount.toString())
-    }
-    if (selectedStayType) {
-      searchParams.set('type', selectedStayType)
+    // 검색 필터 객체 생성
+    const filters = {
+      location: searchLocation,
+      date: selectedDate,
+      guests: guestCount,
+      type: selectedStayType
     }
 
     // 검색 모달 닫기
     setShowSearchModal(false)
 
     // spaces 페이지로 이동
-    router.push(`/spaces?${searchParams.toString()}`)
+    const searchUrl = buildSearchUrl(filters)
+    router.push(searchUrl)
   }
 
   // 목적지 목록
@@ -86,61 +84,11 @@ export default function UserHeader() {
     { id: 'container', name: '컨테이너하우스', icon: '📦' }
   ]
 
-  // 사용자 인증 상태 확인
-  useEffect(() => {
-    let mounted = true
-    
-    const getInitialSession = async () => {
-      if (!mounted) return
-      
-      setIsUserLoading(true)
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession()
-        if (mounted) {
-          if (error) {
-            setUser(null)
-          } else {
-            setUser(session?.user ?? null)
-          }
-        }
-      } catch (error) {
-        if (mounted) {
-          setUser(null)
-        }
-      } finally {
-        if (mounted) {
-          setIsUserLoading(false)
-        }
-      }
-    }
-
-    getInitialSession()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (mounted) {
-          setUser(session?.user ?? null)
-          setIsUserLoading(false)
-        }
-      }
-    )
-
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
-  }, [])
-
   // 로그아웃 처리
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        console.error('로그아웃 실패:', error)
-      } else {
-        setUser(null)
-        setIsUserMenuOpen(false)
-      }
+      await signOut()
+      setIsUserMenuOpen(false)
     } catch (error) {
       console.error('로그아웃 중 오류:', error)
     }

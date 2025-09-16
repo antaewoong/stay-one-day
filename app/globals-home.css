@@ -1,0 +1,70 @@
+/* 가로 스크롤 컨테이너 */
+.scroll-container {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  cursor: grab;
+  user-select: none;
+  scroll-snap-type: x proximity;
+  touch-action: pan-x pan-y; /* 가로와 세로 모두 허용 */
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-container:active {
+  cursor: grabbing;
+}
+
+/* 드래그 방지 */
+.scroll-container img,
+.scroll-container svg {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+}
+
+/* 카드 스크롤 스냅 */
+.scroll-container > * {
+  scroll-snap-align: start;
+}
+
+/* 부드러운 모멘텀 스크롤링 */
+@media (hover: hover) and (pointer: fine) {
+  .scroll-container {
+    transition: scroll-left 0.1s ease-out;
+  }
+}
+
+/* 노치 풀스크린 대응 */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.fullscreen-container {
+  min-height: 100vh;
+  min-height: calc(100vh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
+}
+
+/* iOS Safari 스크롤 최적화 */
+@supports (-webkit-touch-callout: none) {
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    transform: translateZ(0); /* 하드웨어 가속 */
+  }
+
+  /* 노치폰 상태바 영역까지 풀스크린 */
+  .hero-section {
+    padding-top: env(safe-area-inset-top);
+  }
+}

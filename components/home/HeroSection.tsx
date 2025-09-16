@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Search, Heart, Users } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Heart, Users } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import SearchDock from '@/components/SearchDock'
+import SearchBar from '@/components/SearchBar'
 
 interface HeroSlide {
   id: string
@@ -40,9 +42,6 @@ export default function HeroSection({ slides }: HeroSectionProps) {
   const items = useMemo<HeroSlide[]>(() => (Array.isArray(slides) ? slides : []), [slides])
   
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [scrollProgress, setScrollProgress] = useState(0)
-  const heroRef = useRef<HTMLDivElement>(null)
-  const searchRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (items.length > 0) {
@@ -50,35 +49,6 @@ export default function HeroSection({ slides }: HeroSectionProps) {
     }
   }, [items.length])
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const hero = heroRef.current
-      const search = searchRef.current
-      if (!hero || !search) return
-
-      const heroHeight = hero.offsetHeight
-      // body의 scrollTop 사용 (실제 스크롤 컨테이너)
-      const scrollY = document.body.scrollTop || document.documentElement.scrollTop
-
-      // 스크롤 시작부터 애니메이션 시작
-      const progress = Math.min(scrollY / heroHeight, 1)
-
-      setScrollProgress(progress)
-    }
-
-    handleScroll() // 초기 실행
-
-    // body에 스크롤 이벤트 리스너 추가
-    document.body.addEventListener('scroll', handleScroll, { passive: true })
-    document.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', handleScroll)
-
-    return () => {
-      document.body.removeEventListener('scroll', handleScroll)
-      document.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('resize', handleScroll)
-    }
-  }, [])
 
   useEffect(() => {
     if (items.length === 0) return
@@ -106,12 +76,13 @@ export default function HeroSection({ slides }: HeroSectionProps) {
     <div className="relative">
       {/* 완전 풀스크린 히어로 섹션 - 노치까지 확장 + 브레이크포인트별 높이 */}
       <section
-        ref={heroRef}
         className="relative bg-gray-900 min-h-[65vh] sm:min-h-[75vh] md:min-h-[85vh]"
       >
         <div className="absolute inset-0">
           {items.map((slide, index) => {
-            const imageUrl = slide.image_url || slide.image || ''
+            let imageUrl = slide.image_url || slide.image || ''
+            // URL 정리: 줄바꿈 및 공백 제거
+            imageUrl = imageUrl.replace(/\n/g, '').replace(/\s+/g, '')
             if (!imageUrl) return null
             
             return (
@@ -206,64 +177,15 @@ export default function HeroSection({ slides }: HeroSectionProps) {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-sm px-4 pt-20 pb-16">
-            <div
-              ref={searchRef}
-              className="z-40"
-              style={{
-                position: scrollProgress > 0.08 ? 'fixed' : 'relative',
-                top: scrollProgress > 0.08 ? '0px' : 'auto',
-                left: scrollProgress > 0.08 ? '0px' : 'auto',
-                right: scrollProgress > 0.08 ? '0px' : 'auto',
-                transform: scrollProgress > 0.08
-                  ? 'none'
-                  : `translateY(${-scrollProgress * 120}px)`,
-                width: scrollProgress > 0.08
-                  ? scrollProgress < 0.2
-                    ? `${Math.min(384 + (scrollProgress - 0.08) * 1200, window.innerWidth)}px`
-                    : '100vw'
-                  : 'auto',
-                padding: scrollProgress > 0.08 ? '8px 16px' : '0',
-                zIndex: scrollProgress > 0.08 ? 100 : 40,
-                transition: 'none'
-              }}
+          <div className="absolute inset-x-0 top-[20%] z-40">
+            <SearchDock
+              heroWidth="66.6667vw"
+              pinnedMaxWidth={920}
+              pinnedBarHeight={64}
+              pinThresholdPx={120}
             >
-              <div
-                className={`${scrollProgress > 0.095
-                  ? 'max-w-4xl mx-auto bg-white/95 backdrop-blur-sm py-2.5 px-5 h-11 rounded-full'  // 헤더에서는 더 넓게
-                  : 'w-full bg-white/95 backdrop-blur-sm py-2.5 px-5 h-11 rounded-full'             // 처음 크기
-                } flex items-center gap-3 cursor-pointer hover:bg-white/98 transition-all duration-150 shadow-lg border-0 relative`}
-                onClick={() => {
-                  const event = new CustomEvent('openSearchModal');
-                  window.dispatchEvent(event);
-                }}
-              >
-                <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                <div className="flex-1 text-left">
-                  <div className="text-gray-500 font-normal text-base">
-                    온전한 쉼, 완벽한 하루
-                  </div>
-                </div>
-
-                {/* 헤더에 붙었을 때 우측 버튼들을 점진적으로 표시 */}
-                {scrollProgress > 0.12 && (
-                  <div
-                    className="flex items-center gap-1 absolute right-3"
-                    style={{
-                      opacity: Math.min(1, (scrollProgress - 0.12) * 4),
-                      transform: `translateX(${Math.max(0, (0.2 - scrollProgress) * 200)}px)`
-                    }}
-                  >
-                    <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-300">
-                      <Heart className="w-4 h-4" />
-                    </button>
-                    <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-300">
-                      <Users className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+              {(pinned) => <SearchBar isPinned={pinned} />}
+            </SearchDock>
           </div>
           <div className="absolute bottom-0 left-0 right-0">
             {items.length > 0 && items[currentSlide] && (
