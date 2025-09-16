@@ -99,17 +99,7 @@ export default function HeroSection({ slides }: HeroSectionProps) {
   }
 
   if (items.length === 0) {
-    return (
-      <section className="relative bg-gray-900 min-h-[65vh] sm:min-h-[75vh] md:min-h-[85vh] flex items-center justify-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
-        <div className="relative text-center text-white">
-          <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-4">
-            stay<span className="font-medium">oneday</span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-200 font-light">온전한 쉼, 완벽한 하루</p>
-        </div>
-      </section>
-    )
+    return null
   }
 
   return (
@@ -127,26 +117,38 @@ export default function HeroSection({ slides }: HeroSectionProps) {
             return (
               <div
                 key={slide.id}
-                className={`absolute inset-0 transition-all duration-1000 ${
-                  index === currentSlide
-                    ? 'opacity-100 scale-100'
-                    : 'opacity-0 scale-[0.65] md:scale-105'
+                className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                  index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-100'
                 }`}
               >
-                {/* Next.js Image with LCP optimization + Art Direction */}
-                <Image
-                  src={imageUrl}
-                  alt={slide.title || slide.headline || '히어로 이미지'}
-                  fill
-                  className="object-cover object-center sm:object-top"
-                  style={{
-                    filter: 'contrast(1.15) brightness(1.05) saturate(1.1)',
-                    objectPosition: 'center center'
-                  }}
-                  priority={index === 0}
-                  quality={90}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
-                />
+                {/* 즉시 페인트: inline_data_uri가 있으면 즉시 표시 */}
+                {slide.inline_data_uri && index === 0 ? (
+                  <img
+                    src={slide.inline_data_uri}
+                    alt={slide.title || slide.headline || '히어로 이미지'}
+                    className="absolute inset-0 w-full h-full object-cover object-center sm:object-top"
+                    style={{
+                      filter: 'contrast(1.15) brightness(1.05) saturate(1.1)',
+                      objectPosition: 'center center'
+                    }}
+                    fetchPriority="high"
+                    decoding="sync"
+                  />
+                ) : (
+                  <Image
+                    src={imageUrl}
+                    alt={slide.title || slide.headline || '히어로 이미지'}
+                    fill
+                    className="object-cover object-center sm:object-top"
+                    style={{
+                      filter: 'contrast(1.15) brightness(1.05) saturate(1.1)',
+                      objectPosition: 'center center'
+                    }}
+                    priority={index === 0}
+                    quality={90}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
+                  />
+                )}
                 
                 {/* 그라디언트 오버레이 */}
                 <div className="absolute inset-0 bg-gradient-to-br from-black/35 via-transparent to-black/15"></div>

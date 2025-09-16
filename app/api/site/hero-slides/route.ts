@@ -21,7 +21,7 @@ export async function GET() {
     const supabase = createClient(url, anonKey)
     const { data, error } = await supabase
       .from('hero_slides')
-      .select('id,image_url,title,subtitle,description,cta_text,active,slide_order,created_at')
+      .select('id,image_url,title,subtitle,description,cta_text,active,slide_order,created_at,public_url,inline_data_uri,width,height,file_hash,published_at')
       .eq('active', true)
       .order('slide_order', { ascending: true })
 
@@ -32,7 +32,14 @@ export async function GET() {
 
     const mapped = (data ?? []).map(x => ({
       id: x.id,
-      image_url: x.image_url?.replace(/\s+/g, ''),
+      // 출판 파이프라인: public_url 우선, 없으면 기존 image_url 정리
+      image_url: x.public_url || x.image_url?.replace(/\n/g, '').replace(/\s+/g, ''),
+      public_url: x.public_url,
+      inline_data_uri: x.inline_data_uri,
+      width: x.width || 2560,
+      height: x.height || 1440,
+      file_hash: x.file_hash,
+      published_at: x.published_at,
       title: x.title,
       subtitle: x.subtitle,
       description: x.description,
