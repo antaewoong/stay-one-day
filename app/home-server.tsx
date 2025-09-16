@@ -41,39 +41,30 @@ async function getHomePageData() {
       })
     }
 
-    // 2. 숙소 데이터 로드
-    const accommodationResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/accommodations?limit=1000`,
-      {
-        next: { revalidate: 300 }, // 5분 캐싱
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      }
-    )
+    // 2. 숙소 데이터 로드 (직접 Supabase에서)
+    const { data: accommodationsData, error: accommodationsError } = await supabase
+      .from('accommodations')
+      .select(`
+        *,
+        accommodation_amenities (
+          amenity_name
+        )
+      `)
+      .eq('status', 'active')
+      .limit(1000)
 
     let allAccommodations: any[] = []
-    if (accommodationResponse.ok) {
-      const result = await accommodationResponse.json()
-      allAccommodations = result.data || []
+    if (!accommodationsError && accommodationsData) {
+      allAccommodations = accommodationsData
     }
 
-    // 3. 사이트 섹션 설정 로드
-    const sectionsResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/site/sections`,
-      {
-        next: { revalidate: 60 }, // 1분 캐싱
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      }
-    )
+    // 3. 사이트 섹션 설정 로드 (직접 Supabase에서)
+    const { data: sectionsData, error: sectionsError } = await supabase
+      .from('site_sections')
+      .select('*')
+      .eq('active', true)
 
-    let sectionsData: any[] = []
-    if (sectionsResponse.ok) {
-      const result = await sectionsResponse.json()
-      sectionsData = result.data || []
-    }
+    const sections = sectionsData || []
 
     // 4. 섹션별 숙소 데이터 처리
     const processedSections: Record<string, any[]> = {
@@ -85,8 +76,8 @@ async function getHomePageData() {
       new: []
     }
 
-    if (sectionsData.length > 0) {
-      sectionsData.forEach((section: any) => {
+    if (sections.length > 0) {
+      sections.forEach((section: any) => {
         if (!section.active) return
 
         let selectedAccommodations = []
