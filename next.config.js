@@ -78,6 +78,22 @@ const nextConfig = {
         hostname: 'fcmauibvdqbocwhloqov.supabase.co',
       },
       {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'stay-oneday.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'stayoneday.co.kr',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.vercel.app',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
       }
