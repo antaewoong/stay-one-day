@@ -24,8 +24,8 @@ export async function GET(
       )
     }
 
-    // Service role 클라이언트 생성 (서명 URL 생성용)
-    const supabase = createClient()
+    // Service role 클라이언트 생성 (RLS 우회용)
+    const supabase = createServiceRoleClient()
 
     // 숙소 정보와 이미지 목록 조회
     const { data: accommodation, error: accommodationError } = await supabase

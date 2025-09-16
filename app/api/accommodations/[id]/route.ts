@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 // 특정 숙소 상세 정보 조회 (GET)
 export async function GET(
@@ -9,7 +10,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createServiceRoleClient()
     const accommodationId = params.id
 
     // URL 쿼리 파라미터에서 날짜 확인 (예약 가능 여부 체크용)
@@ -116,6 +117,11 @@ export async function GET(
         reviews: reviews || [],
         related_accommodations: relatedAccommodations || []
       }
+    }, {
+      headers: {
+        'Cache-Control': 'private, max-age=60, s-maxage=30',
+        'X-Service-Role': 'accommodation-detail'
+      }
     })
 
   } catch (error) {
@@ -130,7 +136,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createServiceRoleClient()
     const accommodationId = params.id
     
     // 요청 데이터에서 날짜 범위 파싱
@@ -217,7 +223,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createServiceRoleClient()
     const accommodationId = params.id
     const body = await request.json()
     
@@ -377,7 +383,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createServiceRoleClient()
     const accommodationId = params.id
 
     // 숙소 존재 확인
