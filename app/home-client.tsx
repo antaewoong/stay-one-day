@@ -36,7 +36,6 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { getFeaturedAccommodations, getAccommodations } from '@/lib/supabase/accommodations'
 import { createClient } from '@/lib/supabase/client'
 import { StarRating } from '@/components/ui/star-rating'
-import HeroServer from '@/app/hero-server'
 import StayCard from '@/components/StayCard'
 import SectionContainer from '@/components/SectionContainer'
 
@@ -342,8 +341,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
   return (
     <div className="fullscreen-container bg-white">
 
-      {/* 히어로 섹션 */}
-      <HeroServer />
+      {/* 히어로 섹션은 서버 컴포넌트에서 렌더링됨 */}
 
       {/* 추천 스테이 섹션 - 히어로 바로 뒤 */}
       <SectionContainer

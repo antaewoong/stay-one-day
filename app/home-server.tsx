@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import HomeClient from './home-client'
+import HeroServer from './hero-server'
 
 // 서버 사이드에서 데이터 로딩
 async function getHomePageData() {
@@ -204,5 +205,10 @@ async function getHomePageData() {
 export default async function HomeServer() {
   const homeData = await getHomePageData()
 
-  return <HomeClient initialData={homeData} />
+  return (
+    <>
+      <HeroServer />
+      <HomeClient initialData={homeData} />
+    </>
+  )
 }
