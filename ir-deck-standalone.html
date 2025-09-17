@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stay OneDay - IR DECK</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .slide h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #cbd5e1;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .calculator {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .calculator h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .results {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .results h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .result-value {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .highlight h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .value-prop {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .value-prop h4 {
+            color: #0369a1;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .journey-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .journey-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #667eea;
+        }
+
+        .journey-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .journey-item::before {
+            content: '';
+            position: absolute;
+            left: -1.75rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #667eea;
+        }
+
+        .journey-item h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 1cm;
+            }
+
+            body {
+                background: white;
+                font-size: 12px;
+            }
+
+            .container {
+                max-width: none;
+                padding: 0;
+            }
+
+            .slide {
+                page-break-inside: avoid;
+                margin-bottom: 1cm;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+
+            .header {
+                background: #667eea !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+
+            .calculator {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .slide {
+                padding: 1.5rem;
+            }
+
+            .slide h2 {
+                font-size: 1.5rem;
+            }
+
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Stay OneDay</h1>
+            <p>All-in-One 마케팅 플랫폼으로서의 혁신적 여행 숙박 사업</p>
+        </div>
+
+        <div class="slide">
+            <h2>🎯 비전 & 미션</h2>
+            <div class="highlight">
+                <h3>미션</h3>
+                <p>단순한 OTA를 넘어서, 호스트와 게스트, 인플루언서 모두에게 진정한 가치를 제공하는 올인원 마케팅 플랫폼</p>
+            </div>
+            <div class="grid grid-3">
+                <div class="value-prop">
+                    <h4>🏠 호스트를 위한 가치</h4>
+                    <p>마케팅 도구, 수익 최적화, 운영 효율성 제공</p>
+                </div>
+                <div class="value-prop">
+                    <h4>👥 게스트를 위한 가치</h4>
+                    <p>큐레이션된 고품질 숙소, 투명한 정보, 편리한 예약</p>
+                </div>
+                <div class="value-prop">
+                    <h4>📱 인플루언서를 위한 가치</h4>
+                    <p>콘텐츠 협업 기회, 수익 창출, 브랜드 파트너십</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>📊 현재 비즈니스 현황</h2>
+            <div class="grid grid-2">
+                <div class="metric-card">
+                    <div class="metric-value">25</div>
+                    <div class="metric-label">활성 숙박업소</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">72%</div>
+                    <div class="metric-label">풀빌라 비중</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">31만원</div>
+                    <div class="metric-label">평균 세션 가격</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">100%</div>
+                    <div class="metric-label">AI 기반 개발</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>🚀 우리의 개발 여정</h2>
+            <div class="journey-timeline">
+                <div class="journey-item">
+                    <h4>AI 협업 기반 개발 결정</h4>
+                    <p>Claude와의 페어 프로그래밍으로 개발 속도와 품질을 동시에 확보</p>
+                </div>
+                <div class="journey-item">
+                    <h4>3-Way 가치 창출 모델 설계</h4>
+                    <p>호스트, 게스트, 인플루언서 모두에게 실질적 가치를 제공하는 구조 구축</p>
+                </div>
+                <div class="journey-item">
+                    <h4>올인원 플랫폼 아키텍처</h4>
+                    <p>단순 예약을 넘어 마케팅, 분석, 콘텐츠 관리까지 통합</p>
+                </div>
+                <div class="journey-item">
+                    <h4>구독 기반 SaaS 모델 도입</h4>
+                    <p>지속 가능한 수익 구조와 호스트 성장 지원 툴 제공</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>💰 수익 모델 & 시뮬레이션</h2>
+            <div class="calculator">
+                <h3>동적 수익 계산기</h3>
+                <div class="grid grid-2">
+                    <div class="input-group">
+                        <label for="activeHosts">활성 호스트 수</label>
+                        <input type="number" id="activeHosts" value="25" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="avgSessionPrice">평균 세션 가격 (만원)</label>
+                        <input type="number" id="avgSessionPrice" value="31" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="sessionsPerHost">호스트당 월 세션</label>
+                        <input type="number" id="sessionsPerHost" value="8" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="takeRate">플랫폼 수수료율 (%)</label>
+                        <input type="number" id="takeRate" value="12" min="1" max="30">
+                    </div>
+                    <div class="input-group">
+                        <label for="saasOptinRate">SaaS 가입률 (%)</label>
+                        <input type="number" id="saasOptinRate" value="60" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label for="saasMonthlyFee">SaaS 월 구독료 (만원)</label>
+                        <input type="number" id="saasMonthlyFee" value="15" min="1">
+                    </div>
+                </div>
+
+                <div class="results">
+                    <h4>월간 수익 예측</h4>
+                    <div class="result-item">
+                        <span class="result-label">총 거래액 (GMV)</span>
+                        <span class="result-value" id="monthlyGMV">62,000만원</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">플랫폼 수수료 수익</span>
+                        <span class="result-value" id="platformRevenue">7,440만원</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">SaaS 구독 수익</span>
+                        <span class="result-value" id="saasRevenue">2,250만원</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">총 월간 수익</span>
+                        <span class="result-value" id="totalRevenue">9,690만원</span>
+                    </div>
+                </div>
+
+                <div class="results">
+                    <h4>연간 성장 시나리오</h4>
+                    <div class="result-item">
+                        <span class="result-label">12개월 후 예상 수익</span>
+                        <span class="result-value" id="yearlyRevenue">15.5억원</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">목표 호스트 수 (12개월)</span>
+                        <span class="result-value" id="targetHosts">100개</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>🎯 시장 기회 (TAM/SAM/SOM)</h2>
+            <div class="grid grid-3">
+                <div class="metric-card">
+                    <div class="metric-value">12조원</div>
+                    <div class="metric-label">TAM - 국내 숙박 시장</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">3조원</div>
+                    <div class="metric-label">SAM - 프리미엄 숙박</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">1,500억원</div>
+                    <div class="metric-label">SOM - 초기 목표 시장</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>🔮 향후 계획</h2>
+            <div class="grid grid-2">
+                <div>
+                    <h3>단기 목표 (6개월)</h3>
+                    <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+                        <li>호스트 100개소 달성</li>
+                        <li>SaaS 기능 확장</li>
+                        <li>인플루언서 네트워크 구축</li>
+                        <li>AI 추천 시스템 고도화</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>중장기 목표 (12개월)</h3>
+                    <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+                        <li>월 매출 15억원 달성</li>
+                        <li>수도권 외 지역 확장</li>
+                        <li>기업 출장 시장 진입</li>
+                        <li>해외 진출 기반 마련</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>🤝 투자 제안</h2>
+            <div class="highlight">
+                <h3>왜 Stay OneDay인가?</h3>
+                <div class="grid grid-2" style="margin-top: 1rem;">
+                    <div>
+                        <h4>✅ 검증된 비즈니스 모델</h4>
+                        <p>실제 운영 중인 25개 파트너사와 안정적 수익 구조</p>
+                    </div>
+                    <div>
+                        <h4>🚀 AI 기반 확장성</h4>
+                        <p>Claude와의 협업으로 빠른 기능 개발과 최적화</p>
+                    </div>
+                    <div>
+                        <h4>🎯 차별화된 가치 제안</h4>
+                        <p>단순 OTA가 아닌 올인원 마케팅 플랫폼</p>
+                    </div>
+                    <div>
+                        <h4>💰 다각화된 수익원</h4>
+                        <p>수수료 + SaaS + 프리미엄 서비스 복합 모델</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateRevenue() {
+            const activeHosts = parseInt(document.getElementById('activeHosts').value) || 25;
+            const avgSessionPrice = parseInt(document.getElementById('avgSessionPrice').value) || 31;
+            const sessionsPerHost = parseInt(document.getElementById('sessionsPerHost').value) || 8;
+            const takeRate = parseFloat(document.getElementById('takeRate').value) || 12;
+            const saasOptinRate = parseFloat(document.getElementById('saasOptinRate').value) || 60;
+            const saasMonthlyFee = parseInt(document.getElementById('saasMonthlyFee').value) || 15;
+
+            // 월간 GMV (만원)
+            const monthlyGMV = activeHosts * avgSessionPrice * sessionsPerHost;
+
+            // 플랫폼 수수료 수익 (만원)
+            const platformRevenue = monthlyGMV * (takeRate / 100);
+
+            // SaaS 구독 수익 (만원)
+            const saasRevenue = activeHosts * (saasOptinRate / 100) * saasMonthlyFee;
+
+            // 총 월간 수익 (만원)
+            const totalRevenue = platformRevenue + saasRevenue;
+
+            // 연간 성장 시나리오 (월 15% 성장 가정)
+            const yearlyRevenue = totalRevenue * 12 * 1.3; // 30% 연간 성장
+            const targetHosts = Math.round(activeHosts * 4); // 4배 성장 목표
+
+            // 결과 업데이트
+            document.getElementById('monthlyGMV').textContent = monthlyGMV.toLocaleString() + '만원';
+            document.getElementById('platformRevenue').textContent = Math.round(platformRevenue).toLocaleString() + '만원';
+            document.getElementById('saasRevenue').textContent = Math.round(saasRevenue).toLocaleString() + '만원';
+            document.getElementById('totalRevenue').textContent = Math.round(totalRevenue).toLocaleString() + '만원';
+            document.getElementById('yearlyRevenue').textContent = (yearlyRevenue / 10000).toFixed(1) + '억원';
+            document.getElementById('targetHosts').textContent = targetHosts.toLocaleString() + '개';
+        }
+
+        // 입력값 변경시 실시간 계산
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.addEventListener('input', calculateRevenue);
+            });
+
+            // 초기 계산
+            calculateRevenue();
+        });
+    </script>
+</body>
+</html>

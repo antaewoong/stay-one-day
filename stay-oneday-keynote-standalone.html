@@ -32,9 +32,6 @@
             overflow: hidden;
             height: 100vh;
             position: relative;
-            touch-action: pan-x pan-y;
-            -webkit-text-size-adjust: 100%;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body::before {
@@ -287,103 +284,6 @@
                 0 0 0 1px rgba(0, 212, 179, 0.3);
         }
 
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-            .slide {
-                padding: 25px 20px;
-                overflow-y: auto;
-                height: 100vh;
-                min-height: -webkit-fill-available;
-            }
-
-            .slide-content {
-                max-width: 100%;
-                margin: 0;
-                padding: 0;
-            }
-
-            .slide h1 {
-                font-size: clamp(2rem, 9vw, 3.5rem);
-                margin-bottom: 1.5rem;
-                line-height: 1.1;
-            }
-
-            .slide h2 {
-                font-size: clamp(1.6rem, 7vw, 2.5rem);
-                margin-bottom: 1.2rem;
-                line-height: 1.2;
-            }
-
-            .slide h3 {
-                font-size: clamp(1.2rem, 5vw, 1.8rem);
-                margin-bottom: 1rem;
-            }
-
-            .slide p {
-                font-size: clamp(1rem, 4.5vw, 1.3rem);
-                line-height: 1.6;
-                margin-bottom: 1.5rem;
-            }
-
-            .demo-image {
-                max-width: 100%;
-                height: auto;
-                border-radius: 16px;
-            }
-
-            .calculator-container {
-                padding: 25px 20px;
-                margin: 15px 0;
-                border-radius: 20px;
-            }
-
-            .nav-button {
-                padding: 16px 24px;
-                font-size: 1.1rem;
-                min-height: 44px;
-                border-radius: 12px;
-            }
-
-            .progress-bar {
-                bottom: 90px;
-                height: 6px;
-            }
-
-            .slide-navigation {
-                gap: 15px;
-                padding: 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .slide {
-                padding: 20px 15px;
-            }
-
-            .slide h1 {
-                font-size: clamp(1.8rem, 10vw, 2.8rem);
-                margin-bottom: 1.2rem;
-            }
-
-            .slide h2 {
-                font-size: clamp(1.4rem, 8vw, 2.2rem);
-                margin-bottom: 1rem;
-            }
-
-            .slide p {
-                font-size: clamp(0.95rem, 4.5vw, 1.2rem);
-                margin-bottom: 1.2rem;
-            }
-
-            .calculator-container {
-                padding: 20px 15px;
-            }
-
-            .demo-features {
-                font-size: clamp(0.8rem, 4vw, 1rem);
-            }
-        }
-
         /* Revenue Calculator */
         .calculator-slide {
             flex-direction: column;
@@ -560,123 +460,19 @@
             .demo-slide {
                 flex-direction: column;
                 gap: 40px;
-                align-items: center;
-            }
-
-            .demo-slide > div {
-                width: 100%;
-                max-width: none;
             }
 
             .calculator-grid {
                 grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .results-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .input-group {
-                padding: 1rem;
-            }
-
-            .input-group input {
-                font-size: 1.1rem;
-                padding: 12px;
-                min-height: 44px;
             }
 
             .nav-container {
                 bottom: 20px;
-                padding: 0 20px;
             }
 
             .slide-counter {
                 top: 20px;
                 right: 20px;
-                font-size: 0.9rem;
-                padding: 8px 12px;
-            }
-
-            /* Enhanced grid layouts for mobile */
-            div[style*="grid-template-columns: repeat(3, 1fr)"] {
-                grid-template-columns: 1fr !important;
-                gap: 1.5rem !important;
-            }
-
-            div[style*="grid-template-columns: 1fr 1fr"] {
-                grid-template-columns: 1fr !important;
-                gap: 2rem !important;
-            }
-
-            /* Better hero styles for mobile */
-            .hero-title {
-                font-size: clamp(2.5rem, 12vw, 4rem) !important;
-                margin-bottom: 1.5rem;
-            }
-
-            .hero-subtitle {
-                font-size: clamp(1.1rem, 5vw, 1.4rem) !important;
-                line-height: 1.5;
-            }
-
-            .keynote-word {
-                font-size: clamp(2rem, 10vw, 3.5rem) !important;
-            }
-
-            .keynote-description {
-                font-size: clamp(1rem, 5vw, 1.3rem) !important;
-            }
-        }
-
-        /* Additional mobile optimizations */
-        @media (max-width: 480px) {
-            .nav-button {
-                padding: 18px 28px;
-                font-size: 1.2rem;
-                min-height: 48px;
-                border-radius: 14px;
-            }
-
-            .slide-navigation {
-                gap: 20px;
-                padding: 20px;
-            }
-
-            .progress-bar {
-                bottom: 100px;
-                height: 8px;
-                border-radius: 4px;
-            }
-
-            /* Better spacing for small screens */
-            .slide {
-                justify-content: flex-start;
-                padding-top: 40px;
-            }
-
-            .hero-slide {
-                justify-content: center;
-            }
-        }
-
-        /* Enhanced touch interactions */
-        @media (hover: none) and (pointer: coarse) {
-            .nav-button {
-                min-height: 48px;
-                font-size: 1.1rem;
-            }
-
-            .input-group input {
-                min-height: 48px;
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-
-            .slide {
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
             }
         }
     </style>
@@ -693,6 +489,15 @@
             </p>
         </div>
 
+        <!-- Slide 2: Problem Statement -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Crisis</div>
+            <p class="keynote-description">
+                평일 공실률 70-80%<br>
+                건축비·인건비·관리비 상승<br>
+                <span style="color: var(--gold); font-weight: 600;">기존 틀을 깨는 혁신이 필요합니다</span>
+            </p>
+        </div>
 
         <!-- Slide 3: Cost Crisis -->
         <div class="slide keynote-slide">
@@ -714,7 +519,7 @@
 
         <!-- Slide 5: Innovation Need -->
         <div class="slide keynote-slide">
-            <div class="keynote-word">Innovation</div>
+            <div class="keynote-word">Breaking Point</div>
             <p class="keynote-description">
                 기존 틀을 깨는<br>
                 혁신이 필요합니다
@@ -725,17 +530,17 @@
         <div class="slide keynote-slide">
             <div class="keynote-word">Day Trip</div>
             <p class="keynote-description">
-                하루만으로 충분합니다
+                평일 데이트립으로<br>
+                매출 상승 + 충성고객 확보
             </p>
         </div>
 
-        <!-- Slide 7: Opening (Emphasis) -->
-        <div class="slide hero-slide">
-            <div class="hero-tagline">The Future of Korean Travel</div>
-            <h1 class="hero-title">Stay OneDay</h1>
-            <p class="hero-subtitle">
-                평일 공실을 없애주는<br>
-                AI 기반 플랫폼의 탄생
+        <!-- Slide 7: Game Changer -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Game Changer</div>
+            <p class="keynote-description">
+                <span style="color: var(--mint); font-weight: 700; font-size: 1.5em;">5% 수수료</span><br>
+                <span style="color: var(--gold);">경쟁사 대비 반값!</span>
             </p>
         </div>
 
@@ -754,15 +559,6 @@
             <p class="keynote-description">
                 평일 데이트립으로<br>
                 <span style="color: var(--mint);">충성고객 300% 증가</span>
-            </p>
-        </div>
-
-        <!-- Slide 10: Game Changer -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Game Changer</div>
-            <p class="keynote-description">
-                <span style="color: var(--mint); font-weight: 700; font-size: 1.5em;">5% 수수료</span><br>
-                <span style="color: var(--gold);">경쟁사 대비 반값!</span>
             </p>
         </div>
 
@@ -854,7 +650,7 @@
                 </ul>
             </div>
             <div class="demo-visual">
-                <img src="/images/d55.jpg" alt="숙소 검색 결과 화면" class="demo-image" style="width: 150%; max-width: 1200px; transform: scale(1.3); margin-left: -40%;">
+                <img src="./images/d55.jpg" alt="숙소 검색 결과 화면" class="demo-image" style="width: 150%; max-width: 1200px; transform: scale(1.3); margin-left: -40%;">
             </div>
         </div>
 
@@ -862,10 +658,10 @@
         <div class="slide demo-slide">
             <div class="demo-visual">
                 <video autoplay muted loop playsinline class="demo-image" style="border-radius: 20px; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);">
-                    <source src="/images/v1.mov" type="video/quicktime">
-                    <source src="/images/v1.mov" type="video/mp4">
+                    <source src="./images/v1.mov" type="video/quicktime">
+                    <source src="./images/v1.mov" type="video/mp4">
                     <!-- 비디오 재생 불가 시 fallback 이미지 -->
-                    <img src="/images/m1.jpg" alt="상세 페이지" class="demo-image">
+                    <img src="./images/m1.jpg" alt="상세 페이지" class="demo-image">
                 </video>
             </div>
             <div class="demo-content">
@@ -897,16 +693,16 @@
                 </ul>
             </div>
             <div class="demo-visual">
-                <img src="/images/5.png" alt="예약 인원 선택 화면" class="demo-image">
+                <img src="./images/5.png" alt="예약 인원 선택 화면" class="demo-image">
             </div>
         </div>
 
         <!-- Slide 7: Platform Demo - Intelligence -->
         <div class="slide demo-slide">
             <div class="demo-visual" style="display: flex; gap: 2rem; align-items: center;">
-                <img src="/images/d2.jpg" alt="웹 대시보드" class="demo-image" style="width: 70%;">
+                <img src="./images/d2.jpg" alt="웹 대시보드" class="demo-image" style="width: 70%;">
                 <div style="width: 30%;">
-                    <img src="/images/123.png" alt="모바일 대시보드" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+                    <img src="./images/123.png" alt="모바일 대시보드" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
                 </div>
             </div>
             <div class="demo-content">
@@ -1214,8 +1010,8 @@
         <div class="slide keynote-slide">
             <div class="keynote-word">Investment</div>
             <p class="keynote-description">
-                저희가 만들어가는 혁신에<br>
-                함께 해주시겠습니까?
+                한국 숙박업계의 미래에<br>
+                함께 투자하시겠습니까?
             </p>
         </div>
 
@@ -1441,48 +1237,6 @@
             // Initial calculations
             calculateRevenueV1();
             calculateRevenueV2();
-
-            // Mobile touch gestures
-            let startX = 0;
-            let startY = 0;
-            let isScrolling = false;
-
-            document.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                isScrolling = false;
-            }, { passive: true });
-
-            document.addEventListener('touchmove', (e) => {
-                if (!startX || !startY) return;
-
-                let diffX = startX - e.touches[0].clientX;
-                let diffY = startY - e.touches[0].clientY;
-
-                if (Math.abs(diffY) > Math.abs(diffX)) {
-                    isScrolling = true;
-                }
-            }, { passive: true });
-
-            document.addEventListener('touchend', (e) => {
-                if (isScrolling) return;
-                if (!startX || !startY) return;
-
-                let diffX = startX - e.changedTouches[0].clientX;
-                let diffY = startY - e.changedTouches[0].clientY;
-
-                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-                    if (diffX > 0) {
-                        nextSlide();
-                    } else {
-                        prevSlide();
-                    }
-                }
-
-                startX = 0;
-                startY = 0;
-                isScrolling = false;
-            }, { passive: true });
         });
     </script>
 </body>

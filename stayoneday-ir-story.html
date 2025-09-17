@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayOneDay - The Complete Story</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Stay OneDay Brand Colors */
+            --color-navy-900: #0B1A34;
+            --color-navy-800: #102347;
+            --color-navy-700: #16305E;
+            --color-mint-500: #00D4B3;
+            --color-gold-500: #C7A756;
+            --color-gray-900: #111111;
+            --color-gray-700: #333333;
+            --color-gray-600: #4D4D4D;
+            --color-gray-500: #666666;
+            --color-gray-300: #D9D9D9;
+            --color-gray-200: #EEEEEE;
+            --color-gray-100: #F7F7F8;
+            --color-white: #FFFFFF;
+
+            /* Typography */
+            --font-display: "Plus Jakarta Sans", "Noto Sans KR", system-ui, sans-serif;
+            --font-body: "Inter", "Noto Sans KR", system-ui, sans-serif;
+
+            /* Design System */
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 6px 20px rgba(0,0,0,0.12);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.16);
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: radial-gradient(ellipse at top, var(--color-navy-800) 0%, var(--color-navy-900) 50%, #000 100%);
+            color: var(--color-white);
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(0, 212, 179, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(199, 167, 86, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(0, 212, 179, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: floatingLights 20s ease-in-out infinite;
+        }
+
+        @keyframes floatingLights {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .slide {
+            width: 90vw;
+            max-width: 1200px;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: 3rem;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+            animation: slideIn 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .slide h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            color: var(--color-white);
+            text-align: center;
+            margin-bottom: 2rem;
+            line-height: 1.1;
+        }
+
+        .slide h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            color: var(--color-mint-500);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .slide h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-gold-500);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            font-weight: 400;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--color-mint-500);
+            box-shadow: 0 10px 30px rgba(0, 212, 179, 0.2);
+        }
+
+        .card h4 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-mint-500);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card p, .card li {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+        }
+
+        .card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .card li {
+            margin-bottom: 0.6rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .card li:before {
+            content: "▸";
+            color: var(--color-mint-500);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0, 212, 179, 0.1) 0%, rgba(199, 167, 86, 0.1) 100%);
+            border: 2px solid var(--color-mint-500);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .highlight-box h3 {
+            color: var(--color-mint-500);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-gold-500);
+            box-shadow: 0 15px 35px rgba(199, 167, 86, 0.2);
+        }
+
+        .metric-value {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--color-gold-500);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .story-timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .story-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .story-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(10px);
+        }
+
+        .story-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--color-mint-500) 0%, var(--color-gold-500) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+            color: var(--color-navy-900);
+        }
+
+        .calculator-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .calculator-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--color-mint-500);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .result-value {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-mint-500);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .table-container {
+            overflow: hidden;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .table-container th {
+            background: var(--color-navy-800);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .table-container td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .table-container tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: var(--color-mint-500);
+            border-color: var(--color-mint-500);
+            transform: scale(1.1);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 1rem 1.5rem;
+            backdrop-filter: blur(10px);
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-mint-500) 0%, var(--color-gold-500) 100%);
+            transition: width 0.3s ease;
+            z-index: 1001;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--color-mint-500);
+        }
+
+        .ai-showcase {
+            background: linear-gradient(135deg, rgba(0, 212, 179, 0.05) 0%, rgba(199, 167, 86, 0.05) 100%);
+            border: 1px solid var(--color-mint-500);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .ai-engine {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .ai-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .claude-icon { background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%); }
+        .gpt-icon { background: linear-gradient(135deg, #00A67E 0%, #00C896 100%); }
+        .gemini-icon { background: linear-gradient(135deg, #4285F4 0%, #34A853 100%); }
+        .cursor-icon { background: linear-gradient(135deg, #000000 0%, #333333 100%); }
+        .runway-icon { background: linear-gradient(135deg, #FF0080 0%, #FF8A00 100%); }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 1cm;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .slide {
+                background: white !important;
+                color: black !important;
+                page-break-after: always;
+                height: auto;
+                display: block !important;
+            }
+            .navigation, .slide-counter, .progress-bar {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                width: 95vw;
+                height: 90vh;
+                padding: 2rem;
+            }
+            .slide h1 {
+                font-size: 2rem;
+            }
+            .slide h2 {
+                font-size: 1.5rem;
+            }
+            .grid-2, .grid-3, .grid-4, .calculator-inputs, .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- 1. Cover Story -->
+        <div class="slide active">
+            <div style="text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 0.8rem; letter-spacing: 0.2rem; color: rgba(255, 255, 255, 0.6); margin-bottom: 1rem; text-transform: uppercase;">
+                    The Complete Story · 2025.09.18
+                </div>
+                <div class="brand-logo" style="justify-content: center; font-size: 4rem; margin-bottom: 2rem;">
+                    stay<span style="color: var(--color-gold-500);">oneday</span>
+                </div>
+                <p class="subtitle" style="font-size: 1.8rem; margin: 2rem 0;">
+                    <strong>평일 프라임타임의 숨겨진 가치</strong>를 발견한<br>
+                    AI 기반 경험 플랫폼의 성장 스토리
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: margin-top: 2rem;">
+                    <span style="background: rgba(0, 212, 179, 0.2); padding: 0.6rem 1.2rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">AI-Powered Growth</span>
+                    <span style="background: rgba(199, 167, 86, 0.2); padding: 0.6rem 1.2rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">Experience Economy</span>
+                    <span style="background: rgba(255, 255, 255, 0.1); padding: 0.6rem 1.2rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">Prime Time Revolution</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. The Discovery -->
+        <div class="slide">
+            <h2>Chapter 1: 발견</h2>
+            <p class="subtitle">평일 3시부터 11시, 아무도 주목하지 않았던 골든타임</p>
+            <div class="story-timeline">
+                <div class="story-item">
+                    <div class="story-number"><i class="fas fa-search-plus"></i></div>
+                    <div>
+                        <h4>문제 인식</h4>
+                        <p>25개 프리미엄 숙소 운영 데이터 분석 결과, 평일 가동률 12%라는 충격적인 현실 발견</p>
+                    </div>
+                </div>
+                <div class="story-item">
+                    <div class="story-number"><i class="fas fa-chart-gap"></i></div>
+                    <div>
+                        <h4>시장 갭 발견</h4>
+                        <p>OTA는 호텔 중심, 독채·풀빌라는 소외. 숙박 전제 조건이 만드는 접근성 장벽</p>
+                    </div>
+                </div>
+                <div class="story-item">
+                    <div class="story-number"><i class="fas fa-lightbulb"></i></div>
+                    <div>
+                        <h4>아하 모멘트</h4>
+                        <p>"숙박 없이도 프리미엄 공간을 경험할 수 있다면?" - Prime Time 15:00~23:00 아이디어 탄생</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. The Vision -->
+        <div class="slide">
+            <h2>Chapter 2: 비전</h2>
+            <p class="subtitle">단순한 공간 대여를 넘어선 '경험 상품화' 혁신</p>
+            <div class="highlight-box">
+                <h3><i class="fas fa-bullseye"></i> 핵심 인사이트</h3>
+                <div style="font-size: 2.5rem; font-weight: 800; color: var(--color-gold-500); margin: 1.5rem 0;">
+                    평일 프라임타임 = 새로운 수익원
+                </div>
+                <p style="font-size: 1.2rem;">침구 미사용 · 청소비 최소화 · 체험 중심 운영으로<br>호스트와 게스트 모두에게 윈-윈 가치 창출</p>
+            </div>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h4><i class="fas fa-home"></i> 호스트 가치</h4>
+                    <ul>
+                        <li>유휴 자산 활용 새 매출원</li>
+                        <li>고정비 증가 없는 수익성</li>
+                        <li>브랜드 인지도 확산</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-users"></i> 게스트 가치</h4>
+                    <ul>
+                        <li>합리적 가격 프리미엄 경험</li>
+                        <li>인원·목적 제약 최소화</li>
+                        <li>당일 여행 쉬운 접근</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-chart-line"></i> 시장 가치</h4>
+                    <ul>
+                        <li>'경험 경제' 새 카테고리</li>
+                        <li>OTA 대체 불가 영역</li>
+                        <li>글로벌 확장 가능성</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. The AI Strategy -->
+        <div class="slide">
+            <h2>Chapter 3: AI 전략</h2>
+            <p class="subtitle">멀티 AI 엔진으로 구축한 자율 성장 플랫폼</p>
+            <div class="ai-showcase">
+                <h3 style="text-align: center; margin-bottom: 2rem;"><i class="fas fa-microchip"></i> AI 오케스트레이션 아키텍처</h3>
+                <div class="grid grid-2">
+                    <div class="ai-engine">
+                        <div class="ai-icon claude-icon">C</div>
+                        <div>
+                            <h4>Claude (Anthropic)</h4>
+                            <p>코드 개발 & 감사, 프롬프트 엔지니어링</p>
+                        </div>
+                    </div>
+                    <div class="ai-engine">
+                        <div class="ai-icon gpt-icon">G</div>
+                        <div>
+                            <h4>GPT-4 (OpenAI)</h4>
+                            <p>콘텐츠 생성, 마케팅 카피, 리뷰 분석</p>
+                        </div>
+                    </div>
+                    <div class="ai-engine">
+                        <div class="ai-icon gemini-icon">G</div>
+                        <div>
+                            <h4>Gemini (Google)</h4>
+                            <p>데이터 분석, 수요 예측, 가격 최적화</p>
+                        </div>
+                    </div>
+                    <div class="ai-engine">
+                        <div class="ai-icon cursor-icon">↗</div>
+                        <div>
+                            <h4>Cursor IDE</h4>
+                            <p>실시간 코딩 지원, 페어 프로그래밍</p>
+                        </div>
+                    </div>
+                    <div class="ai-engine">
+                        <div class="ai-icon runway-icon">R</div>
+                        <div>
+                            <h4>Runway ML</h4>
+                            <p>영상 제작 자동화, 숏폼 콘텐츠</p>
+                        </div>
+                    </div>
+                    <div class="ai-engine">
+                        <div class="ai-icon" style="background: var(--color-mint-500); color: var(--color-navy-900);">+</div>
+                        <div>
+                            <h4>Custom Models</h4>
+                            <p>도메인 특화 매칭, 리스크 스코어링</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="highlight-box" style="margin-top: 2rem;">
+                    <h3><i class="fas fa-cogs"></i> 웹사이트 제작 자동화 시스템</h3>
+                    <div class="grid grid-3" style="text-align: left; margin-top: 1.5rem;">
+                        <div>
+                            <h4 style="color: var(--color-mint-500);">템플릿 엔진</h4>
+                            <ul style="font-size: 0.9rem;">
+                                <li>표준 레이아웃 기반</li>
+                                <li>브랜딩 자동 적용</li>
+                                <li>SEO 최적화</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--color-mint-500);">콘텐츠 자동화</h4>
+                            <ul style="font-size: 0.9rem;">
+                                <li>AI 카피라이팅</li>
+                                <li>이미지 자동 배치</li>
+                                <li>예약 시스템 연동</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--color-mint-500);">배포 & 관리</h4>
+                            <ul style="font-size: 0.9rem;">
+                                <li>원클릭 배포</li>
+                                <li>도메인 자동 설정</li>
+                                <li>성과 추적 대시보드</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. The Technology -->
+        <div class="slide">
+            <h2>Chapter 4: 기술력</h2>
+            <p class="subtitle">엔터프라이즈급 안정성과 확장성을 위한 현대적 스택</p>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h4><i class="fas fa-code"></i> 프론트엔드 & 백엔드</h4>
+                    <ul>
+                        <li>Next.js 15 Full-stack</li>
+                        <li>TypeScript 타입 안전성</li>
+                        <li>Tailwind CSS 스타일링</li>
+                        <li>Vercel Edge 글로벌 배포</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-database"></i> 데이터 & 저장소</h4>
+                    <ul>
+                        <li>Supabase PostgreSQL + RLS</li>
+                        <li>Redis 캐싱 & 세션</li>
+                        <li>S3 미디어 저장소</li>
+                        <li>Real-time 웹소켓</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-shield-alt"></i> 보안 & 모니터링</h4>
+                    <ul>
+                        <li>JWT 토큰 기반 인증</li>
+                        <li>Row Level Security</li>
+                        <li>OpenTelemetry 추적</li>
+                        <li>Rate Limiting 보호</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3><i class="fas fa-chart-line"></i> AI 기반 자동화 성과</h3>
+                <div class="grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-value">87%</div>
+                        <div class="metric-label">운영 업무 자동화</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">3.2x</div>
+                        <div class="metric-label">콘텐츠 제작 속도</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">45%</div>
+                        <div class="metric-label">마케팅 비용 절감</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">24/7</div>
+                        <div class="metric-label">무인 모니터링</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Platform Demo -->
+        <div class="slide">
+            <h2>Chapter 5: 플랫폼 시연</h2>
+            <p class="subtitle">실제 운영 중인 Stay OneDay 플랫폼 주요 기능</p>
+
+            <div class="demo-section">
+                <div class="demo-grid">
+                    <div class="demo-item">
+                        <div class="demo-image">
+                            <img src="/images/1.png" alt="메인 페이지" style="width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-lg);">
+                        </div>
+                        <h4><i class="fas fa-home"></i> 메인 페이지</h4>
+                        <p>직관적인 검색과 필터링으로 완벽한 풀빌라 발견</p>
+                    </div>
+
+                    <div class="demo-item">
+                        <div class="demo-image">
+                            <img src="/images/2.png" alt="상세 페이지" style="width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-lg);">
+                        </div>
+                        <h4><i class="fas fa-images"></i> 상세 페이지</h4>
+                        <p>고화질 이미지와 AI 생성 콘텐츠로 몰입감 극대화</p>
+                    </div>
+
+                    <div class="demo-item">
+                        <div class="demo-image">
+                            <img src="/images/3.png" alt="예약 시스템" style="width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-lg);">
+                        </div>
+                        <h4><i class="fas fa-calendar-check"></i> 예약 시스템</h4>
+                        <p>실시간 예약 가능 일정과 간편한 결제 프로세스</p>
+                    </div>
+
+                    <div class="demo-item">
+                        <div class="demo-image">
+                            <img src="/images/4.png" alt="호스트 대시보드" style="width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-lg);">
+                        </div>
+                        <h4><i class="fas fa-tachometer-alt"></i> 호스트 대시보드</h4>
+                        <p>실시간 예약 관리와 수익 분석 인사이트</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 2rem;">
+                <h3><i class="fas fa-mobile-alt"></i> 반응형 & 모바일 최적화</h3>
+                <p>모든 디바이스에서 완벽한 사용자 경험 - PWA 지원으로 앱과 동일한 퍼포먼스</p>
+            </div>
+        </div>
+
+        <!-- 6. The Validation -->
+        <div class="slide">
+            <h2>Chapter 6: 검증</h2>
+            <p class="subtitle">25개 파트너사와 함께 증명한 비즈니스 모델</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4><i class="fas fa-chart-bar"></i> 현재 운영 지표</h4>
+                    <ul>
+                        <li><strong>25개</strong> 활성 숙박업소</li>
+                        <li><strong>72%</strong> 풀빌라 비중</li>
+                        <li><strong>31만원</strong> 평균 세션 가격</li>
+                        <li><strong>98.7%</strong> 시스템 가용성</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-trophy"></i> 실증 성과</h4>
+                    <ul>
+                        <li>평일 가동률 <strong>12% → 38%</strong></li>
+                        <li>프라임 매출 <strong>85만 → 212만원</strong>/주</li>
+                        <li>리뷰/UGC <strong>6 → 21개</strong>/월</li>
+                        <li>네이버 노출 <strong>+34%</strong> 증가</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3><i class="fas fa-chart-bar"></i> 케이스 스터디: 구공스테이 청주</h3>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">
+                    AI 숏폼 8편 제작 → 검색 최적화 12건 적용 → 인플루언서 5명 매칭<br>
+                    <strong>결과: 월 매출 250% 증가, 브랜드 인지도 대폭 상승</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- 7. The Market -->
+        <div class="slide">
+            <h2>Chapter 6: 시장 기회</h2>
+            <p class="subtitle">독채·풀빌라 특화로 개척하는 새로운 카테고리</p>
+            <div class="grid grid-3">
+                <div class="metric-card">
+                    <div class="metric-value">7조원</div>
+                    <div class="metric-label">TAM<br>국내 프리미엄 숙박</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">2.5조원</div>
+                    <div class="metric-label">SAM<br>독채·풀빌라 시장</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">285억원</div>
+                    <div class="metric-label">SOM<br>초기 목표 (M24)</div>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>구분</th>
+                            <th>StayOneDay</th>
+                            <th>기존 OTA</th>
+                            <th>Dayuse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>타깃 공간</strong></td>
+                            <td>독채·풀빌라·프리미엄</td>
+                            <td>호텔·모텔 중심</td>
+                            <td>호텔 중심</td>
+                        </tr>
+                        <tr>
+                            <td><strong>이용 방식</strong></td>
+                            <td>그룹 체험·테마 모임</td>
+                            <td>숙박·대실</td>
+                            <td>낮 시간 대실</td>
+                        </tr>
+                        <tr>
+                            <td><strong>기술력</strong></td>
+                            <td>멀티 AI + 자동화</td>
+                            <td>기본 검색·예약</td>
+                            <td>단순 예약</td>
+                        </tr>
+                        <tr>
+                            <td><strong>핵심 가치</strong></td>
+                            <td>평일 프라임타임 경험화</td>
+                            <td>숙박 객실 판매</td>
+                            <td>낮 시간 활용</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 8. The Business Model -->
+        <div class="slide">
+            <h2>Chapter 7: 비즈니스 모델</h2>
+            <p class="subtitle">4-Track 수익 구조로 호스트별 완전 맞춤형 비즈니스 지원</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4><i class="fas fa-percentage"></i> 거래 수수료</h4>
+                    <ul>
+                        <li>프라임타임 예약 5% 고정</li>
+                        <li>기존 플랫폼 15-20% vs 우리 5%</li>
+                        <li>락인 효과로 이탈 방지</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-sync"></i> SaaS 구독</h4>
+                    <ul>
+                        <li>AI 마케팅 툴 패키지</li>
+                        <li>데이터 분석 대시보드</li>
+                        <li>콘텐츠 제작 자동화</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-globe"></i> 개별 웹사이트 제작</h4>
+                    <ul>
+                        <li>스테이별 전용 웹사이트 개발</li>
+                        <li>표준 템플릿 기반 양산 시스템</li>
+                        <li>SEO 최적화 및 예약 연동</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-camera"></i> 촬영+마케팅 패키지</h4>
+                    <ul>
+                        <li>웹사이트+촬영 패키지 100만원</li>
+                        <li>시장가 200만원 대비 50% 할인</li>
+                        <li>호스트 락인 효과 극대화</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3><i class="fas fa-rocket"></i> 혁신적 비즈니스 전략</h3>
+                <div class="grid grid-2" style="text-align: left; margin-top: 1.5rem;">
+                    <div>
+                        <h4 style="color: var(--color-mint-500);">락인 효과 극대화</h4>
+                        <ul style="font-size: 0.95rem;">
+                            <li><strong>5% 수수료</strong> vs 기존 15-20%</li>
+                            <li><strong>100만원 패키지</strong> vs 시장가 200만원</li>
+                            <li>울며 겨자먹기 → 선택적 파트너십</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--color-mint-500);">확장형 수익 모델</h4>
+                        <ul style="font-size: 0.95rem;">
+                            <li>한 번 개발 → 무한 복제</li>
+                            <li>템플릿 기반 자동화</li>
+                            <li>월 3-5개 신규 웹사이트 제작</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. Revenue Calculator -->
+        <div class="slide">
+            <h2>Chapter 8: 수익 시뮬레이션</h2>
+            <p class="subtitle">실시간 데이터 기반 비즈니스 모델 검증</p>
+            <div class="calculator-section">
+                <h3><i class="fas fa-calculator"></i> 인터랙티브 수익 계산기</h3>
+                <div class="calculator-inputs">
+                    <div class="input-group">
+                        <label>활성 호스트 수</label>
+                        <input type="number" id="activeHosts" value="25" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label>평균 세션 가격 (만원)</label>
+                        <input type="number" id="avgSessionPrice" value="31" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label>호스트당 월 세션</label>
+                        <input type="number" id="sessionsPerHost" value="14" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label>플랫폼 수수료율 (%)</label>
+                        <input type="number" id="takeRate" value="5" min="5" max="5" readonly style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;">
+                    </div>
+                    <div class="input-group">
+                        <label>SaaS 가입률 (%)</label>
+                        <input type="number" id="saasOptinRate" value="35" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label>SaaS 월 구독료 (만원)</label>
+                        <input type="number" id="saasMonthlyFee" value="9" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label>웹사이트+촬영 패키지 (백만원)</label>
+                        <input type="number" id="websiteFee" value="100" min="50" readonly style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;">
+                    </div>
+                    <div class="input-group">
+                        <label>시장가 대비 할인율 (%)</label>
+                        <input type="number" id="discountRate" value="50" min="30" max="70" readonly style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;">
+                    </div>
+                    <div class="input-group">
+                        <label>월 신규 웹사이트 제작</label>
+                        <input type="number" id="newWebsites" value="3" min="0">
+                    </div>
+                </div>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-value" id="monthlyGMV">10,850만원</div>
+                        <div class="result-label">월간 총 거래액 (GMV)</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-value" id="platformRevenue">543만원</div>
+                        <div class="result-label">플랫폼 수수료 수익</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-value" id="saasRevenue">79만원</div>
+                        <div class="result-label">SaaS 구독 수익</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-value" id="websiteRevenue">300만원</div>
+                        <div class="result-label">웹사이트+촬영 수익</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-value" id="totalRevenue">922만원</div>
+                        <div class="result-label">총 월간 수익</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-value" id="yearlyProjection">1.11억원</div>
+                        <div class="result-label">연간 예상 수익</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. Financial Projections -->
+        <div class="slide">
+            <h2>Chapter 9: 재무 전망</h2>
+            <p class="subtitle">AI 기반 성장으로 달성하는 24개월 로드맵</p>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h4><i class="fas fa-shield-alt"></i> Conservative</h4>
+                    <ul>
+                        <li>M12 GMV ₩320M · Rev ₩34M</li>
+                        <li>M24 GMV ₩654M · Rev ₩69M</li>
+                        <li>M24 Hosts 172개</li>
+                        <li>Payback 1.8개월</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-color: var(--color-mint-500);">
+                    <h4><i class="fas fa-bullseye"></i> Base (목표)</h4>
+                    <ul>
+                        <li>M12 GMV ₩629M · Rev ₩80M</li>
+                        <li>M24 GMV ₩1.33B · Rev ₩168M</li>
+                        <li>M24 Hosts 285개</li>
+                        <li>Payback 0.9개월</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-rocket"></i> Aggressive</h4>
+                    <ul>
+                        <li>M12 GMV ₩1.31B · Rev ₩196M</li>
+                        <li>M24 GMV ₩2.94B · Rev ₩436M</li>
+                        <li>M24 Hosts 523개</li>
+                        <li>Payback 0.5개월</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3><i class="fas fa-calculator"></i> 핵심 가정값</h3>
+                <div class="grid grid-2" style="text-align: left; margin-top: 1.5rem;">
+                    <div>
+                        <ul>
+                            <li><strong>Take Rate:</strong> 10% / 12% / 14%</li>
+                            <li><strong>SaaS ARPU:</strong> ₩80k / ₩90k / ₩100k</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li><strong>신규 호스트/월:</strong> 10 / 15 / 25</li>
+                            <li><strong>세션/호스트:</strong> 11 / 14 / 16 (M12)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11. Growth Strategy -->
+        <div class="slide">
+            <h2>Chapter 10: 성장 전략</h2>
+            <p class="subtitle">AI 기반 자동화로 가속화하는 확장 계획</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4><i class="fas fa-calendar"></i> 단기 목표 (6개월)</h4>
+                    <ul>
+                        <li>호스트 100개소 달성</li>
+                        <li>AI 마케팅 툴 고도화</li>
+                        <li>인플루언서 네트워크 구축</li>
+                        <li>B2B 오프사이트 패키지 런칭</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-globe"></i> 중장기 목표 (12-24개월)</h4>
+                    <ul>
+                        <li>월 매출 15억원 달성</li>
+                        <li>수도권 외 지역 확장</li>
+                        <li>해외 진출 (일본·대만)</li>
+                        <li>마켓플레이스 2.0 구축</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="story-timeline">
+                <div class="story-item">
+                    <div class="story-number"><i class="fas fa-globe-asia"></i></div>
+                    <div>
+                        <h4>자동 현지화</h4>
+                        <p>AI 기반 언어·문화 적응으로 해외 시장 빠른 진입</p>
+                    </div>
+                </div>
+                <div class="story-item">
+                    <div class="story-number"><i class="fas fa-handshake"></i></div>
+                    <div>
+                        <h4>파트너 온보딩</h4>
+                        <p>무인 심사·승인 시스템으로 스케일 경제 달성</p>
+                    </div>
+                </div>
+                <div class="story-item">
+                    <div class="story-number"><i class="fas fa-chart-line"></i></div>
+                    <div>
+                        <h4>AI 고도화</h4>
+                        <p>지속적 학습으로 운영 효율성과 수익성 동시 개선</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12. Investment Ask -->
+        <div class="slide">
+            <h2>Chapter 11: 투자 제안</h2>
+            <p class="subtitle">AI 리더십 확보와 시장 선점을 위한 Seed 라운드</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4><i class="fas fa-dollar-sign"></i> Seed Round</h4>
+                    <ul>
+                        <li><strong>투자 규모:</strong> ₩3억 ~ ₩5억</li>
+                        <li><strong>밸류에이션:</strong> 협의</li>
+                        <li><strong>투자 기간:</strong> 12개월</li>
+                        <li><strong>Exit 전략:</strong> Series A (24-30개월)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-chart-pie"></i> 자금 사용 계획</h4>
+                    <ul>
+                        <li><strong>AI/엔지니어링:</strong> 45%</li>
+                        <li><strong>인프라/보안:</strong> 25%</li>
+                        <li><strong>마케팅/그로스:</strong> 20%</li>
+                        <li><strong>운영/컴플라이언스:</strong> 10%</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="grid grid-3" style="margin-top: 2rem;">
+                <div class="metric-card">
+                    <div class="metric-value">M+6</div>
+                    <div class="metric-label">80 호스트<br>월 GMV ₩4억</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">M+12</div>
+                    <div class="metric-label">180 호스트<br>월 GMV ₩8억</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">99.9%</div>
+                    <div class="metric-label">서비스 가용성<br>목표 달성</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 13. Competitive Advantage -->
+        <div class="slide">
+            <h2>Chapter 12: 경쟁 우위</h2>
+            <p class="subtitle">AI 기술력과 독채 전문성으로 구축한 지속 가능한 모트</p>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h4><i class="fas fa-brain"></i> 기술적 모트</h4>
+                    <ul>
+                        <li>멀티 AI 엔진 오케스트레이션</li>
+                        <li>87% 운영 자동화 달성</li>
+                        <li>웹사이트 템플릿 양산 시스템</li>
+                        <li>도메인 특화 모델 구축</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-shield-alt"></i> 시장적 모트</h4>
+                    <ul>
+                        <li>독채·풀빌라 시장 1위 포지션</li>
+                        <li>'경험 상품화' 카테고리 개척</li>
+                        <li>OTA 대체 불가 영역 구축</li>
+                        <li>네트워크 효과 강화</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-lock"></i> 락인 모트</h4>
+                    <ul>
+                        <li>5% 수수료 vs 기존 15-20%</li>
+                        <li>100만원 패키지 vs 시장가 200만원</li>
+                        <li>원스톱 솔루션 의존성</li>
+                        <li>전환 비용 증가</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3><i class="fas fa-shield-alt"></i> 경쟁사 차별화 포인트</h3>
+                <div class="grid grid-3" style="text-align: left; margin-top: 1.5rem;">
+                    <div>
+                        <h4 style="color: var(--color-mint-500);">vs OTA</h4>
+                        <ul style="font-size: 0.9rem;">
+                            <li>독채 전문성</li>
+                            <li>AI 기반 자동화</li>
+                            <li>경험 상품화</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--color-mint-500);">vs Dayuse</h4>
+                        <ul style="font-size: 0.9rem;">
+                            <li>프라임타임 활용</li>
+                            <li>그룹 체험 중심</li>
+                            <li>마케팅 자동화</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--color-mint-500);">vs 신규 진입</h4>
+                        <ul style="font-size: 0.9rem;">
+                            <li>검증된 파트너 네트워크</li>
+                            <li>축적된 데이터 자산</li>
+                            <li>AI 기술 선점 효과</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 14. Team & Execution -->
+        <div class="slide">
+            <h2>Chapter 13: 팀 & 실행력</h2>
+            <p class="subtitle">AI 협업 경험과 도메인 전문성을 갖춘 실행 조직</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4><i class="fas fa-users"></i> 핵심 역량</h4>
+                    <ul>
+                        <li>호스피탈리티 업계 경험</li>
+                        <li>AI 기술 활용 전문성</li>
+                        <li>마케팅 & 데이터 분석</li>
+                        <li>제품 개발 & 운영</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-rocket"></i> 확장 계획</h4>
+                    <ul>
+                        <li>마케팅·콘텐츠 전문가</li>
+                        <li>세일즈·비즈니스 개발</li>
+                        <li>데이터 사이언티스트</li>
+                        <li>AI 엔지니어</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="story-timeline">
+                <div class="story-item">
+                    <div class="story-number"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <h4>검증된 실행력</h4>
+                        <p>25개 파트너사 온보딩, 평일 가동률 3배 개선 실증</p>
+                    </div>
+                </div>
+                <div class="story-item">
+                    <div class="story-number"><i class="fas fa-brain"></i></div>
+                    <div>
+                        <h4>AI 협업 경험</h4>
+                        <p>Claude, GPT, Gemini 등 멀티 AI 활용한 개발 및 운영 노하우</p>
+                    </div>
+                </div>
+                <div class="story-item">
+                    <div class="story-number"><i class="fas fa-chart-bar"></i></div>
+                    <div>
+                        <h4>데이터 중심 의사결정</h4>
+                        <p>KPI 기반 지속적 개선, A/B 테스트 문화 정착</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 15. The Future -->
+        <div class="slide">
+            <h2>Epilogue: 미래</h2>
+            <p class="subtitle">여행 산업의 AI 혁신을 이끄는 글로벌 플랫폼으로</p>
+            <div class="highlight-box">
+                <h3><i class="fas fa-star"></i> 우리의 비전</h3>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--color-gold-500); margin: 1.5rem 0;">
+                    "경험 경제의 새로운 표준을 만들다"
+                </div>
+                <p style="font-size: 1.3rem;">
+                    AI 기반 자율 성장 플랫폼으로<br>
+                    전 세계 프리미엄 공간의 가치를 재정의합니다
+                </p>
+            </div>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4><i class="fas fa-check-circle"></i> 왜 StayOneDay인가?</h4>
+                    <ul>
+                        <li>검증된 비즈니스 모델과 실증 데이터</li>
+                        <li>AI 기반 확장 가능한 기술력</li>
+                        <li>독채·풀빌라 시장 선점 기회</li>
+                        <li>글로벌 확장 준비된 아키텍처</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-handshake"></i> 함께 만들어갈 가치</h4>
+                    <ul>
+                        <li>호스트의 새로운 수익 기회 창출</li>
+                        <li>게스트의 프리미엄 경험 접근성 확대</li>
+                        <li>여행 산업의 AI 혁신 선도</li>
+                        <li>지속 가능한 경험 경제 생태계 구축</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 3rem;">
+                <p style="font-size: 1.5rem; color: var(--color-mint-500); font-weight: 600;">
+                    함께 여행의 미래를 만들어갑시다
+                </p>
+                <div class="brand-logo" style="justify-content: center; font-size: 2rem; margin-top: 2rem;">
+                    stay<span style="color: var(--color-gold-500);">oneday</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">15</span>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="previousSlide()">‹</button>
+        <button class="nav-btn" id="nextBtn" onclick="nextSlide()">›</button>
+    </div>
+
+    <div class="progress-bar" id="progressBar"></div>
+
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+
+            document.getElementById('currentSlide').textContent = index + 1;
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = index === totalSlides - 1;
+
+            const progress = ((index + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                currentSlideIndex++;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+                e.preventDefault();
+                previousSlide();
+            } else if (e.key.toLowerCase() === 'p') {
+                window.print();
+            }
+        });
+
+        function calculateRevenue() {
+            const activeHosts = parseInt(document.getElementById('activeHosts')?.value) || 25;
+            const avgSessionPrice = parseInt(document.getElementById('avgSessionPrice')?.value) || 31;
+            const sessionsPerHost = parseInt(document.getElementById('sessionsPerHost')?.value) || 14;
+            const takeRate = parseFloat(document.getElementById('takeRate')?.value) || 5;
+            const saasOptinRate = parseFloat(document.getElementById('saasOptinRate')?.value) || 35;
+            const saasMonthlyFee = parseInt(document.getElementById('saasMonthlyFee')?.value) || 9;
+            const websiteFee = parseInt(document.getElementById('websiteFee')?.value) || 100;
+            const newWebsites = parseInt(document.getElementById('newWebsites')?.value) || 3;
+            const managedWebsites = parseInt(document.getElementById('managedWebsites')?.value) || 8;
+            const managementFee = parseInt(document.getElementById('managementFee')?.value) || 5;
+
+            const monthlyGMV = activeHosts * avgSessionPrice * sessionsPerHost;
+            const platformRevenue = monthlyGMV * (takeRate / 100);
+            const saasRevenue = activeHosts * (saasOptinRate / 100) * saasMonthlyFee;
+            const websiteRevenue = newWebsites * websiteFee;
+            const managementRevenue = managedWebsites * managementFee;
+            const totalRevenue = platformRevenue + saasRevenue + websiteRevenue + managementRevenue;
+            const yearlyProjection = totalRevenue * 12;
+
+            const elements = {
+                'monthlyGMV': monthlyGMV.toLocaleString() + '만원',
+                'platformRevenue': Math.round(platformRevenue).toLocaleString() + '만원',
+                'saasRevenue': Math.round(saasRevenue).toLocaleString() + '만원',
+                'websiteRevenue': Math.round(websiteRevenue).toLocaleString() + '만원',
+                'managementRevenue': Math.round(managementRevenue).toLocaleString() + '만원',
+                'totalRevenue': Math.round(totalRevenue).toLocaleString() + '만원',
+                'yearlyProjection': (yearlyProjection / 10000).toFixed(2) + '억원'
+            };
+
+            Object.entries(elements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = value;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showSlide(0);
+
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.addEventListener('input', calculateRevenue);
+            });
+
+            calculateRevenue();
+        });
+    </script>
+</body>
+</html>

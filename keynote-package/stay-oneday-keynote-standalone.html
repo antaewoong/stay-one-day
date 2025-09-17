@@ -32,6 +32,9 @@
             overflow: hidden;
             height: 100vh;
             position: relative;
+            touch-action: pan-x pan-y;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body::before {
@@ -284,6 +287,103 @@
                 0 0 0 1px rgba(0, 212, 179, 0.3);
         }
 
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 25px 20px;
+                overflow-y: auto;
+                height: 100vh;
+                min-height: -webkit-fill-available;
+            }
+
+            .slide-content {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            .slide h1 {
+                font-size: clamp(2rem, 9vw, 3.5rem);
+                margin-bottom: 1.5rem;
+                line-height: 1.1;
+            }
+
+            .slide h2 {
+                font-size: clamp(1.6rem, 7vw, 2.5rem);
+                margin-bottom: 1.2rem;
+                line-height: 1.2;
+            }
+
+            .slide h3 {
+                font-size: clamp(1.2rem, 5vw, 1.8rem);
+                margin-bottom: 1rem;
+            }
+
+            .slide p {
+                font-size: clamp(1rem, 4.5vw, 1.3rem);
+                line-height: 1.6;
+                margin-bottom: 1.5rem;
+            }
+
+            .demo-image {
+                max-width: 100%;
+                height: auto;
+                border-radius: 16px;
+            }
+
+            .calculator-container {
+                padding: 25px 20px;
+                margin: 15px 0;
+                border-radius: 20px;
+            }
+
+            .nav-button {
+                padding: 16px 24px;
+                font-size: 1.1rem;
+                min-height: 44px;
+                border-radius: 12px;
+            }
+
+            .progress-bar {
+                bottom: 90px;
+                height: 6px;
+            }
+
+            .slide-navigation {
+                gap: 15px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slide {
+                padding: 20px 15px;
+            }
+
+            .slide h1 {
+                font-size: clamp(1.8rem, 10vw, 2.8rem);
+                margin-bottom: 1.2rem;
+            }
+
+            .slide h2 {
+                font-size: clamp(1.4rem, 8vw, 2.2rem);
+                margin-bottom: 1rem;
+            }
+
+            .slide p {
+                font-size: clamp(0.95rem, 4.5vw, 1.2rem);
+                margin-bottom: 1.2rem;
+            }
+
+            .calculator-container {
+                padding: 20px 15px;
+            }
+
+            .demo-features {
+                font-size: clamp(0.8rem, 4vw, 1rem);
+            }
+        }
+
         /* Revenue Calculator */
         .calculator-slide {
             flex-direction: column;
@@ -460,19 +560,123 @@
             .demo-slide {
                 flex-direction: column;
                 gap: 40px;
+                align-items: center;
+            }
+
+            .demo-slide > div {
+                width: 100%;
+                max-width: none;
             }
 
             .calculator-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .input-group {
+                padding: 1rem;
+            }
+
+            .input-group input {
+                font-size: 1.1rem;
+                padding: 12px;
+                min-height: 44px;
             }
 
             .nav-container {
                 bottom: 20px;
+                padding: 0 20px;
             }
 
             .slide-counter {
                 top: 20px;
                 right: 20px;
+                font-size: 0.9rem;
+                padding: 8px 12px;
+            }
+
+            /* Enhanced grid layouts for mobile */
+            div[style*="grid-template-columns: repeat(3, 1fr)"] {
+                grid-template-columns: 1fr !important;
+                gap: 1.5rem !important;
+            }
+
+            div[style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 2rem !important;
+            }
+
+            /* Better hero styles for mobile */
+            .hero-title {
+                font-size: clamp(2.5rem, 12vw, 4rem) !important;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: clamp(1.1rem, 5vw, 1.4rem) !important;
+                line-height: 1.5;
+            }
+
+            .keynote-word {
+                font-size: clamp(2rem, 10vw, 3.5rem) !important;
+            }
+
+            .keynote-description {
+                font-size: clamp(1rem, 5vw, 1.3rem) !important;
+            }
+        }
+
+        /* Additional mobile optimizations */
+        @media (max-width: 480px) {
+            .nav-button {
+                padding: 18px 28px;
+                font-size: 1.2rem;
+                min-height: 48px;
+                border-radius: 14px;
+            }
+
+            .slide-navigation {
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .progress-bar {
+                bottom: 100px;
+                height: 8px;
+                border-radius: 4px;
+            }
+
+            /* Better spacing for small screens */
+            .slide {
+                justify-content: flex-start;
+                padding-top: 40px;
+            }
+
+            .hero-slide {
+                justify-content: center;
+            }
+        }
+
+        /* Enhanced touch interactions */
+        @media (hover: none) and (pointer: coarse) {
+            .nav-button {
+                min-height: 48px;
+                font-size: 1.1rem;
+            }
+
+            .input-group input {
+                min-height: 48px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .slide {
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
         }
     </style>
@@ -484,30 +688,158 @@
             <div class="hero-tagline">The Future of Korean Travel</div>
             <h1 class="hero-title">Stay OneDay</h1>
             <p class="hero-subtitle">
-                숙박업계에 혁신을 가져올<br>
+                평일 공실을 없애주는<br>
                 AI 기반 플랫폼의 탄생
             </p>
         </div>
 
-        <!-- Slide 2: Problem Statement -->
+
+        <!-- Slide 3: Cost Crisis -->
         <div class="slide keynote-slide">
-            <div class="keynote-word">Problem</div>
+            <div class="keynote-word">Cost Crisis</div>
             <p class="keynote-description">
-                한국 풀빌라, 스테이 시장의 65%가<br>
-                여전히 전화 예약에 의존하고 있습니다
+                건축비·인건비·관리비<br>
+                모든 비용이 상승했습니다
             </p>
         </div>
 
-        <!-- Slide 3: Our Solution -->
+        <!-- Slide 4: Revenue Problem -->
         <div class="slide keynote-slide">
-            <div class="keynote-word">Solution</div>
+            <div class="keynote-word">Revenue Gap</div>
             <p class="keynote-description">
-                AI와 현대적 기술로<br>
-                완전히 새로운 예약 경험을 제공합니다
+                할인판매 말고는<br>
+                주말 외 수익 창출이 어렵습니다
             </p>
         </div>
 
-        <!-- Slide 4: Platform Demo - Discovery -->
+        <!-- Slide 5: Innovation Need -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Innovation</div>
+            <p class="keynote-description">
+                기존 틀을 깨는<br>
+                혁신이 필요합니다
+            </p>
+        </div>
+
+        <!-- Slide 6: Our Solution -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Day Trip</div>
+            <p class="keynote-description">
+                하루만으로 충분합니다
+            </p>
+        </div>
+
+        <!-- Slide 7: Opening (Emphasis) -->
+        <div class="slide hero-slide">
+            <div class="hero-tagline">The Future of Korean Travel</div>
+            <h1 class="hero-title">Stay OneDay</h1>
+            <p class="hero-subtitle">
+                평일 공실을 없애주는<br>
+                AI 기반 플랫폼의 탄생
+            </p>
+        </div>
+
+        <!-- Slide 8: Market Insight -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Insight</div>
+            <p class="keynote-description">
+                평일 데이트립 수요가<br>
+                폭발적으로 증가하고 있습니다
+            </p>
+        </div>
+
+        <!-- Slide 9: Target Success -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Proven Success</div>
+            <p class="keynote-description">
+                평일 데이트립으로<br>
+                <span style="color: var(--mint);">충성고객 300% 증가</span>
+            </p>
+        </div>
+
+        <!-- Slide 10: Game Changer -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Game Changer</div>
+            <p class="keynote-description">
+                <span style="color: var(--mint); font-weight: 700; font-size: 1.5em;">5% 수수료</span><br>
+                <span style="color: var(--gold);">경쟁사 대비 반값!</span>
+            </p>
+        </div>
+
+        <!-- Slide 10: AI Technology -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">AI Power</div>
+            <p class="keynote-description">
+                멀티 AI 전략으로<br>
+                완전 자동화된 플랫폼
+            </p>
+        </div>
+
+        <!-- Slide 11: Market Size -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Market Size</div>
+            <p class="keynote-description">
+                국내 숙박업 시장규모<br>
+                <span style="color: var(--mint); font-weight: 700;">연 12조원</span>
+            </p>
+        </div>
+
+        <!-- Slide 12: Digital Transformation -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Digital Gap</div>
+            <p class="keynote-description">
+                아직도 전화예약에 의존하는<br>
+                <span style="color: var(--gold);">디지털 전환 기회</span>
+            </p>
+        </div>
+
+        <!-- Slide 13: Customer Pain -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Customer Pain</div>
+            <p class="keynote-description">
+                복잡한 예약 과정<br>
+                투명하지 않은 가격 정보
+            </p>
+        </div>
+
+        <!-- Slide 14: Host Pain -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Host Pain</div>
+            <p class="keynote-description">
+                높은 플랫폼 수수료<br>
+                <span style="color: var(--gold);">10-15%</span> vs <span style="color: var(--mint);">우리 5%</span>
+            </p>
+        </div>
+
+        <!-- Slide 15: Our Approach -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Our Approach</div>
+            <p class="keynote-description">
+                AI 기반 개인화 추천<br>
+                완전 자동화된 예약 시스템
+            </p>
+        </div>
+
+        <!-- Slide 16: Technology Stack -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Tech Stack</div>
+            <p class="keynote-description">
+                Next.js 15 + Supabase<br>
+                <span style="color: var(--mint);">멀티 AI 통합</span>
+            </p>
+        </div>
+
+        <!-- Slide 17: Mission -->
+        <div class="slide keynote-slide">
+            <div class="keynote-word">Mission</div>
+            <p class="keynote-description">
+                누구나 특별한 하루를<br>
+                보낼 수 있습니다<br>
+                <span style="color: var(--mint); font-weight: 600;">Stay OneDay</span>
+            </p>
+        </div>
+
+        <!-- Slide 18: Platform Demo - Discovery -->
         <div class="slide demo-slide">
             <div class="demo-content">
                 <h2 class="demo-title">Discovery</h2>
@@ -522,18 +854,18 @@
                 </ul>
             </div>
             <div class="demo-visual">
-                <img src="./images/d55.jpg" alt="숙소 검색 결과 화면" class="demo-image" style="width: 150%; max-width: 1200px; transform: scale(1.3); margin-left: -40%;">
+                <img src="/images/d55.jpg" alt="숙소 검색 결과 화면" class="demo-image" style="width: 150%; max-width: 1200px; transform: scale(1.3); margin-left: -40%;">
             </div>
         </div>
 
-        <!-- Slide 5: Platform Demo - Immersion -->
+        <!-- Slide 19: Platform Demo - Immersion -->
         <div class="slide demo-slide">
             <div class="demo-visual">
                 <video autoplay muted loop playsinline class="demo-image" style="border-radius: 20px; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);">
-                    <source src="./images/v1.mov" type="video/quicktime">
-                    <source src="./images/v1.mov" type="video/mp4">
+                    <source src="/images/v1.mov" type="video/quicktime">
+                    <source src="/images/v1.mov" type="video/mp4">
                     <!-- 비디오 재생 불가 시 fallback 이미지 -->
-                    <img src="./images/m1.jpg" alt="상세 페이지" class="demo-image">
+                    <img src="/images/m1.jpg" alt="상세 페이지" class="demo-image">
                 </video>
             </div>
             <div class="demo-content">
@@ -565,16 +897,16 @@
                 </ul>
             </div>
             <div class="demo-visual">
-                <img src="./images/5.png" alt="예약 인원 선택 화면" class="demo-image">
+                <img src="/images/5.png" alt="예약 인원 선택 화면" class="demo-image">
             </div>
         </div>
 
         <!-- Slide 7: Platform Demo - Intelligence -->
         <div class="slide demo-slide">
             <div class="demo-visual" style="display: flex; gap: 2rem; align-items: center;">
-                <img src="./images/d2.jpg" alt="웹 대시보드" class="demo-image" style="width: 70%;">
+                <img src="/images/d2.jpg" alt="웹 대시보드" class="demo-image" style="width: 70%;">
                 <div style="width: 30%;">
-                    <img src="./images/123.png" alt="모바일 대시보드" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+                    <img src="/images/123.png" alt="모바일 대시보드" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
                 </div>
             </div>
             <div class="demo-content">
@@ -882,8 +1214,8 @@
         <div class="slide keynote-slide">
             <div class="keynote-word">Investment</div>
             <p class="keynote-description">
-                한국 숙박업계의 미래에<br>
-                함께 투자하시겠습니까?
+                저희가 만들어가는 혁신에<br>
+                함께 해주시겠습니까?
             </p>
         </div>
 
@@ -1109,6 +1441,48 @@
             // Initial calculations
             calculateRevenueV1();
             calculateRevenueV2();
+
+            // Mobile touch gestures
+            let startX = 0;
+            let startY = 0;
+            let isScrolling = false;
+
+            document.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isScrolling = false;
+            }, { passive: true });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!startX || !startY) return;
+
+                let diffX = startX - e.touches[0].clientX;
+                let diffY = startY - e.touches[0].clientY;
+
+                if (Math.abs(diffY) > Math.abs(diffX)) {
+                    isScrolling = true;
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', (e) => {
+                if (isScrolling) return;
+                if (!startX || !startY) return;
+
+                let diffX = startX - e.changedTouches[0].clientX;
+                let diffY = startY - e.changedTouches[0].clientY;
+
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                    if (diffX > 0) {
+                        nextSlide();
+                    } else {
+                        prevSlide();
+                    }
+                }
+
+                startX = 0;
+                startY = 0;
+                isScrolling = false;
+            }, { passive: true });
         });
     </script>
 </body>

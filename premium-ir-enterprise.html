@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stay OneDay - Enterprise IR Deck</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 30%, #16213e 70%, #0f1419 100%);
+            color: #ffffff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            width: 92vw;
+            max-width: 1400px;
+            height: 88vh;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.08) 100%);
+            backdrop-filter: blur(30px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            padding: 4rem;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            box-shadow:
+                0 0 80px rgba(103, 126, 234, 0.3),
+                0 25px 50px -12px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+            animation: slideIn 1s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.96);
+                filter: blur(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        .slide h1 {
+            font-size: clamp(3.5rem, 6vw, 5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 30%, #f093fb 70%, #f5576c 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 2rem;
+            line-height: 1.1;
+            text-shadow: 0 0 30px rgba(103, 126, 234, 0.3);
+        }
+
+        .slide h2 {
+            font-size: clamp(2.5rem, 4.5vw, 3.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(103, 126, 234, 0.2);
+        }
+
+        .slide h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 1.2rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.85);
+            text-align: center;
+            font-weight: 400;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .grid {
+            display: grid;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.12) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.2) 100%);
+            border-color: rgba(103, 126, 234, 0.6);
+            box-shadow:
+                0 0 40px rgba(103, 126, 234, 0.4),
+                0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h4 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #a5b4fc;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .card h4 i {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card p, .card li {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        .card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .card li {
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .card li:before {
+            content: "▸";
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2rem;
+            position: absolute;
+            left: 0;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.15) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 28px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            backdrop-filter: blur(25px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            border-radius: 28px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .metric-card:hover::before {
+            opacity: 0.7;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow:
+                0 0 60px rgba(103, 126, 234, 0.5),
+                0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .metric-value {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(103, 126, 234, 0.3);
+        }
+
+        .metric-label {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .ai-ecosystem {
+            background: linear-gradient(135deg, rgba(103, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 50%, rgba(240, 147, 251, 0.1) 100%);
+            border: 3px solid rgba(103, 126, 234, 0.3);
+            border-radius: 32px;
+            padding: 3rem;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-ecosystem::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(103, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(240, 147, 251, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .ai-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .ai-engine {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .ai-engine:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .ai-engine-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .claude { background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%); }
+        .gpt { background: linear-gradient(135deg, #00A67E 0%, #00C896 100%); }
+        .gemini { background: linear-gradient(135deg, #4285F4 0%, #34A853 100%); }
+        .cursor { background: linear-gradient(135deg, #000000 0%, #333333 100%); }
+        .runway { background: linear-gradient(135deg, #FF0080 0%, #FF8A00 100%); }
+
+        .table-container {
+            overflow: hidden;
+            border-radius: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        .table-container th {
+            background: linear-gradient(135deg, rgba(11, 31, 58, 0.8) 0%, rgba(103, 126, 234, 0.8) 100%);
+            color: white;
+            padding: 1.5rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-container td {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 500;
+        }
+
+        .table-container tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .table-container tr:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(103, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 50%, rgba(240, 147, 251, 0.15) 100%);
+            border: 3px solid rgba(103, 126, 234, 0.4);
+            border-radius: 28px;
+            padding: 3rem;
+            margin: 2rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(103, 126, 234, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .highlight-box h3 {
+            color: #a5b4fc;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .calculator-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            padding: 3rem;
+            margin-top: 2rem;
+            backdrop-filter: blur(25px);
+        }
+
+        .calculator-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-group label i {
+            color: #667eea;
+        }
+
+        .input-group input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 1.2rem;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(103, 126, 234, 0.3);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.12) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(15px);
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.8rem;
+        }
+
+        .result-label {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 3rem;
+            right: 3rem;
+            display: flex;
+            gap: 1.5rem;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.2) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn:hover {
+            background: linear-gradient(135deg, rgba(103, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%);
+            border-color: #667eea;
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 0 40px rgba(103, 126, 234, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 3rem;
+            left: 3rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.2) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 1.5rem 2rem;
+            backdrop-filter: blur(20px);
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            transition: width 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 1001;
+            box-shadow: 0 0 20px rgba(103, 126, 234, 0.5);
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .tech-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .tech-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 1cm;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            .slide {
+                background: white !important;
+                color: black !important;
+                page-break-after: always;
+                height: auto;
+                display: block !important;
+            }
+
+            .navigation, .slide-counter, .progress-bar {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                width: 95vw;
+                height: 90vh;
+                padding: 2rem;
+            }
+
+            .slide h1 {
+                font-size: 2.5rem;
+            }
+
+            .slide h2 {
+                font-size: 2rem;
+            }
+
+            .grid-2, .grid-3, .grid-4, .calculator-inputs, .results-grid, .ai-grid, .tech-stack {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Cover -->
+        <div class="slide active">
+            <div style="text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 0.9rem; letter-spacing: 0.3rem; color: rgba(255, 255, 255, 0.6); margin-bottom: 2rem; text-transform: uppercase;">
+                    <i class="fas fa-chart-line"></i> Enterprise IR Deck · 2025.09.18
+                </div>
+                <h1 style="font-size: clamp(4rem, 8vw, 7rem);">StayOneDay</h1>
+                <p class="subtitle" style="font-size: clamp(1.5rem, 3vw, 2.5rem); margin: 3rem 0;">
+                    멀티 AI 엔진 기반 <strong>프리미엄 스테이</strong> 혁신 플랫폼<br>
+                    <strong>평일 프라임타임</strong>을 새로운 수익원으로 전환
+                </p>
+                <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: margin-top: 3rem;">
+                    <span style="background: rgba(255,255,255,0.15); padding: 0.8rem 1.5rem; border-radius: 30px; font-size: 1rem; font-weight: 600;">
+                        <i class="fas fa-robot"></i> Multi-AI Engine
+                    </span>
+                    <span style="background: rgba(255,255,255,0.15); padding: 0.8rem 1.5rem; border-radius: 30px; font-size: 1rem; font-weight: 600;">
+                        <i class="fas fa-brain"></i> Autonomous Growth
+                    </span>
+                    <span style="background: rgba(255,255,255,0.15); padding: 0.8rem 1.5rem; border-radius: 30px; font-size: 1rem; font-weight: 600;">
+                        <i class="fas fa-rocket"></i> Experience-as-Product
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Multi-AI Engine Strategy -->
+        <div class="slide">
+            <h2><i class="fas fa-network-wired"></i> 멀티 AI 엔진 전략</h2>
+            <p class="subtitle">적재적소 AI 배치로 플랫폼 전 영역 자동화 및 최적화</p>
+            <div class="ai-ecosystem">
+                <h3 style="text-align: center; margin-bottom: 2rem;">
+                    <i class="fas fa-cogs"></i> AI 오케스트레이션 아키텍처
+                </h3>
+                <div class="ai-grid">
+                    <div class="ai-engine">
+                        <div class="ai-engine-header">
+                            <div class="ai-logo claude">C</div>
+                            <div>
+                                <h4>Claude (Anthropic)</h4>
+                                <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">코드 개발 & 감사</p>
+                            </div>
+                        </div>
+                        <ul style="font-size: 0.9rem;">
+                            <li>Next.js 15 풀스택 개발</li>
+                            <li>TypeScript 타입 안전성 검증</li>
+                            <li>보안 코드 리뷰 자동화</li>
+                        </ul>
+                    </div>
+                    <div class="ai-engine">
+                        <div class="ai-engine-header">
+                            <div class="ai-logo gpt">G</div>
+                            <div>
+                                <h4>GPT-4 (OpenAI)</h4>
+                                <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">콘텐츠 생성 & 분석</p>
+                            </div>
+                        </div>
+                        <ul style="font-size: 0.9rem;">
+                            <li>마케팅 카피 자동 생성</li>
+                            <li>사용자 리뷰 감성 분석</li>
+                            <li>SEO 최적화 콘텐츠</li>
+                        </ul>
+                    </div>
+                    <div class="ai-engine">
+                        <div class="ai-engine-header">
+                            <div class="ai-logo gemini">G</div>
+                            <div>
+                                <h4>Gemini (Google)</h4>
+                                <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">데이터 분석 & 예측</p>
+                            </div>
+                        </div>
+                        <ul style="font-size: 0.9rem;">
+                            <li>수요 예측 알고리즘</li>
+                            <li>동적 가격 최적화</li>
+                            <li>사용자 행동 패턴 분석</li>
+                        </ul>
+                    </div>
+                    <div class="ai-engine">
+                        <div class="ai-engine-header">
+                            <div class="ai-logo cursor">↗</div>
+                            <div>
+                                <h4>Cursor IDE</h4>
+                                <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">실시간 코딩 지원</p>
+                            </div>
+                        </div>
+                        <ul style="font-size: 0.9rem;">
+                            <li>페어 프로그래밍 가속화</li>
+                            <li>버그 사전 감지</li>
+                            <li>코드 품질 실시간 향상</li>
+                        </ul>
+                    </div>
+                    <div class="ai-engine">
+                        <div class="ai-engine-header">
+                            <div class="ai-logo runway">R</div>
+                            <div>
+                                <h4>Runway ML</h4>
+                                <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">영상 제작 자동화</p>
+                            </div>
+                        </div>
+                        <ul style="font-size: 0.9rem;">
+                            <li>숏폼 영상 자동 생성</li>
+                            <li>브랜딩 비디오 제작</li>
+                            <li>인플루언서 콘텐츠 템플릿</li>
+                        </ul>
+                    </div>
+                    <div class="ai-engine">
+                        <div class="ai-engine-header">
+                            <div class="ai-logo" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <div>
+                                <h4>Custom ML Models</h4>
+                                <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">도메인 특화 AI</p>
+                            </div>
+                        </div>
+                        <ul style="font-size: 0.9rem;">
+                            <li>호스트-게스트 매칭</li>
+                            <li>리스크 스코어링</li>
+                            <li>ROI 예측 모델</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: AI-Driven Autonomous Platform -->
+        <div class="slide">
+            <h2><i class="fas fa-brain"></i> AI 기반 자율 성장 플랫폼</h2>
+            <p class="subtitle">인간 개입 최소화, AI가 스스로 학습하고 최적화하는 능동형 시스템</p>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h4><i class="fas fa-chart-line"></i> 자동 수요 예측</h4>
+                    <ul>
+                        <li>날씨, 이벤트, 트렌드 데이터 실시간 분석</li>
+                        <li>지역별 최적 프라임타임 슬롯 제안</li>
+                        <li>계절성 패턴 학습 및 사전 대응</li>
+                        <li>98.7% 정확도 달성 (베타 테스트)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-magic"></i> 스마트 콘텐츠 엔진</h4>
+                    <ul>
+                        <li>호스트 사진 → 10초 내 숏폼 영상 자동 생성</li>
+                        <li>플랫폼별 최적화 (인스타/틱톡/유튜브)</li>
+                        <li>바이럴 요소 자동 삽입 (후킹/자막)</li>
+                        <li>A/B 테스트 자동 실행 및 성과 피드백</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-robot"></i> 지능형 운영 자동화</h4>
+                    <ul>
+                        <li>인플루언서 발굴 → 역제안 → 계약 자동화</li>
+                        <li>리뷰 모니터링 및 즉시 대응</li>
+                        <li>가격 동적 조정 (실시간 경쟁 분석)</li>
+                        <li>리스크 사전 감지 및 예방 조치</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 3rem;">
+                <h3><i class="fas fa-trophy"></i> AI 효율성 지표</h3>
+                <div class="grid grid-4" style="text-align: left; margin-top: 2rem;">
+                    <div class="metric-card">
+                        <div class="metric-value">87%</div>
+                        <div class="metric-label">운영 업무 자동화율</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">3.2x</div>
+                        <div class="metric-label">콘텐츠 제작 속도</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">45%</div>
+                        <div class="metric-label">마케팅 비용 절감</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">24/7</div>
+                        <div class="metric-label">무인 모니터링</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Problem & Solution -->
+        <div class="slide">
+            <h2><i class="fas fa-search"></i> 문제 인식 & 솔루션</h2>
+            <p class="subtitle">프리미엄 숙소의 구조적 비효율성을 AI 기반 혁신으로 해결</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 핵심 문제점</h4>
+                    <ul>
+                        <li><strong>자산 비효율:</strong> 주말 만실 vs 평일 공실</li>
+                        <li><strong>플랫폼 미스핏:</strong> OTA는 호텔 중심, 독채 소외</li>
+                        <li><strong>운영 제약:</strong> 침구 중심 비용 구조</li>
+                        <li><strong>마케팅 한계:</strong> 수동적 홍보, 낮은 도달률</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-lightbulb"></i> AI 기반 혁신 솔루션</h4>
+                    <ul>
+                        <li><strong>프라임타임 활용:</strong> 15:00~23:00 경험형 상품화</li>
+                        <li><strong>스마트 매칭:</strong> AI 추천으로 수요-공급 최적화</li>
+                        <li><strong>자동 마케팅:</strong> 멀티채널 콘텐츠 동시 배포</li>
+                        <li><strong>능동형 운영:</strong> 사람 개입 없는 24/7 최적화</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 2rem;">
+                <h3><i class="fas fa-clock"></i> Prime Time Revolution</h3>
+                <div style="font-size: 3rem; font-weight: 900; color: #667eea; margin: 1.5rem 0;">15:00 → 23:00</div>
+                <p style="font-size: 1.3rem;">침구 미사용 · 청소비 최소화 · 체험 중심 운영으로 새로운 수익원 창출</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: 3-Way Lock-in Effect -->
+        <div class="slide">
+            <h2><i class="fas fa-users"></i> 3-Way 생태계 락인</h2>
+            <p class="subtitle">AI 기반 맞춤형 가치 제공으로 각 주체별 강력한 락인 효과 구현</p>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h4><i class="fas fa-user-friends"></i> 이용자 (게스트)</h4>
+                    <ul>
+                        <li><strong>AI 추천:</strong> 취향 기반 공간 매칭</li>
+                        <li><strong>합리적 가격:</strong> 숙박비 없는 프리미엄 체험</li>
+                        <li><strong>유연한 이용:</strong> 인원/목적 제약 최소화</li>
+                        <li><strong>큐레이션:</strong> 품질 보장 엄선 공간</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-home"></i> 호스트 (업주)</h4>
+                    <ul>
+                        <li><strong>AI 분석 리포트:</strong> 주 2회 자동 인사이트</li>
+                        <li><strong>새로운 매출원:</strong> 평일 프라임 슬롯 활용</li>
+                        <li><strong>마케팅 자동화:</strong> 콘텐츠 제작부터 배포까지</li>
+                        <li><strong>운영 최적화:</strong> 가격/스케줄 AI 추천</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-video"></i> 인플루언서</h4>
+                    <ul>
+                        <li><strong>스마트 매칭:</strong> ROI 기반 자동 제안</li>
+                        <li><strong>성과 투명성:</strong> 실시간 데이터 제공</li>
+                        <li><strong>콘텐츠 지원:</strong> AI 템플릿 & 편집 도구</li>
+                        <li><strong>장기 파트너십:</strong> 데이터 기반 공정 계약</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Competitive Differentiation -->
+        <div class="slide">
+            <h2><i class="fas fa-chess"></i> 경쟁 우위 & 차별화</h2>
+            <p class="subtitle">AI 기술력과 독채 전문성으로 구축한 모트(Moat)</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-tag"></i> 구분</th>
+                            <th><i class="fas fa-crown"></i> StayOneDay</th>
+                            <th><i class="fas fa-building"></i> 기존 OTA</th>
+                            <th><i class="fas fa-clock"></i> Dayuse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong><i class="fas fa-home"></i> 타깃 공간</strong></td>
+                            <td>독채·풀빌라·프리미엄 스테이</td>
+                            <td>호텔·모텔 중심</td>
+                            <td>호텔 중심</td>
+                        </tr>
+                        <tr>
+                            <td><strong><i class="fas fa-users"></i> 이용 방식</strong></td>
+                            <td>그룹 체험·테마 모임</td>
+                            <td>숙박·대실</td>
+                            <td>낮 시간 대실</td>
+                        </tr>
+                        <tr>
+                            <td><strong><i class="fas fa-robot"></i> 기술력</strong></td>
+                            <td>멀티 AI 엔진 + 자동화</td>
+                            <td>기본 검색·예약</td>
+                            <td>단순 예약 플랫폼</td>
+                        </tr>
+                        <tr>
+                            <td><strong><i class="fas fa-chart-line"></i> 수익 모델</strong></td>
+                            <td>수수료+SaaS+AI 서비스</td>
+                            <td>수수료 중심</td>
+                            <td>수수료 단일</td>
+                        </tr>
+                        <tr>
+                            <td><strong><i class="fas fa-target"></i> 핵심 가치</strong></td>
+                            <td>평일 프라임타임 '경험화'</td>
+                            <td>숙박 객실 판매</td>
+                            <td>낮 시간 활용</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Slide 7: Market Opportunity -->
+        <div class="slide">
+            <h2><i class="fas fa-globe"></i> 시장 기회 & 확장성</h2>
+            <p class="subtitle">AI 기반 확장으로 글로벌 '경험 상품화' 시장 선점</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4><i class="fas fa-chart-area"></i> 시장 분석 (TAM/SAM/SOM)</h4>
+                    <ul>
+                        <li><strong>TAM:</strong> 국내 프리미엄 숙박 시장 ₩7조</li>
+                        <li><strong>SAM:</strong> 독채·풀빌라 세그먼트 ₩2.5조</li>
+                        <li><strong>SOM:</strong> 초기 목표 시장 ₩285억 (M24)</li>
+                        <li><strong>글로벌 확장:</strong> 일본·대만·동남아</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-rocket"></i> AI 기반 확장 전략</h4>
+                    <ul>
+                        <li><strong>자동 현지화:</strong> 언어·문화 AI 적응</li>
+                        <li><strong>파트너 온보딩:</strong> 무인 심사·승인 시스템</li>
+                        <li><strong>마켓핏 학습:</strong> 지역별 선호도 자동 분석</li>
+                        <li><strong>스케일 경제:</strong> AI 고도화로 마진 개선</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="grid grid-4" style="margin-top: 2rem;">
+                <div class="metric-card">
+                    <div class="metric-value">7조</div>
+                    <div class="metric-label">TAM<br>국내 프리미엄 숙박</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">2.5조</div>
+                    <div class="metric-label">SAM<br>독채·풀빌라</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">285억</div>
+                    <div class="metric-label">SOM<br>초기 목표 (M24)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">5개국</div>
+                    <div class="metric-label">확장 목표<br>아시아 권역</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Revenue Calculator -->
+        <div class="slide">
+            <h2><i class="fas fa-calculator"></i> AI 기반 수익 시뮬레이터</h2>
+            <p class="subtitle">실시간 데이터 기반 동적 수익 예측 및 최적화</p>
+            <div class="calculator-section">
+                <h3><i class="fas fa-chart-line"></i> 인터랙티브 비즈니스 모델 계산기</h3>
+                <div class="calculator-inputs">
+                    <div class="input-group">
+                        <label><i class="fas fa-home"></i> 활성 호스트 수</label>
+                        <input type="number" id="activeHosts" value="25" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-won-sign"></i> 평균 세션 가격 (만원)</label>
+                        <input type="number" id="avgSessionPrice" value="28" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-calendar"></i> 호스트당 월 세션</label>
+                        <input type="number" id="sessionsPerHost" value="14" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-percentage"></i> 플랫폼 수수료율 (%)</label>
+                        <input type="number" id="takeRate" value="12" min="1" max="30">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-users-cog"></i> SaaS 가입률 (%)</label>
+                        <input type="number" id="saasOptinRate" value="35" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-credit-card"></i> SaaS 월 구독료 (만원)</label>
+                        <input type="number" id="saasMonthlyFee" value="9" min="1">
+                    </div>
+                </div>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-value" id="monthlyGMV">9,800만원</div>
+                        <div class="result-label"><i class="fas fa-chart-bar"></i> 월간 총 거래액 (GMV)</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-value" id="platformRevenue">1,176만원</div>
+                        <div class="result-label"><i class="fas fa-coins"></i> 플랫폼 수수료 수익</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-value" id="saasRevenue">79만원</div>
+                        <div class="result-label"><i class="fas fa-sync"></i> SaaS 구독 수익</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-value" id="totalRevenue">1,255만원</div>
+                        <div class="result-label"><i class="fas fa-trophy"></i> 총 월간 수익</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Financial Projections -->
+        <div class="slide">
+            <h2><i class="fas fa-chart-line"></i> 재무 예측 모델</h2>
+            <p class="subtitle">AI 기반 3-시나리오 분석: Conservative / Base / Aggressive</p>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h4><i class="fas fa-shield-alt"></i> Conservative</h4>
+                    <ul>
+                        <li>M12 GMV ₩320.1M · Rev ₩34.0M</li>
+                        <li>M24 GMV ₩653.6M · Rev ₩68.8M</li>
+                        <li>M24 EBITDA ₩-51.8M</li>
+                        <li>M24 Hosts 172개</li>
+                        <li>Payback@M12 1.8개월</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-color: #667eea;">
+                    <h4><i class="fas fa-bullseye"></i> Base (목표)</h4>
+                    <ul>
+                        <li>M12 GMV ₩628.5M · Rev ₩80.4M</li>
+                        <li>M24 GMV ₩1.326B · Rev ₩168.1M</li>
+                        <li>M24 EBITDA ₩29.0M</li>
+                        <li>M24 Hosts 285개</li>
+                        <li>Payback@M12 0.9개월</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-rocket"></i> Aggressive</h4>
+                    <ul>
+                        <li>M12 GMV ₩1.312B · Rev ₩195.9M</li>
+                        <li>M24 GMV ₩2.944B · Rev ₩435.7M</li>
+                        <li>M24 EBITDA ₩234.0M</li>
+                        <li>M24 Hosts 523개</li>
+                        <li>Payback@M12 0.5개월</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 2rem;">
+                <h3><i class="fas fa-key"></i> 핵심 가정값</h3>
+                <div class="grid grid-2" style="text-align: left; margin-top: 1.5rem;">
+                    <div>
+                        <ul>
+                            <li><strong>Take Rate:</strong> 10% / 12% / 14%</li>
+                            <li><strong>SaaS ARPU:</strong> ₩80k / ₩90k / ₩100k</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li><strong>신규 호스트/월:</strong> 10 / 15 / 25</li>
+                            <li><strong>세션/호스트:</strong> 11 / 14 / 16 (M12)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Technology Stack -->
+        <div class="slide">
+            <h2><i class="fas fa-server"></i> 기술 아키텍처 & 인프라</h2>
+            <p class="subtitle">엔터프라이즈급 안정성과 확장성을 위한 현대적 기술 스택</p>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h4><i class="fas fa-code"></i> 프론트엔드 & 백엔드</h4>
+                    <ul>
+                        <li><strong>Next.js 15:</strong> Full-stack React 프레임워크</li>
+                        <li><strong>TypeScript:</strong> 타입 안전성 보장</li>
+                        <li><strong>Tailwind CSS:</strong> 유틸리티 스타일링</li>
+                        <li><strong>Vercel Edge:</strong> 글로벌 CDN 배포</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-database"></i> 데이터베이스 & 저장소</h4>
+                    <ul>
+                        <li><strong>Supabase:</strong> PostgreSQL + RLS 보안</li>
+                        <li><strong>Redis:</strong> 캐싱 & 세션 관리</li>
+                        <li><strong>S3 Compatible:</strong> 미디어 파일 저장</li>
+                        <li><strong>Real-time:</strong> 웹소켓 기반 실시간 업데이트</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-shield-alt"></i> 보안 & 모니터링</h4>
+                    <ul>
+                        <li><strong>RLS (Row Level Security):</strong> 데이터 권한 관리</li>
+                        <li><strong>JWT Authentication:</strong> 토큰 기반 인증</li>
+                        <li><strong>OpenTelemetry:</strong> 분산 추적 & 로깅</li>
+                        <li><strong>Rate Limiting:</strong> API 보호 & DDoS 방지</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <div class="tech-icon"><i class="fab fa-react"></i></div>
+                    <h4>React 18</h4>
+                    <p>최신 동시성 기능</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon"><i class="fas fa-database"></i></div>
+                    <h4>PostgreSQL</h4>
+                    <p>ACID 트랜잭션</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon"><i class="fas fa-cloud"></i></div>
+                    <h4>Edge Computing</h4>
+                    <p>글로벌 저지연</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon"><i class="fas fa-lock"></i></div>
+                    <h4>Zero-Trust</h4>
+                    <p>엔드투엔드 보안</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Investment Ask -->
+        <div class="slide">
+            <h2><i class="fas fa-handshake"></i> 투자 제안</h2>
+            <p class="subtitle">AI 기반 확장과 시장 선점을 위한 Seed 라운드</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4><i class="fas fa-dollar-sign"></i> Seed Round</h4>
+                    <ul>
+                        <li><strong>투자 규모:</strong> ₩3억 ~ ₩5억</li>
+                        <li><strong>밸류에이션:</strong> 협의</li>
+                        <li><strong>투자 기간:</strong> 12개월</li>
+                        <li><strong>Exit 전략:</strong> Series A (24-30개월)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-chart-pie"></i> 자금 사용 계획</h4>
+                    <ul>
+                        <li><strong>AI/엔지니어링:</strong> 45% (₩1.8-2.3억)</li>
+                        <li><strong>인프라/보안:</strong> 25% (₩0.8-1.3억)</li>
+                        <li><strong>마케팅/그로스:</strong> 20% (₩0.6-1억)</li>
+                        <li><strong>운영/컴플라이언스:</strong> 10% (₩0.3-0.5억)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="grid grid-3" style="margin-top: 2rem;">
+                <div class="metric-card">
+                    <div class="metric-value">M+6</div>
+                    <div class="metric-label">80 호스트<br>월 GMV ₩4억</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">M+12</div>
+                    <div class="metric-label">180 호스트<br>월 GMV ₩8억</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">99.9%</div>
+                    <div class="metric-label">서비스 가용성<br>목표 달성</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Why StayOneDay -->
+        <div class="slide">
+            <h2><i class="fas fa-crown"></i> 왜 StayOneDay인가?</h2>
+            <div class="highlight-box">
+                <h3><i class="fas fa-star"></i> 혁신적 AI 기술과 검증된 비즈니스 모델의 완벽한 결합</h3>
+                <p style="font-size: 1.4rem;">독채·풀빌라 전문성 × 멀티 AI 엔진 × 자율 성장 시스템</p>
+            </div>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4><i class="fas fa-check-circle"></i> 검증된 비즈니스</h4>
+                    <ul>
+                        <li>25개 파트너사와 안정적 운영</li>
+                        <li>평일 가동률 12% → 38% 실증</li>
+                        <li>검증된 수익 모델</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-robot"></i> AI 기술 리더십</h4>
+                    <ul>
+                        <li>멀티 AI 엔진 오케스트레이션</li>
+                        <li>87% 운영 자동화 달성</li>
+                        <li>실시간 학습 및 최적화</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-target"></i> 차별화된 포지셔닝</h4>
+                    <ul>
+                        <li>독채·풀빌라 시장 1위 목표</li>
+                        <li>'경험 상품화' 카테고리 개척</li>
+                        <li>OTA 대체 불가 영역 구축</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4><i class="fas fa-expand-arrows-alt"></i> 확장성 & 스케일</h4>
+                    <ul>
+                        <li>AI 기반 무인 확장 가능</li>
+                        <li>글로벌 시장 진출 준비</li>
+                        <li>다각화된 수익 모델</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 4rem;">
+                <p class="subtitle" style="font-size: 1.8rem; color: #a5b4fc;">
+                    <i class="fas fa-rocket"></i> 함께 여행 산업의 AI 혁신을 이끌어갑시다
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">12</span>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="previousSlide()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="nav-btn" id="nextBtn" onclick="nextSlide()">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <div class="progress-bar" id="progressBar"></div>
+
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+
+            document.getElementById('currentSlide').textContent = index + 1;
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = index === totalSlides - 1;
+
+            const progress = ((index + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                currentSlideIndex++;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+                e.preventDefault();
+                previousSlide();
+            } else if (e.key.toLowerCase() === 'p') {
+                window.print();
+            }
+        });
+
+        function calculateRevenue() {
+            const activeHosts = parseInt(document.getElementById('activeHosts')?.value) || 25;
+            const avgSessionPrice = parseInt(document.getElementById('avgSessionPrice')?.value) || 28;
+            const sessionsPerHost = parseInt(document.getElementById('sessionsPerHost')?.value) || 14;
+            const takeRate = parseFloat(document.getElementById('takeRate')?.value) || 12;
+            const saasOptinRate = parseFloat(document.getElementById('saasOptinRate')?.value) || 35;
+            const saasMonthlyFee = parseInt(document.getElementById('saasMonthlyFee')?.value) || 9;
+
+            const monthlyGMV = activeHosts * avgSessionPrice * sessionsPerHost;
+            const platformRevenue = monthlyGMV * (takeRate / 100);
+            const saasRevenue = activeHosts * (saasOptinRate / 100) * saasMonthlyFee;
+            const totalRevenue = platformRevenue + saasRevenue;
+
+            const elements = {
+                'monthlyGMV': monthlyGMV.toLocaleString() + '만원',
+                'platformRevenue': Math.round(platformRevenue).toLocaleString() + '만원',
+                'saasRevenue': Math.round(saasRevenue).toLocaleString() + '만원',
+                'totalRevenue': Math.round(totalRevenue).toLocaleString() + '만원'
+            };
+
+            Object.entries(elements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = value;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showSlide(0);
+
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.addEventListener('input', calculateRevenue);
+            });
+
+            calculateRevenue();
+        });
+    </script>
+</body>
+</html>

@@ -184,23 +184,33 @@ export default function PartnershipPage() {
                       <DollarSign className="w-4 h-4 inline mr-1" />
                       데이유즈 기본 요금 (4명 기준)
                     </Label>
-                    <div className="relative">
-                      <Input
-                        type="number"
+                    <div className="space-y-3">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-gray-900">₩{simulationData.baseCost.toLocaleString()}</div>
+                        <div className="text-sm text-gray-500">데이유즈 기본 요금</div>
+                      </div>
+                      <input
+                        type="range"
+                        min="300000"
+                        max="800000"
+                        step="50000"
                         value={simulationData.baseCost}
                         onChange={(e) => setSimulationData(prev => ({
                           ...prev,
-                          baseCost: Math.max(300000, parseInt(e.target.value) || 300000)
+                          baseCost: parseInt(e.target.value)
                         }))}
-                        className="text-right pr-12 text-lg font-medium"
-                        min="300000"
-                        max="700000"
-                        step="10000"
+                        className="w-full h-3 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, #dbeafe 0%, #e0e7ff ${((simulationData.baseCost - 300000) / 500000) * 100}%, #f3f4f6 ${((simulationData.baseCost - 300000) / 500000) * 100}%, #f3f4f6 100%)`
+                        }}
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">원</span>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>30만원</span>
+                        <span>80만원</span>
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      데이유즈 기준 4명 이용 시 받을 금액 (30~70만원)
+                    <p className="text-xs text-gray-500 mt-2">
+                      데이유즈 기준 4명 이용 시 받을 금액 (30~80만원)
                     </p>
                   </div>
 
