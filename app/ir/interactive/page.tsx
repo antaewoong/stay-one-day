@@ -23,7 +23,7 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
-  Print,
+  Printer,
   ArrowRight,
   CheckCircle2,
   Brain,
@@ -167,7 +167,7 @@ export default function InteractiveIRDeck() {
                 onClick={() => window.print()}
                 className="flex items-center gap-2"
               >
-                <Print className="w-4 h-4" />
+                <Printer className="w-4 h-4" />
                 인쇄
               </Button>
               <Button

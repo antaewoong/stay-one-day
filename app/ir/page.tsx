@@ -31,7 +31,8 @@ import {
   Crown,
   Heart,
   CheckCircle2,
-  ArrowUpRight
+  ArrowUpRight,
+  Waves
 } from 'lucide-react'
 import Header from '@/components/header'
 import OptimizedImage from '@/components/optimized-image'
