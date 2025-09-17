@@ -71,6 +71,17 @@ const HeroSection = memo(function HeroSection({
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
 
+  // 이미지 프리로딩
+  useEffect(() => {
+    if (heroSlides && heroSlides.length > 0) {
+      heroSlides.forEach((slide) => {
+        const img = new Image()
+        img.src = slide.image
+        // 이미지를 미리 로드하여 캐시에 저장
+      })
+    }
+  }, [heroSlides])
+
   // 슬라이드 네비게이션 함수들
   const nextSlide = () => {
     const slidesLength = (heroSlides || []).length
@@ -115,11 +126,12 @@ const HeroSection = memo(function HeroSection({
     setTouchEnd(null)
   }
   return (
-    <section 
-      className="relative h-[65vh] sm:h-[45vh] md:h-[45vh] lg:h-[50vh] overflow-hidden touch-pan-y"
+    <section
+      className="relative h-[50vh] sm:h-[40vh] md:h-[35vh] lg:h-[40vh] overflow-hidden touch-pan-y bg-transparent"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      style={{ backgroundColor: 'transparent' }}
     >
       {/* 배경 이미지 슬라이더 */}
       <motion.div 
@@ -137,6 +149,7 @@ const HeroSection = memo(function HeroSection({
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
+              backgroundColor: 'transparent',
               filter: 'contrast(1.15) brightness(1.05) saturate(1.1)',
             }}
           >

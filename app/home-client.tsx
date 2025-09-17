@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { useHeroSlidePreloader } from '@/hooks/useHeroSlidePreloader'
 import { 
   CalendarDays, 
   MapPin, 
@@ -56,7 +57,31 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialData }: HomeClientProps) {
-  // const [currentSlide, setCurrentSlide] = useState(0) // 서버 컴포넌트로 이동
+  // 히어로 슬라이드 프리로더 사용 (어제 구현한 해결책)
+  const { heroSlides, isLoading: heroLoading, preloadedImages } = useHeroSlidePreloader()
+
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [currentEmotionalText, setCurrentEmotionalText] = useState(0)
+  const [textOpacity, setTextOpacity] = useState(1)
+
+  // 히어로 텍스트 데이터
+  const heroTexts = [
+    {
+      accent: "Premium Stay Experience",
+      main: "완벽한 하루를 위한 특별한 공간",
+      sub: "엄선된 숙소에서 만나는 프리미엄 휴식"
+    },
+    {
+      accent: "Curated Accommodations",
+      main: "당신만을 위한 맞춤 스테이",
+      sub: "취향과 목적에 따라 선별된 최고의 숙소"
+    },
+    {
+      accent: "Instant Booking",
+      main: "언제든 떠날 수 있는 자유",
+      sub: "간편한 예약으로 시작하는 완벽한 여행"
+    }
+  ]
   const [selectedCategory, setSelectedCategory] = useState('전체')
   const [viewMode, setViewMode] = useState('grid')
   const [searchQuery, setSearchQuery] = useState('')
