@@ -76,7 +76,7 @@ export default function HeroSection({ slides }: HeroSectionProps) {
     <div className="relative">
       {/* 완전 풀스크린 히어로 섹션 - 노치까지 확장 + 브레이크포인트별 높이 */}
       <section
-        className="relative bg-gray-900 min-h-[65vh] sm:min-h-[75vh] md:min-h-[85vh]"
+        className="relative bg-gray-900 min-h-[65vh] sm:min-h-[70vh] md:min-h-[65vh] lg:min-h-[70vh]"
       >
         <div className="absolute inset-0">
           {items.map((slide, index) => {

@@ -28,16 +28,22 @@ export default function HostLayout({
     }
 
     const checkAuth = () => {
-      // localStorage에서 Supabase 토큰 확인 + sessionStorage에서 호스트 데이터 확인
-      const supabaseToken = localStorage.getItem('sb-fcmauibvdqbocwhloqov-auth-token')
+      // localStorage에서 Supabase 토큰들을 동적으로 찾기
+      const supabaseKeys = Object.keys(localStorage).filter(key =>
+        key.includes('supabase') || key.includes('sb-fcmauibvdqbocwhloqov')
+      )
+
       const hostUserData = sessionStorage.getItem('hostUser')
-      
-      console.log('Layout 인증 체크:', { 
-        hasToken: !!supabaseToken, 
-        hasHostData: !!hostUserData 
+
+      console.log('Layout 인증 체크:', {
+        allSupabaseKeys: supabaseKeys,
+        hasHostData: !!hostUserData
       })
-      
-      if (!supabaseToken && !hostUserData) {
+
+      // Supabase 토큰이 하나라도 있거나 호스트 데이터가 있으면 인증된 것으로 간주
+      const hasAnySupabaseToken = supabaseKeys.length > 0
+
+      if (!hasAnySupabaseToken && !hostUserData) {
         console.log('Layout: 인증 정보 없음, 로그인 페이지로 이동')
         setIsAuthenticated(false)
         router.replace('/host/login')

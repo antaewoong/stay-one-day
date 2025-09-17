@@ -134,26 +134,25 @@ export default function SecureHostLoginPage() {
       sessionStorage.setItem('hostUser', JSON.stringify(hostUserData))
       console.log('💾 호스트 정보 저장 완료:', hostUserData)
       
-      // 로컬 스토리지 확인
+      // 로컬 스토리지 확인 - 동적으로 Supabase 키들 찾기
+      const supabaseKeys = Object.keys(localStorage).filter(key =>
+        key.includes('supabase') || key.includes('sb-fcmauibvdqbocwhloqov') || key.includes('sb-')
+      )
       console.log('📦 로컬 스토리지 확인:', {
-        supabaseAuth: localStorage.getItem('sb-fcmauibvdqbocwhloqov-auth-token'),
-        allKeys: Object.keys(localStorage).filter(key => key.includes('supabase') || key.includes('sb-'))
+        allSupabaseKeys: supabaseKeys,
+        keyCount: supabaseKeys.length
       })
       
       console.log('✅ 로그인 성공, 대시보드로 이동...')
-      
-      // 세션이 완전히 저장될 때까지 잠시 대기 후 강제 페이지 이동
+
+      // 즉시 router.push 시도
+      router.push('/host')
+
+      // 백업: 2초 후 강제 이동
       setTimeout(() => {
-        console.log('대시보드로 이동 중...')
-        // 1차: Next.js router 시도
-        router.push('/host')
-        
-        // 2차: 1초 후 강제 window.location 시도
-        setTimeout(() => {
-          console.log('강제 페이지 이동 시도...')
-          window.location.replace('/host')
-        }, 1000)
-      }, 1000)
+        console.log('백업 페이지 이동 시도...')
+        window.location.href = '/host'
+      }, 2000)
 
     } catch (error) {
       console.error('💥 로그인 처리 중 예외:', error)

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
 // 숙소 목록 조회 (GET)
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = createServiceRoleClient()
     
     // URL 쿼리 파라미터 파싱
     const { searchParams } = new URL(request.url)
@@ -21,19 +21,10 @@ export async function GET(request: NextRequest) {
     const amenities = searchParams.get('amenities')?.split(',')
     const rating = parseFloat(searchParams.get('rating') || '0')
 
-    // 기본 쿼리 구성 (편의시설 정보 포함)
+    // 기본 쿼리 구성
     let query = supabase
       .from('accommodations')
-      .select(`
-        *,
-        accommodation_amenities(
-          id,
-          amenity_type,
-          amenity_name,
-          is_available,
-          additional_info
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
     
     // 기본적으로 활성화된 숙소만 조회
@@ -107,7 +98,11 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('숙소 조회 실패:', error)
-      return NextResponse.json({ error: '숙소 조회에 실패했습니다.' }, { status: 500 })
+      console.error('Query details:', { status, collaborationOnly, limit, page })
+      return NextResponse.json({
+        error: '숙소 조회에 실패했습니다.',
+        debug: error.message
+      }, { status: 500 })
     }
 
     // cover_images 동적으로 생성 및 처리

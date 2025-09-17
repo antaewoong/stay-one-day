@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { useRouter } from 'next/navigation'
 import { useHeroSlidePreloader } from '@/hooks/useHeroSlidePreloader'
 import { 
   CalendarDays, 
@@ -57,6 +58,8 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialData }: HomeClientProps) {
+  const router = useRouter()
+
   // 히어로 슬라이드 프리로더 사용 (어제 구현한 해결책)
   const { heroSlides, isLoading: heroLoading, preloadedImages } = useHeroSlidePreloader()
 
@@ -812,8 +815,27 @@ export default function HomeClient({ initialData }: HomeClientProps) {
                   size="sm"
                   className="px-4"
                   onClick={() => {
-                    console.log('검색 실행:', { searchLocation, selectedDate, guestCount })
+                    // 검색 파라미터 구성
+                    const searchParams = new URLSearchParams()
+
+                    if (searchLocation && searchLocation.trim()) {
+                      searchParams.set('location', searchLocation.trim())
+                    }
+
+                    if (selectedDate) {
+                      searchParams.set('date', selectedDate.toISOString().split('T')[0])
+                    }
+
+                    if (guestCount > 0) {
+                      searchParams.set('guests', guestCount.toString())
+                    }
+
+                    // 검색 결과 페이지로 이동
+                    const searchUrl = `/spaces${searchParams.toString() ? '?' + searchParams.toString() : ''}`
+                    console.log('검색 실행:', { searchLocation, selectedDate, guestCount, searchUrl })
+
                     setShowSearchModal(false)
+                    router.push(searchUrl)
                   }}
                 >
                   검색
