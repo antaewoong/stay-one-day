@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>누크랩스 생태계</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 50px;
+            background: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 1000px;
+            height: 700px;
+            margin: 0 auto;
+            position: relative;
+            background: white;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 50px;
+            color: #333;
+        }
+
+        .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #4A90E2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .box {
+            position: absolute;
+            width: 140px;
+            height: 80px;
+            border: 2px solid #666;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .box-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .box-desc {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .youtube { top: 50px; left: 50px; border-color: #E74C3C; }
+        .wellswap { top: 50px; right: 50px; border-color: #9B59B6; }
+        .stay { bottom: 100px; left: 50px; border-color: #3498DB; }
+        .trading { bottom: 100px; right: 50px; border-color: #27AE60; }
+
+        .arrow {
+            position: absolute;
+            width: 2px;
+            background: #999;
+            transform-origin: bottom;
+        }
+
+        .arrow::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -4px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 10px solid #999;
+        }
+
+        .arrow1 { bottom: 420px; left: 380px; height: 120px; transform: rotate(-35deg); }
+        .arrow2 { bottom: 420px; right: 380px; height: 120px; transform: rotate(35deg); }
+        .arrow3 { bottom: 200px; left: 380px; height: 120px; transform: rotate(35deg); }
+        .arrow4 { bottom: 200px; right: 380px; height: 120px; transform: rotate(-35deg); }
+
+        .customer-flow {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 12px;
+        }
+
+        .flow-step {
+            background: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .flow-arrow {
+            font-size: 16px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">누크랩스 플랫폼 생태계 - 고소득 자산가 타겟</div>
+
+        <div class="center">
+            누크랩스<br>
+            <small style="font-size: 12px;">통합 허브</small>
+        </div>
+
+        <div class="box youtube">
+            <div class="box-title">YouTube 채널</div>
+            <div class="box-desc">글로벌 금융 정보<br>니즈 파악</div>
+        </div>
+
+        <div class="box wellswap">
+            <div class="box-title">Wellswap</div>
+            <div class="box-desc">연금보험 양도거래<br>컨시어지 서비스</div>
+        </div>
+
+        <div class="box stay">
+            <div class="box-title">Stay OneDay</div>
+            <div class="box-desc">프리미엄 숙박<br>풀빌라/럭셔리</div>
+        </div>
+
+        <div class="box trading">
+            <div class="box-title">AI Trading</div>
+            <div class="box-desc">머신러닝 알고리즘<br>자동 암호화폐 거래</div>
+        </div>
+
+        <div class="arrow arrow1"></div>
+        <div class="arrow arrow2"></div>
+        <div class="arrow arrow3"></div>
+        <div class="arrow arrow4"></div>
+
+        <div class="customer-flow">
+            <div class="flow-step">1단계<br>금융정보</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">2단계<br>연금거래</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">3단계<br>암호화폐</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">4단계<br>프리미엄 숙박</div>
+        </div>
+    </div>
+</body>
+</html>

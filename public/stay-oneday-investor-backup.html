@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>누크랩스 - 투자자 프레젠테이션</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy: #0B1A34;
+            --navy-light: #1A2B4D;
+            --mint: #00D4B3;
+            --mint-light: #33DFC8;
+            --mint-dark: #00A892;
+            --gold: #C7A756;
+            --gold-light: #D4B869;
+            --white: #FFFFFF;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+
+            --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            --font-body: 'SF Pro Text', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            --space-3xl: 4rem;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-2xl: 32px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1a202c;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+            touch-action: pan-x pan-y;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 25% 25%, rgba(0, 212, 179, 0.03) 0%, transparent 60%),
+                radial-gradient(circle at 75% 75%, rgba(199, 167, 86, 0.02) 0%, transparent 60%),
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            animation: ambientGlow 20s ease-in-out infinite;
+        }
+
+        @keyframes ambientGlow {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                filter: blur(0px);
+            }
+            33% {
+                opacity: 0.9;
+                transform: scale(1.02) rotate(0.3deg);
+                filter: blur(0.5px);
+            }
+            66% {
+                opacity: 0.85;
+                transform: scale(1.05) rotate(-0.2deg);
+                filter: blur(1px);
+            }
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            padding: 4rem 6rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform: translateX(100px);
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .slide h1 {
+            font-family: var(--font-display);
+            font-size: clamp(3.5rem, 8vw, 6rem);
+            font-weight: 700;
+            line-height: 0.9;
+            text-align: left;
+            margin-bottom: 3rem;
+            color: #1e40af;
+            margin-top: 2rem;
+        }
+
+        .slide h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            font-weight: 600;
+            line-height: 1.1;
+            text-align: left;
+            margin-bottom: 2rem;
+            color: #1e40af;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 1rem;
+        }
+
+        .slide h3 {
+            font-family: var(--font-display);
+            font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+            font-weight: 500;
+            line-height: 1.2;
+            text-align: left;
+            margin-bottom: 1.5rem;
+            color: #059669;
+        }
+
+        .slide p {
+            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            line-height: 1.6;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--space-lg);
+            color: #374151;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% {
+                filter: drop-shadow(0 0 10px rgba(0, 212, 179, 0.3));
+            }
+            50% {
+                filter: drop-shadow(0 0 20px rgba(0, 212, 179, 0.5)) drop-shadow(0 0 30px rgba(199, 167, 86, 0.3));
+            }
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: end;
+            justify-content: space-around;
+            height: 300px;
+            padding: 0 1rem;
+            margin-top: 1rem;
+        }
+
+        .bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            margin: 0 0.5rem;
+        }
+
+        .bar {
+            width: 40px;
+            background: linear-gradient(to top, var(--mint), var(--mint-light));
+            border-radius: 4px 4px 0 0;
+            margin-bottom: 0.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .bar:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--white);
+            white-space: nowrap;
+        }
+
+        .bar-label {
+            font-size: 0.9rem;
+            text-align: center;
+            color: var(--white);
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+
+        .line-chart {
+            position: relative;
+            height: 300px;
+            margin: 2rem 0;
+        }
+
+        .line-chart svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .growth-trend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .trend-item {
+            background: linear-gradient(135deg, rgba(0, 212, 179, 0.1), rgba(199, 167, 86, 0.1));
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .trend-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--mint-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .trend-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .pie-chart {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .pie-slice {
+            stroke: var(--bg-primary);
+            stroke-width: 2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pie-slice:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .market-comparison {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .comparison-item {
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .comparison-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: var(--bg-primary);
+        }
+
+        .competitor-1 { background: var(--mint); }
+        .competitor-2 { background: var(--gold); }
+        .competitor-3 { background: rgba(255, 255, 255, 0.7); }
+        .stay-oneday { background: linear-gradient(135deg, var(--mint), var(--gold)); }
+
+        /* Navigation */
+        .nav-controls {
+            position: fixed;
+            bottom: var(--space-xl);
+            right: var(--space-xl);
+            display: flex;
+            gap: var(--space-sm);
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 212, 179, 0.2);
+            border-color: var(--mint);
+            transform: translateY(-2px);
+        }
+
+        /* Slide counter */
+        .slide-counter {
+            position: fixed;
+            bottom: var(--space-xl);
+            left: var(--space-xl);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-xl);
+            font-size: 0.9rem;
+            color: var(--mint-light);
+            z-index: 100;
+        }
+
+        /* Content layouts */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-xl);
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--mint);
+            box-shadow: 0 20px 40px rgba(0, 212, 179, 0.1);
+        }
+
+        .platform-card {
+            background: linear-gradient(135deg, rgba(0, 212, 179, 0.1) 0%, rgba(199, 167, 86, 0.1) 100%);
+            border: 1px solid rgba(0, 212, 179, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            margin: var(--space-md);
+            transition: all 0.3s ease;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 212, 179, 0.2);
+            border-color: var(--mint);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-xl);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .team-member {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            transition: all 0.3s ease;
+        }
+
+        .team-member:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--mint);
+        }
+
+        .team-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto var(--space-md);
+            border: 3px solid var(--mint);
+            transition: all 0.3s ease;
+        }
+
+        .team-member:hover .team-photo {
+            transform: scale(1.1);
+            border-color: var(--gold);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--space-lg);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: var(--space-lg);
+            background: rgba(0, 212, 179, 0.1);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(0, 212, 179, 0.3);
+        }
+
+        .metric-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--mint);
+            margin-bottom: var(--space-sm);
+        }
+
+        .metric-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            color: var(--white);
+        }
+
+        .financial-table {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .financial-table th,
+        .financial-table td {
+            padding: var(--space-md);
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .financial-table th {
+            background: rgba(0, 212, 179, 0.2);
+            color: var(--mint-light);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .financial-table td {
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        .financial-table .year-header {
+            background: rgba(199, 167, 86, 0.2);
+            color: var(--gold-light);
+            font-weight: 600;
+        }
+
+        .financial-table .total-row {
+            background: rgba(0, 212, 179, 0.15);
+            font-weight: 700;
+            color: var(--mint);
+        }
+
+        .financial-table .platform-row {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .chart-container {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-xl);
+            max-width: 1000px;
+            margin: var(--space-xl) auto 0;
+        }
+
+        .chart-item {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .chart-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--mint);
+            margin-bottom: var(--space-sm);
+        }
+
+        .chart-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .slide {
+                padding: var(--space-xl) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+            }
+
+            .slide h1 {
+                font-size: 2.2rem !important;
+                line-height: 0.9 !important;
+                margin-bottom: var(--space-lg) !important;
+            }
+
+            .slide h2 {
+                font-size: 1.6rem !important;
+                margin-bottom: var(--space-md) !important;
+            }
+
+            .slide h3 {
+                font-size: 1.3rem !important;
+                margin-bottom: var(--space-sm) !important;
+            }
+
+            .slide p {
+                font-size: 1rem !important;
+                line-height: 1.5 !important;
+                margin-bottom: var(--space-md) !important;
+            }
+
+            .content-grid,
+            .team-grid {
+                grid-template-columns: 1fr !important;
+                gap: var(--space-md) !important;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: var(--space-sm) !important;
+            }
+
+            .platform-card {
+                padding: var(--space-lg) !important;
+                margin: var(--space-sm) !important;
+            }
+
+            .nav-controls {
+                bottom: var(--space-md) !important;
+                right: var(--space-md) !important;
+            }
+
+            .slide-counter {
+                bottom: var(--space-md) !important;
+                left: var(--space-md) !important;
+            }
+
+            .financial-table {
+                font-size: 0.8rem !important;
+            }
+
+            .financial-table th,
+            .financial-table td {
+                padding: var(--space-sm) !important;
+            }
+
+            .chart-container {
+                flex-direction: column !important;
+                gap: var(--space-md) !important;
+            }
+
+            .chart-value {
+                font-size: 1.4rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <h1>누크랩스</h1>
+            <h2>안정적인 플랫폼 비즈니스로의 전환</h2>
+            <p>블록체인 컨설팅에서 지속가능한 플랫폼 수익 모델로</p>
+            <p style="margin-top: 2rem; opacity: 0.7; font-size: 1.1rem;">
+                한국 🇰🇷 홍콩 🇭🇰 인도네시아 🇮🇩
+            </p>
+        </div>
+
+        <!-- Slide 2: 목차 -->
+        <div class="slide">
+            <h2>목차</h2>
+            <div style="max-width: 800px; text-align: left;">
+                <div class="toc-section">
+                    <h3 style="color: var(--mint); margin-bottom: 1rem;">1. 회사 개요</h3>
+                    <p style="margin-left: 1rem; margin-bottom: 0.5rem;">• 누크랩스 소개</p>
+                    <p style="margin-left: 1rem; margin-bottom: 0.5rem;">• 사업 전환 배경</p>
+                    <p style="margin-left: 1rem; margin-bottom: 1.5rem;">• 글로벌 인프라 현황</p>
+                </div>
+                <div class="toc-section">
+                    <h3 style="color: var(--mint); margin-bottom: 1rem;">2. 시장 분석</h3>
+                    <p style="margin-left: 1rem; margin-bottom: 0.5rem;">• 숙박 중개 시장 현황</p>
+                    <p style="margin-left: 1rem; margin-bottom: 0.5rem;">• 경쟁 환경 분석</p>
+                    <p style="margin-left: 1rem; margin-bottom: 1.5rem;">• 시장 기회</p>
+                </div>
+                <div class="toc-section">
+                    <h3 style="color: var(--mint); margin-bottom: 1rem;">3. 사업 모델 및 플랫폼</h3>
+                    <p style="margin-left: 1rem; margin-bottom: 0.5rem;">• 4개 플랫폼 전략</p>
+                    <p style="margin-left: 1rem; margin-bottom: 0.5rem;">• Stay OneDay 플랫폼</p>
+                    <p style="margin-left: 1rem; margin-bottom: 0.5rem;">• Wellswap 플랫폼</p>
+                    <p style="margin-left: 1rem; margin-bottom: 1.5rem;">• 기타 수익 모델</p>
+                </div>
+                <div class="toc-section">
+                    <h3 style="color: var(--mint); margin-bottom: 1rem;">4. 재무 계획 및 투자 제안</h3>
+                    <p style="margin-left: 1rem; margin-bottom: 0.5rem;">• 5개년 재무 전망</p>
+                    <p style="margin-left: 1rem; margin-bottom: 0.5rem;">• 투자 계획</p>
+                    <p style="margin-left: 1rem; margin-bottom: 1.5rem;">• 팀 소개</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: 회사 개요 -->
+        <div class="slide">
+            <h2>1. 회사 개요</h2>
+            <div style="background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); color: white; padding: 3rem; border-radius: 20px; max-width: 1000px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+                    <div>
+                        <h3 style="font-size: 2rem; margin-bottom: 1.5rem;">누크랩스 (NUKLABS Co., Ltd.)</h3>
+                        <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 2rem;">글로벌 플랫폼 비즈니스를 통해 지속가능한 수익 창출을 목표로 하는 종합 테크놀로지 기업</p>
+                        <div class="company-stats">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+                                <span>설립연도</span>
+                                <span style="color: var(--mint); font-weight: 600;">2021년</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+                                <span>본사 위치</span>
+                                <span style="color: var(--mint); font-weight: 600;">대한민국 서울특별시</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+                                <span>해외 법인</span>
+                                <span style="color: var(--mint); font-weight: 600;">홍콩, 인도네시아</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+                                <span>사업 분야</span>
+                                <span style="color: var(--mint); font-weight: 600;">플랫폼 운영 및 개발</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 15px; backdrop-filter: blur(10px);">
+                            <h4 style="margin-bottom: 1.5rem; color: var(--mint); font-weight: 600;">핵심 사업 영역</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div style="padding: 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;">
+                                    <div style="font-weight: 600; color: var(--mint); margin-bottom: 0.5rem;">숙박 중개</div>
+                                    <div style="font-size: 0.85rem; opacity: 0.8;">Stay OneDay</div>
+                                </div>
+                                <div style="padding: 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;">
+                                    <div style="font-weight: 600; color: var(--mint); margin-bottom: 0.5rem;">자산 거래</div>
+                                    <div style="font-size: 0.85rem; opacity: 0.8;">Wellswap</div>
+                                </div>
+                                <div style="padding: 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;">
+                                    <div style="font-weight: 600; color: var(--mint); margin-bottom: 0.5rem;">미디어 콘텐츠</div>
+                                    <div style="font-size: 0.85rem; opacity: 0.8;">YouTube</div>
+                                </div>
+                                <div style="padding: 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;">
+                                    <div style="font-weight: 600; color: var(--mint); margin-bottom: 0.5rem;">트레이딩</div>
+                                    <div style="font-size: 0.85rem; opacity: 0.8;">Algorithm</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Business Evolution -->
+        <div class="slide">
+            <h2>사업 전환 배경 및 전략적 방향</h2>
+            <div style="max-width: 900px; text-align: left;">
+                <div style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(255, 59, 48, 0.1); border-left: 4px solid #ff3b30; border-radius: 8px;">
+                    <h3 style="color: #ff6b6b; margin-bottom: 1rem;">기존 블록체인 컨설팅 한계</h3>
+                    <p>• 규제 불확실성으로 인한 프로젝트 중단</p>
+                    <p>• 클라이언트 결제 지연 및 미수금 발생</p>
+                    <p>• 시장 변동성에 따른 수익 불안정성</p>
+                </div>
+
+                <div style="padding: 1.5rem; background: rgba(0, 212, 179, 0.1); border-left: 4px solid var(--mint); border-radius: 8px;">
+                    <h3 style="color: var(--mint); margin-bottom: 1rem;">안정적인 플랫폼 비즈니스로 전환</h3>
+                    <p>• 완성된 플랫폼을 통한 지속적인 수익 창출</p>
+                    <p>• 글로벌 시장 진출을 위한 인프라 구축 완료</p>
+                    <p>• 마케팅 및 홍보 전략을 통한 사용자 확보</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: 4 Platform Strategy -->
+        <div class="slide">
+            <h2>멀티 플랫폼 포트폴리오 전략</h2>
+            <div style="max-width: 1100px;">
+                <div style="margin-bottom: 2rem; text-align: center;">
+                    <p style="font-size: 1.1rem; color: var(--gray-800);">
+                        리스크 분산과 시너지 효과를 통한 안정적인 수익 구조 확립
+                    </p>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="platform-card" style="border: 2px solid var(--mint); padding: 2rem;">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="width: 12px; height: 12px; background: var(--mint); border-radius: 50%; margin-right: 1rem;"></div>
+                            <h3 style="color: var(--navy); font-size: 1.3rem; margin: 0;">Stay OneDay</h3>
+                        </div>
+                        <p style="font-weight: 600; color: var(--gray-800); margin-bottom: 0.5rem;">프리미엄 숙박 중개 플랫폼</p>
+                        <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 1rem;">상용화 완료, 월 수익 창출 중</p>
+                        <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 활성 호스트 30+</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 월 평균 거래액 500만원</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 플랫폼 수수료 5%</p>
+                        </div>
+                    </div>
+                    <div class="platform-card" style="border: 2px solid var(--gold); padding: 2rem;">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="width: 12px; height: 12px; background: var(--gold); border-radius: 50%; margin-right: 1rem;"></div>
+                            <h3 style="color: var(--navy); font-size: 1.3rem; margin: 0;">Wellswap</h3>
+                        </div>
+                        <p style="font-weight: 600; color: var(--gray-800); margin-bottom: 0.5rem;">AI 기반 자산 거래 플랫폼</p>
+                        <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 1rem;">베타 테스트 완료, 출시 준비</p>
+                        <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• AI 알고리즘 기반 매칭</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 수수료 기반 수익 모델</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 글로벌 시장 진출 예정</p>
+                        </div>
+                    </div>
+                    <div class="platform-card" style="border: 2px solid #FF6B6B; padding: 2rem;">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="width: 12px; height: 12px; background: #FF6B6B; border-radius: 50%; margin-right: 1rem;"></div>
+                            <h3 style="color: var(--navy); font-size: 1.3rem; margin: 0;">YouTube 채널</h3>
+                        </div>
+                        <p style="font-weight: 600; color: var(--gray-800); margin-bottom: 0.5rem;">홍투사 미디어 콘텐츠</p>
+                        <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 1rem;">수익화 진행 중, 구독자 증가</p>
+                        <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 투자 관련 콘텐츠</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 광고 및 협찬 수익</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 브랜드 인지도 향상</p>
+                        </div>
+                    </div>
+                    <div class="platform-card" style="border: 2px solid #4ECDC4; padding: 2rem;">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="width: 12px; height: 12px; background: #4ECDC4; border-radius: 50%; margin-right: 1rem;"></div>
+                            <h3 style="color: var(--navy); font-size: 1.3rem; margin: 0;">Algorithm Trading</h3>
+                        </div>
+                        <p style="font-weight: 600; color: var(--gray-800); margin-bottom: 0.5rem;">자동화 트레이딩 시스템</p>
+                        <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 1rem;">개발 완료, 운영 테스트 중</p>
+                        <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 자동화된 거래 실행</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 리스크 관리 시스템</p>
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--gray-700);">• 안정적인 수익 창출</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Stay OneDay Platform -->
+        <div class="slide">
+            <h2>Stay OneDay 플랫폼</h2>
+            <div style="max-width: 1000px;">
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-number">30+</div>
+                        <div class="metric-label">활성 호스트</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number">50만원</div>
+                        <div class="metric-label">평균 세션 가격</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number">10</div>
+                        <div class="metric-label">월 평균 세션</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number">5%</div>
+                        <div class="metric-label">플랫폼 수수료</div>
+                    </div>
+                </div>
+                <div style="margin-top: 2rem; text-align: center;">
+                    <p>완성된 숙박 중개 플랫폼으로 즉시 수익 창출 가능</p>
+                    <p style="font-size: 1.2rem; color: var(--mint); margin-top: 1rem;">
+                        월 예상 수익: <strong>750만원</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Wellswap Technology -->
+        <!-- Slide 6: Wellswap Market Analysis -->
+        <div class="slide">
+            <h2>자산 거래 플랫폼 시장 현황</h2>
+            <h3>P2P 자산거래 시장 규모</h3>
+            <div class="content-grid">
+                <div class="content-card">
+                    <h3>글로벌 P2P 거래 플랫폼</h3>
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--mint-light); margin: 1rem 0;">$3.1억 (2025년)</div>
+                    <p>연평균 성장률 12%로 꾸준한 확장</p>
+                </div>
+                <div class="content-card">
+                    <h3>디지털 자산 거래 플랫폼</h3>
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--gold-light); margin: 1rem 0;">$12억 → $65억</div>
+                    <p>2024년 → 2032년 전망</p>
+                </div>
+            </div>
+            <div style="margin-top: 2rem; text-align: center;">
+                <p style="font-size: 1.2rem; opacity: 0.8;">AI 기반 매칭 서비스와 실시간 리스크 분석 중심으로 시장 확산</p>
+            </div>
+        </div>
+
+        <!-- Slide 7: Wellswap Technology Stack -->
+        <div class="slide">
+            <h2>Wellswap 핵심 기술</h2>
+            <div class="content-grid">
+                <div class="content-card">
+                    <h3>AI 기반 가치 평가</h3>
+                    <p>머신러닝 알고리즘을 통한 정확한 자산 가치 산정</p>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>실시간 시장 데이터 분석</li>
+                        <li>과거 거래 패턴 학습</li>
+                        <li>리스크 점수 자동 생성</li>
+                    </ul>
+                </div>
+                <div class="content-card">
+                    <h3>블록체인 거래 시스템</h3>
+                    <p>안전하고 투명한 거래 보장</p>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>스마트 컨트랙트 기반</li>
+                        <li>탈중앙화 에스크로</li>
+                        <li>거래 기록 불변성</li>
+                    </ul>
+                </div>
+                <div class="content-card">
+                    <h3>OCR 문서 인식</h3>
+                    <p>자동 데이터 추출 및 검증</p>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>다국어 문서 처리</li>
+                        <li>실시간 진위성 검증</li>
+                        <li>자동 분류 시스템</li>
+                    </ul>
+                </div>
+                <div class="content-card">
+                    <h3>다국어 지원 시스템</h3>
+                    <p>글로벌 사용자 접근성 확대</p>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>실시간 자동 번역</li>
+                        <li>현지화된 UI/UX</li>
+                        <li>지역별 결제 연동</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Wellswap Target Markets -->
+        <div class="slide">
+            <h2>Wellswap 타겟 시장</h2>
+            <h3>홍콩 저축성 보험 시장</h3>
+            <div class="content-grid">
+                <div class="content-card">
+                    <h3>시장 규모</h3>
+                    <div style="font-size: 1.8rem; font-weight: bold; color: var(--mint-light); margin: 1rem 0;">$803억 (2025년)</div>
+                    <p>연평균 성장률 6.8%, 2032년 $1,200억 전망</p>
+                </div>
+                <div class="content-card">
+                    <h3>외국인 가입 비중</h3>
+                    <div style="font-size: 1.8rem; font-weight: bold; color: var(--gold-light); margin: 1rem 0;">10-15%</div>
+                    <p>한국·일본인 중심의 해외 직접구매 수요</p>
+                </div>
+            </div>
+            <div class="market-details" style="margin-top: 2rem; background: rgba(0, 212, 179, 0.1); padding: 2rem; border-radius: 15px;">
+                <h4 style="margin-bottom: 1rem; color: var(--mint-light);">시장 특성</h4>
+                <ul style="text-align: left; line-height: 1.8;">
+                    <li>전체 보험료의 72.3%가 생명·저축성 보험</li>
+                    <li>한국인 연간 3,000건 이상 해외 직접구매</li>
+                    <li>다국어 지원이 시장 진입장벽 해소의 핵심</li>
+                    <li>USDT 등 암호화폐 결제 수요 증가</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 9: YouTube Marketing Ecosystem -->
+        <div class="slide">
+            <h2>YouTube 콘텐츠 마케팅 시장</h2>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--mint-light);">글로벌 YouTube 광고 시장 규모</h3>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar" style="height: 120px; background: linear-gradient(to top, #ff6b6b, #ff8a80);">
+                            <div class="bar-value">280억</div>
+                        </div>
+                        <div class="bar-label">2023년</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 160px; background: linear-gradient(to top, #ff6b6b, #ff8a80);">
+                            <div class="bar-value">320억</div>
+                        </div>
+                        <div class="bar-label">2024년</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 200px; background: linear-gradient(to top, var(--gold), var(--gold-light));">
+                            <div class="bar-value">380억</div>
+                        </div>
+                        <div class="bar-label">2025년</div>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                    단위: 달러, 국내 투자 재테크 채널 급성장 중
+                </p>
+            </div>
+
+            <div class="growth-trend">
+                <div class="trend-item">
+                    <div class="trend-value">13.6조원</div>
+                    <div class="trend-label">인플루언서 마케팅 시장</div>
+                </div>
+                <div class="trend-item">
+                    <div class="trend-value">CAGR 25%</div>
+                    <div class="trend-label">연평균 성장률</div>
+                </div>
+                <div class="trend-item">
+                    <div class="trend-value">70%</div>
+                    <div class="trend-label">광고 매출 비중</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: YouTube Integration Strategy -->
+        <div class="slide">
+            <h2>YouTube × Wellswap 연계 전략</h2>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--mint-light);">통합 마케팅 생태계</h3>
+                <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 2rem; align-items: center;">
+                    <div class="trend-item" style="background: rgba(255, 107, 107, 0.1); border: 2px solid #ff6b6b;">
+                        <h4 style="color: #ff6b6b; margin-bottom: 1rem;">YouTube 채널</h4>
+                        <ul style="text-align: left; font-size: 0.9rem;">
+                            <li>자체 영상 제작</li>
+                            <li>타겟 광고 운영</li>
+                            <li>콘텐츠 기획~편집</li>
+                            <li>수요 창출</li>
+                        </ul>
+                    </div>
+
+                    <div style="font-size: 2rem; color: var(--mint);">⇄</div>
+
+                    <div class="trend-item" style="background: rgba(0, 212, 179, 0.1); border: 2px solid var(--mint);">
+                        <h4 style="color: var(--mint); margin-bottom: 1rem;">Wellswap 플랫폼</h4>
+                        <ul style="text-align: left; font-size: 0.9rem;">
+                            <li>보험 직구 컨시어지</li>
+                            <li>맞춤형 상담</li>
+                            <li>계약~사후관리</li>
+                            <li>수익 창출</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--gold-light);">현재 운영 성과</h3>
+                <div class="market-comparison">
+                    <div class="comparison-item">
+                        <div class="comparison-circle" style="background: var(--mint); font-size: 1.2rem;">
+                            <span style="color: white;">월 2-3명</span>
+                        </div>
+                        <div style="margin-top: 0.5rem;">직구 가입자</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="comparison-circle" style="background: var(--gold); font-size: 1rem;">
+                            <span style="color: white;">700-1000만원</span>
+                        </div>
+                        <div style="margin-top: 0.5rem;">건당 매출</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="comparison-circle" style="background: linear-gradient(135deg, var(--mint), var(--gold)); font-size: 1.2rem;">
+                            <span style="color: white;">100%</span>
+                        </div>
+                        <div style="margin-top: 0.5rem;">순수익률</div>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; font-size: 1rem; opacity: 0.8;">
+                    외주 없이 자체 운영으로 순수익 = 매출
+                </p>
+            </div>
+
+            <div style="background: rgba(199, 167, 86, 0.1); padding: 2rem; border-radius: 15px; margin-top: 2rem;">
+                <h4 style="color: var(--gold-light); margin-bottom: 1rem; text-align: center;">핵심 경쟁우위</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h5 style="color: var(--mint); margin-bottom: 0.5rem;">자체 운영 역량</h5>
+                        <ul style="font-size: 0.9rem; line-height: 1.6;">
+                            <li>기획→촬영→편집→배포 전과정</li>
+                            <li>마케팅 대행사 없이 직접 운영</li>
+                            <li>타겟 광고 및 디멘드젠 운영</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 style="color: var(--mint); margin-bottom: 0.5rem;">통합 서비스</h5>
+                        <ul style="font-size: 0.9rem; line-height: 1.6;">
+                            <li>콘텐츠→상담→계약 원스톱</li>
+                            <li>글로벌 보험상품 전문성</li>
+                            <li>USDT 결제 등 핀테크 연계</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: CEO Profile -->
+        <div class="slide">
+            <h2>CEO 프로필</h2>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 3rem; align-items: start;">
+                <div style="text-align: center;">
+                    <img src="/images/team/안태웅.jpg" alt="안태웅" style="width: 250px; height: 250px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.5rem; margin: 0.5rem 0;">안태웅</h3>
+                    <p style="color: #059669; font-weight: bold; font-size: 1.2rem;">CEO & Founder</p>
+                </div>
+                <div>
+                    <h3 style="color: #1e40af;">학력</h3>
+                    <ul style="margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.8; color: #374151;">
+                        <li>청주대학교 경영학과 졸업</li>
+                        <li>동국대학교 경영학 석사</li>
+                    </ul>
+
+                    <h3 style="color: #1e40af;">주요 경력</h3>
+                    <ul style="margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.8; color: #374151;">
+                        <li><strong>2018-2019</strong> - 주식회사 케이스타그룹 마케팅 전략본부 이사</li>
+                        <li style="font-size: 0.95rem; opacity: 0.8; margin-left: 1rem;">- 그룹사 마케팅 전략 수립 및 기획 업무 총괄</li>
+                        <li><strong>2020</strong> - 주식회사 아이스엔브이 마케팅 이사</li>
+                        <li style="font-size: 0.95rem; opacity: 0.8; margin-left: 1rem;">- O2O 서비스 물반고기반 마케팅 업무 담당</li>
+                        <li><strong>2020-2022</strong> - 주식회사 비트온큐브 대표이사</li>
+                        <li style="font-size: 0.95rem; opacity: 0.8; margin-left: 1rem;">- 블록체인 및 웹서비스 기획 및 마케팅 사업운영</li>
+                        <li><strong>2022-2025</strong> - 주식회사 누크랩스 대표이사</li>
+                        <li style="font-size: 0.95rem; opacity: 0.8; margin-left: 1rem;">- 유투브 마케팅, 병원관리 MSO 및 다수 웹서비스 기획 및 운영</li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Team Overview -->
+        <div class="slide">
+            <h2>핵심 인력</h2>
+            <div class="team-grid">
+                <div class="team-member">
+                    <img src="/images/team/안태웅.jpg" alt="안태웅" class="team-photo">
+                    <h3>안태웅</h3>
+                    <p>CEO</p>
+                    <div style="font-size: 0.85rem; line-height: 1.4; margin-top: 0.5rem;">
+                        <p style="margin: 0.2rem 0; font-weight: 600;">청주대학교 경영학과 졸업</p>
+                        <p style="margin: 0.2rem 0; font-weight: 600;">동국대학교 경영학 석사</p>
+                        <p style="margin: 0.2rem 0;">주식회사 케이스타그룹 마케팅 전략본부 이사 2018-2019</p>
+                        <p style="margin: 0.2rem 0; font-size: 0.8rem; opacity: 0.8;">- 그룹사 마케팅 전략 수립 및 기획 업무 총괄</p>
+                        <p style="margin: 0.2rem 0;">주식회사 아이스엔브이 마케팅 이사 2020</p>
+                        <p style="margin: 0.2rem 0; font-size: 0.8rem; opacity: 0.8;">- O2O 서비스 물반고기반 마케팅 업무 담당</p>
+                        <p style="margin: 0.2rem 0;">주식회사 비트온큐브 대표이사 2020-2022</p>
+                        <p style="margin: 0.2rem 0; font-size: 0.8rem; opacity: 0.8;">- 블록체인 및 웹서비스 기획 및 마케팅 사업운영</p>
+                        <p style="margin: 0.2rem 0;">주식회사 누크랩스 대표이사 2022-2025</p>
+                        <p style="margin: 0.2rem 0; font-size: 0.8rem; opacity: 0.8;">- 유투브 마케팅, 병원관리 MSO 및 다수 웹서비스 기획 및 운영</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <img src="/images/team/안태진.jpg" alt="안태진" class="team-photo">
+                    <h3>안태진</h3>
+                    <p>누크랩스 부설연구소 소장 & 법무팀장</p>
+                    <div style="font-size: 0.85rem; line-height: 1.4; margin-top: 0.5rem;">
+                        <p style="margin: 0.2rem 0; font-weight: 600;">연세대학교 신학과 졸업</p>
+                        <p style="margin: 0.2rem 0; font-weight: 600;">연세대학교 조직 문화 신학 석사</p>
+                        <p style="margin: 0.2rem 0; font-weight: 600;">한동대학교 국제법률대학원 법학석사</p>
+                        <p style="margin: 0.2rem 0; font-weight: 600;">Regent University School of Law LL.M</p>
+                        <p style="margin: 0.2rem 0;">주식회사 비트온큐브 법무팀</p>
+                        <p style="margin: 0.2rem 0;">주식회사 누크랩스 법무팀장</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <img src="/images/team/박재우.jpg" alt="박재우" class="team-photo">
+                    <h3>박재우</h3>
+                    <p>누크랩스 기획팀 홍투사 마케팅</p>
+                    <div style="font-size: 0.85rem; line-height: 1.4; margin-top: 0.5rem;">
+                        <p style="margin: 0.2rem 0; font-weight: 600;">동국대학교 영어통번역학과 졸업</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <img src="/images/team/최승우.jpg" alt="최승우" class="team-photo">
+                    <h3>최승우</h3>
+                    <p>누크랩스 기획팀 구공스테이 관리 & 청소 담당</p>
+                    <div style="font-size: 0.85rem; line-height: 1.4; margin-top: 0.5rem;">
+                        <p style="margin: 0.2rem 0; font-weight: 600;">청주대학교 경영학과 졸업</p>
+                        <p style="margin: 0.2rem 0;">주식회사 비트온큐브 블록체인팀</p>
+                        <p style="margin: 0.2rem 0;">주식회사 누크랩스 블록체인 기획팀</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <img src="/images/team/이지응.jpg" alt="이지응" class="team-photo">
+                    <h3>이지응</h3>
+                    <p>누크랩스 부설연구소 연구원 & 기획팀 팀장</p>
+                    <div style="font-size: 0.85rem; line-height: 1.4; margin-top: 0.5rem;">
+                        <p style="margin: 0.2rem 0; font-weight: 600;">동국대학교 광고홍보학과 졸업</p>
+                        <p style="margin: 0.2rem 0; font-weight: 600;">동국대학교 경영학 석사</p>
+                        <p style="margin: 0.2rem 0;">주식회사 컨텐츠큐브 BD팀 2016-2020</p>
+                        <p style="margin: 0.2rem 0;">주식회사 바른컴퍼니 신사업팀 2020-2021</p>
+                        <p style="margin: 0.2rem 0;">주식회사 로프앤컴퍼니 기획팀 2022</p>
+                        <p style="margin: 0.2rem 0;">주식회사 누크랩스 기획팀 2022-</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <img src="/images/team/한은지.jpg" alt="한은지" class="team-photo">
+                    <h3>한은지</h3>
+                    <p>법무팀 미국변호사</p>
+                    <div style="font-size: 0.85rem; line-height: 1.4; margin-top: 0.5rem;">
+                        <p style="margin: 0.2rem 0; font-weight: 600;">한동대학교 법학과 졸업</p>
+                        <p style="margin: 0.2rem 0; font-weight: 600;">한동대학교 국제법률대학원 법학석사</p>
+                        <p style="margin: 0.2rem 0; font-weight: 600;">Regent University School of Law LL.M</p>
+                        <p style="margin: 0.2rem 0;">미국 워싱턴 DC 변호사</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Patents & IP -->
+        <div class="slide">
+            <h2>특허 및 지적재산권</h2>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 2rem; color: #059669;">보유 특허 현황</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+                    <div style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 2rem; border-radius: 15px; text-align: center;">
+                        <h3 style="color: white; font-size: 1.8rem; margin-bottom: 1rem;">특허 등록 완료</h3>
+                        <div style="font-size: 3rem; font-weight: bold; margin: 1rem 0;">3건</div>
+                        <p>등록결정서 보유</p>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 2rem; border-radius: 15px;">
+                        <h4 style="color: white; margin-bottom: 1rem;">암호화폐 관련 특허</h4>
+                        <p style="font-weight: bold; margin-bottom: 0.5rem;">블록체인 기술 특허</p>
+                        <p style="font-size: 0.9rem; opacity: 0.9;">등록번호: 10-2024-0071566</p>
+                        <div style="margin-top: 1rem; padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                            <p style="font-size: 0.8rem;">✓ 등록 완료</p>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; padding: 2rem; border-radius: 15px;">
+                        <h4 style="color: white; margin-bottom: 1rem;">보험증권 관련 특허</h4>
+                        <p style="font-weight: bold; margin-bottom: 0.5rem;">금융 서비스 특허</p>
+                        <p style="font-size: 0.9rem; opacity: 0.9;">등록번호: 10-2024-0078859</p>
+                        <div style="margin-top: 1rem; padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                            <p style="font-size: 0.8rem;">✓ 등록 완료</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 2rem; color: #1e40af;">누크랩스 핵심 기술 특허</h3>
+                <div style="background: linear-gradient(135deg, #dc2626, #ef4444); color: white; padding: 2rem; border-radius: 15px; text-align: center;">
+                    <h4 style="color: white; margin-bottom: 1rem; font-size: 1.5rem;">누크랩스 특허</h4>
+                    <p style="font-size: 1.1rem; font-weight: bold; margin-bottom: 1rem;">핵심 기술 특허</p>
+                    <p style="font-size: 1rem; opacity: 0.9; margin-bottom: 1rem;">등록번호: 10-2024-0071569</p>
+                    <div style="display: inline-block; padding: 0.8rem 1.5rem; background: rgba(255,255,255,0.2); border-radius: 25px;">
+                        <p style="font-weight: bold; margin: 0;">✓ 특허증 보유 완료</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(34, 197, 94, 0.1); padding: 2rem; border-radius: 15px; margin-top: 2rem; border-left: 4px solid #22c55e;">
+                <h4 style="color: #059669; margin-bottom: 1rem; text-align: center;">특허 포트폴리오 경쟁우위</h4>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+                    <div>
+                        <h5 style="color: #1e40af; margin-bottom: 0.5rem;">기술적 보호</h5>
+                        <ul style="font-size: 1rem; line-height: 1.6; color: #374151;">
+                            <li>블록체인 핵심 기술 독점</li>
+                            <li>AI 기반 매칭 알고리즘 보호</li>
+                            <li>금융 서비스 혁신 기술 확보</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 style="color: #1e40af; margin-bottom: 0.5rem;">사업적 가치</h5>
+                        <ul style="font-size: 1rem; line-height: 1.6; color: #374151;">
+                            <li>시장 진입 장벽 구축</li>
+                            <li>라이선싱 수익 창출 가능</li>
+                            <li>투자 가치 및 기업 신뢰도 향상</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Competitive Landscape Analysis -->
+        <div class="slide">
+            <h2>경쟁사 분석 - 숙박 중개 플랫폼</h2>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--mint-light);">주요 경쟁사 비교</h3>
+                <div class="market-comparison">
+                    <div class="comparison-item">
+                        <div class="comparison-circle competitor-1">
+                            <span style="color: white;">야놀자</span>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--mint);">324만</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">월간 활성 사용자</div>
+                        </div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="comparison-circle competitor-2">
+                            <span style="color: white;">여기어때</span>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--gold);">309만</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">월간 활성 사용자</div>
+                        </div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="comparison-circle competitor-3">
+                            <span style="color: black;">에어비앤비</span>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--white);">185만</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">국내 월간 사용자</div>
+                        </div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="comparison-circle stay-oneday">
+                            <span style="color: white;">Stay OneDay</span>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--mint-light);">프리미엄</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">틈새 시장 공략</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--gold-light);">RevPAR 성장률 비교 (2024년)</h3>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar" style="height: 160px; background: linear-gradient(to top, var(--mint), var(--mint-light));">
+                            <div class="bar-value">+5.0%</div>
+                        </div>
+                        <div class="bar-label">펜션<br>(Stay OneDay 타겟)</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 100px; background: linear-gradient(to top, #ff6b6b, #ff8a80);">
+                            <div class="bar-value">-0.4%</div>
+                        </div>
+                        <div class="bar-label">모텔<br>(여기어때 주력)</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 40px; background: linear-gradient(to top, #ff3b30, #ff6b6b);">
+                            <div class="bar-value">-39.0%</div>
+                        </div>
+                        <div class="bar-label">럭셔리 호텔<br>(야놀자 주력)</div>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                    출처: 야놀자리서치 2025년 1분기 숙박업 동향 보고서
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 14: Competitive Advantage Matrix -->
+        <div class="slide">
+            <h2>Stay OneDay 경쟁 우위 분석</h2>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--mint-light);">차별화 요소 매트릭스</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: rgba(0, 212, 179, 0.2);">
+                            <th style="padding: 1rem; text-align: left; border: 1px solid rgba(255,255,255,0.1);">구분</th>
+                            <th style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">야놀자</th>
+                            <th style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">여기어때</th>
+                            <th style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">에어비앤비</th>
+                            <th style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 212, 179, 0.3);">Stay OneDay</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 1rem; border: 1px solid rgba(255,255,255,0.1); font-weight: bold;">타겟 고객</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">대중</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">대중</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">해외 관광객</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 212, 179, 0.1);"><strong>프리미엄 고객</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border: 1px solid rgba(255,255,255,0.1); font-weight: bold;">평균 객단가</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">15만원</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">12만원</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">25만원</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 212, 179, 0.1);"><strong>50만원</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border: 1px solid rgba(255,255,255,0.1); font-weight: bold;">수수료율</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">10-15%</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">8-12%</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">3%</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 212, 179, 0.1);"><strong>5%</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border: 1px solid rgba(255,255,255,0.1); font-weight: bold;">맞춤 서비스</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">❌</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">❌</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">△</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 212, 179, 0.1);"><strong>✅</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border: 1px solid rgba(255,255,255,0.1); font-weight: bold;">브랜드 차별화</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">가격 경쟁</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">편의성</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);">글로벌</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 212, 179, 0.1);"><strong>프리미엄 큐레이션</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="growth-trend">
+                <div class="trend-item">
+                    <div class="trend-value">3.3배</div>
+                    <div class="trend-label">경쟁사 대비 높은 객단가</div>
+                </div>
+                <div class="trend-item">
+                    <div class="trend-value">5%</div>
+                    <div class="trend-label">합리적인 수수료율</div>
+                </div>
+                <div class="trend-item">
+                    <div class="trend-value">1:1</div>
+                    <div class="trend-label">개인 맞춤 큐레이션</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Market Opportunity by Region -->
+        <div class="slide">
+            <h2>지역별 시장 기회 분석</h2>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--mint-light);">아시아 주요 도시 숙박 시장 규모</h3>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar" style="height: 200px; background: linear-gradient(to top, var(--mint), var(--mint-light));">
+                            <div class="bar-value">₩15.2조</div>
+                        </div>
+                        <div class="bar-label">한국<br>(서울, 부산)</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 240px; background: linear-gradient(to top, var(--gold), var(--gold-light));">
+                            <div class="bar-value">$80.3B</div>
+                        </div>
+                        <div class="bar-label">홍콩<br>(보험 연계)</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 160px; background: linear-gradient(to top, #4ECDC4, #26D0CE);">
+                            <div class="bar-value">$28.5B</div>
+                        </div>
+                        <div class="bar-label">인도네시아<br>(발리, 자카르타)</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 180px; background: linear-gradient(to top, #ff6b6b, #ff8a80); opacity: 0.7;">
+                            <div class="bar-value">$45.2B</div>
+                        </div>
+                        <div class="bar-label">일본<br>(확장 계획)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--gold-light);">3개국 법인 시너지 효과</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+                    <div class="trend-item" style="background: rgba(0, 212, 179, 0.1);">
+                        <h4 style="color: var(--mint); margin-bottom: 1rem;">한국 본사</h4>
+                        <ul style="text-align: left; font-size: 0.9rem;">
+                            <li>기술 개발 센터</li>
+                            <li>Stay OneDay 플랫폼</li>
+                            <li>YouTube 콘텐츠 제작</li>
+                            <li>국내 고객 서비스</li>
+                        </ul>
+                    </div>
+                    <div class="trend-item" style="background: rgba(199, 167, 86, 0.1);">
+                        <h4 style="color: var(--gold); margin-bottom: 1rem;">홍콩 법인</h4>
+                        <ul style="text-align: left; font-size: 0.9rem;">
+                            <li>Wellswap 글로벌 허브</li>
+                            <li>보험 직구 서비스</li>
+                            <li>아시아 금융 네트워크</li>
+                            <li>중화권 시장 진출</li>
+                        </ul>
+                    </div>
+                    <div class="trend-item" style="background: rgba(78, 205, 196, 0.1);">
+                        <h4 style="color: #4ECDC4; margin-bottom: 1rem;">인도네시아 법인</h4>
+                        <ul style="text-align: left; font-size: 0.9rem;">
+                            <li>동남아 거점</li>
+                            <li>현지 파트너십</li>
+                            <li>관광 산업 연계</li>
+                            <li>무슬림 관광객 타겟</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Revenue Model Breakdown -->
+        <div class="slide">
+            <h2>다각화된 수익 모델</h2>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--mint-light);">4개 플랫폼 수익 구조</h3>
+                <div class="pie-chart">
+                    <svg viewBox="0 0 300 300" style="width: 100%; height: 100%;">
+                        <!-- Stay OneDay (40%) -->
+                        <path d="M 150,150 L 150,50 A 100,100 0 0,1 220,80 Z" fill="var(--mint)" class="pie-slice">
+                            <title>Stay OneDay: 40%</title>
+                        </path>
+                        <!-- YouTube (25%) -->
+                        <path d="M 150,150 L 220,80 A 100,100 0 0,1 250,150 Z" fill="#ff6b6b" class="pie-slice">
+                            <title>YouTube: 25%</title>
+                        </path>
+                        <!-- Wellswap (20%) -->
+                        <path d="M 150,150 L 250,150 A 100,100 0 0,1 220,220 Z" fill="var(--gold)" class="pie-slice">
+                            <title>Wellswap: 20%</title>
+                        </path>
+                        <!-- Algorithm Trading (15%) -->
+                        <path d="M 150,150 L 220,220 A 100,100 0 0,1 150,50 Z" fill="#4ECDC4" class="pie-slice">
+                            <title>Algorithm: 15%</title>
+                        </path>
+
+                        <!-- Labels -->
+                        <text x="185" y="90" fill="white" font-size="12" font-weight="bold">Stay OneDay</text>
+                        <text x="195" y="105" fill="white" font-size="10">40%</text>
+
+                        <text x="220" y="130" fill="white" font-size="12" font-weight="bold">YouTube</text>
+                        <text x="235" y="145" fill="white" font-size="10">25%</text>
+
+                        <text x="200" y="190" fill="white" font-size="12" font-weight="bold">Wellswap</text>
+                        <text x="215" y="205" fill="white" font-size="10">20%</text>
+
+                        <text x="110" y="200" fill="white" font-size="12" font-weight="bold">Algorithm</text>
+                        <text x="125" y="215" fill="white" font-size="10">15%</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--gold-light);">월별 수익 현황 및 목표</h3>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar" style="height: 160px; background: var(--mint);">
+                            <div class="bar-value">₩750만</div>
+                        </div>
+                        <div class="bar-label">Stay OneDay<br>(운영 중)</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 180px; background: #ff6b6b;">
+                            <div class="bar-value">₩850만</div>
+                        </div>
+                        <div class="bar-label">YouTube<br>(확장 중)</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 100px; background: var(--gold); opacity: 0.7;">
+                            <div class="bar-value">₩500만</div>
+                        </div>
+                        <div class="bar-label">Wellswap<br>(출시 예정)</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 80px; background: #4ECDC4; opacity: 0.7;">
+                            <div class="bar-value">₩300만</div>
+                        </div>
+                        <div class="bar-label">Algorithm<br>(테스트 중)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="growth-trend">
+                <div class="trend-item">
+                    <div class="trend-value">₩2,400만</div>
+                    <div class="trend-label">월 총 목표 수익</div>
+                </div>
+                <div class="trend-item">
+                    <div class="trend-value">₩2.9억</div>
+                    <div class="trend-label">연간 예상 매출</div>
+                </div>
+                <div class="trend-item">
+                    <div class="trend-value">75%</div>
+                    <div class="trend-label">예상 순이익률</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: 3-Year Financial Projection -->
+        <div class="slide">
+            <h2>재무 전략 및 성장 계획</h2>
+            <div style="margin-bottom: 2rem; text-align: center;">
+                <p style="font-size: 1.2rem; color: var(--mint);">
+                    <strong>안정적 성장을 통한 지속가능한 수익 모델</strong>
+                </p>
+                <p style="font-size: 1rem; opacity: 0.8; margin-top: 0.5rem;">
+                    시장 검증된 비즈니스 모델로 단계적 성장 추진
+                </p>
+            </div>
+
+            <table class="financial-table">
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th class="year-header">2025년</th>
+                        <th class="year-header">2026년</th>
+                        <th class="year-header">2027년</th>
+                        <th class="year-header">2028년</th>
+                        <th class="year-header">2029년</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="total-row">
+                        <td><strong>매출</strong></td>
+                        <td><strong>₩3.7억</strong></td>
+                        <td><strong>₩13.4억</strong></td>
+                        <td><strong>₩28억</strong></td>
+                        <td><strong>₩42억</strong></td>
+                        <td><strong>₩58억</strong></td>
+                    </tr>
+                    <tr style="background: rgba(255, 59, 48, 0.1);">
+                        <td><strong>영업이익</strong></td>
+                        <td style="color: #ff6b6b;">₩-1.76억</td>
+                        <td style="color: #ff6b6b;">₩-0.63억</td>
+                        <td style="color: var(--mint);">₩4.2억</td>
+                        <td style="color: var(--mint);">₩8.4억</td>
+                        <td style="color: var(--mint);">₩14.5억</td>
+                    </tr>
+                    <tr class="platform-row">
+                        <td><strong>영업이익률</strong></td>
+                        <td>-47.6%</td>
+                        <td>-4.7%</td>
+                        <td>15.0%</td>
+                        <td>20.0%</td>
+                        <td>25.0%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(0, 212, 179, 0.1); border-radius: var(--radius-lg); border-left: 4px solid var(--mint);">
+                <h3 style="color: var(--mint); margin-bottom: 1rem;">성장 단계별 전략</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: left;">
+                    <div>
+                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">① PoC 검증 (2025-2026)</h4>
+                        <p style="font-size: 0.9rem;">플랫폼 검증 및 초기 사용자 확보</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">② 고객 확보 (2027)</h4>
+                        <p style="font-size: 0.9rem;">본격적인 마케팅을 통한 사용자 급증</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">③ 플랫폼 최적화 (2028-2029)</h4>
+                        <p style="font-size: 0.9rem;">수익성 극대화 및 글로벌 확장</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-item">
+                    <div class="chart-value">매출 16배</div>
+                    <div class="chart-label">5년간 성장률</div>
+                </div>
+                <div class="chart-item">
+                    <div class="chart-value">2027년</div>
+                    <div class="chart-label">흑자 전환 시점</div>
+                </div>
+                <div class="chart-item">
+                    <div class="chart-value">₩25억</div>
+                    <div class="chart-label">5년 누적 영업이익</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Investment Proposal -->
+        <div class="slide">
+            <h2>투자 제안</h2>
+            <div style="max-width: 800px;">
+                <div style="margin-bottom: 3rem;">
+                    <h3 style="color: var(--mint); font-size: 2.5rem; margin-bottom: 1rem;">
+                        투자 유치 목표: 10억원
+                    </h3>
+                    <p style="font-size: 1.2rem;">플랫폼 확장 및 마케팅 강화를 위한 자금</p>
+                </div>
+
+                <div class="content-grid">
+                    <div class="content-card">
+                        <h3>🚀 사업 확장</h3>
+                        <p>4개 플랫폼 동시 마케팅 및 사용자 확보</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>🌏 글로벌 진출</h3>
+                        <p>아시아 3개국 시장 본격 진입</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>💼 팀 확장</h3>
+                        <p>개발 및 마케팅 인력 충원</p>
+                    </div>
+                    <div class="content-card">
+                        <h3>📈 수익 극대화</h3>
+                        <p>5년 내 연 58억원 매출 목표</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Algorithm Trading Market -->
+        <div class="slide">
+            <h2>알고리즘 트레이딩 시장 분석</h2>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--mint-light);">글로벌 알고리즘 트레이딩 시장 성장</h3>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar" style="height: 120px; background: linear-gradient(to top, #4ECDC4, #26D0CE);">
+                            <div class="bar-value">$32억</div>
+                        </div>
+                        <div class="bar-label">2025년</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 180px; background: linear-gradient(to top, #4ECDC4, #26D0CE);">
+                            <div class="bar-value">$45억</div>
+                        </div>
+                        <div class="bar-label">2028년</div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar" style="height: 240px; background: linear-gradient(to top, var(--gold), var(--gold-light));">
+                            <div class="bar-value">$60억</div>
+                        </div>
+                        <div class="bar-label">2032년</div>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                    연평균 성장률 9.1%, AI 기반 전략이 전체 거래의 89%
+                </p>
+            </div>
+
+            <div class="growth-trend">
+                <div class="trend-item">
+                    <div class="trend-value">89%</div>
+                    <div class="trend-label">AI 기반 거래 비중</div>
+                </div>
+                <div class="trend-item">
+                    <div class="trend-value">CAGR 9.1%</div>
+                    <div class="trend-label">연평균 성장률</div>
+                </div>
+                <div class="trend-item">
+                    <div class="trend-value">4조2천억원</div>
+                    <div class="trend-label">2025년 시장규모</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Algorithm Trading Business Model -->
+        <div class="slide">
+            <h2>알고리즘 트레이딩 수익 모델</h2>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--mint-light);">이중 수익 구조</h3>
+                <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 2rem; align-items: center;">
+                    <div class="trend-item" style="background: rgba(78, 205, 196, 0.1); border: 2px solid #4ECDC4;">
+                        <h4 style="color: #4ECDC4; margin-bottom: 1rem;">구독 수익</h4>
+                        <div class="trend-value" style="color: #4ECDC4;">월 $30</div>
+                        <div class="trend-label">봇 사용료</div>
+                        <p style="font-size: 0.9rem; margin-top: 1rem; opacity: 0.8;">
+                            하루 $1로 책정된<br>합리적인 가격
+                        </p>
+                    </div>
+
+                    <div style="font-size: 2rem; color: var(--mint);">+</div>
+
+                    <div class="trend-item" style="background: rgba(199, 167, 86, 0.1); border: 2px solid var(--gold);">
+                        <h4 style="color: var(--gold); margin-bottom: 1rem;">레퍼럴 수익</h4>
+                        <div class="trend-value" style="color: var(--gold);">30-50%</div>
+                        <div class="trend-label">거래소 커미션</div>
+                        <p style="font-size: 0.9rem; margin-top: 1rem; opacity: 0.8;">
+                            선물거래 0.05% 수수료의<br>30-50% 리베이트
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--gold-light);">레퍼럴 수익 계산 공식</h3>
+                <div style="background: rgba(199, 167, 86, 0.1); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+                    <div style="text-align: center; font-size: 1.1rem; font-family: monospace; color: var(--gold-light); margin-bottom: 1rem;">
+                        월 평균 수익 = Σ(거래량 × 수수료율 × 커미션율)
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; font-size: 0.9rem;">
+                        <div style="text-align: center;">
+                            <div style="font-weight: bold; color: var(--mint);">거래량</div>
+                            <div>1인당 월 평균</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: bold; color: var(--mint);">수수료율</div>
+                            <div>0.02~0.05%</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: bold; color: var(--mint);">커미션율</div>
+                            <div>30~50%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 15px;">
+                    <h4 style="text-align: center; margin-bottom: 1.5rem; color: var(--mint-light);">실제 수익 프로젝션</h4>
+                    <div class="bar-chart" style="height: 250px;">
+                        <div class="bar-item">
+                            <div class="bar" style="height: 80px; background: linear-gradient(to top, #4ECDC4, #26D0CE);">
+                                <div class="bar-value">$210</div>
+                            </div>
+                            <div class="bar-label">1명<br>($30 + $180)</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar" style="height: 120px; background: linear-gradient(to top, #4ECDC4, #26D0CE);">
+                                <div class="bar-value">$450</div>
+                            </div>
+                            <div class="bar-label">5명<br>($150 + $300)</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar" style="height: 160px; background: linear-gradient(to top, var(--gold), var(--gold-light));">
+                                <div class="bar-value">$900</div>
+                            </div>
+                            <div class="bar-label">10명<br>($300 + $600)</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar" style="height: 200px; background: linear-gradient(to top, var(--mint), var(--mint-light));">
+                                <div class="bar-value">$4,350</div>
+                            </div>
+                            <div class="bar-label">50명<br>($1,500 + $2,850)</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar" style="height: 240px; background: linear-gradient(to top, var(--mint), var(--gold));">
+                                <div class="bar-value">$8,700</div>
+                            </div>
+                            <div class="bar-label">100명<br>($3,000 + $5,700)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 212, 179, 0.1); padding: 1.5rem; border-radius: 10px; margin-top: 2rem;">
+                    <h5 style="color: var(--mint-light); margin-bottom: 1rem; text-align: center;">실제 계산 예시</h5>
+                    <div style="font-size: 0.9rem; line-height: 1.6; text-align: center;">
+                        <p><strong>100명 × 월 $200,000 거래량 × 0.05% 수수료 × 50% 커미션</strong></p>
+                        <p style="color: var(--gold-light); margin-top: 0.5rem;">
+                            = <strong>월 $5,000 레퍼럴 수익</strong> (약 670만원)
+                        </p>
+                        <p style="margin-top: 0.5rem; opacity: 0.8;">
+                            + 구독료 $3,000 = <strong>총 월 $8,000</strong> (약 1,070만원)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Risk Management & Compliance -->
+        <div class="slide">
+            <h2>리스크 관리 및 컴플라이언스</h2>
+
+            <div class="chart-container">
+                <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--mint-light);">합법적 운영 구조</h3>
+                <div class="growth-trend">
+                    <div class="trend-item" style="background: rgba(0, 212, 179, 0.1);">
+                        <h4 style="color: var(--mint); margin-bottom: 0.5rem;">툴 제공</h4>
+                        <p style="font-size: 0.9rem;">불법 투자 플랫폼이 아닌<br>전문 투자 도구 제공</p>
+                    </div>
+                    <div class="trend-item" style="background: rgba(199, 167, 86, 0.1);">
+                        <h4 style="color: var(--gold); margin-bottom: 0.5rem;">국내 거래소</h4>
+                        <p style="font-size: 0.9rem;">빗썸, 업비트, 코인원 등<br>정식 허가 거래소 연동</p>
+                    </div>
+                    <div class="trend-item" style="background: rgba(78, 205, 196, 0.1);">
+                        <h4 style="color: #4ECDC4; margin-bottom: 0.5rem;">투명성</h4>
+                        <p style="font-size: 0.9rem;">모든 거래 내역 공개<br>및 리스크 고지</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 15px; margin-top: 2rem;">
+                <h4 style="color: var(--gold-light); margin-bottom: 1rem; text-align: center;">핵심 안전장치</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h5 style="color: var(--mint); margin-bottom: 0.5rem;">기술적 보안</h5>
+                        <ul style="font-size: 0.9rem; line-height: 1.6;">
+                            <li>API 키 암호화 저장</li>
+                            <li>실시간 리스크 모니터링</li>
+                            <li>자동 손실 제한 시스템</li>
+                            <li>사용자 자금 직접 접근 불가</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 style="color: var(--mint); margin-bottom: 0.5rem;">규제 준수</h5>
+                        <ul style="font-size: 0.9rem; line-height: 1.6;">
+                            <li>금융당국 가이드라인 준수</li>
+                            <li>정기적 컴플라이언스 점검</li>
+                            <li>사용자 교육 프로그램 운영</li>
+                            <li>투자위험 고지 의무화</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: Thank You -->
+        <div class="slide">
+            <h1>감사합니다</h1>
+            <h2>누크랩스와 함께 성장하세요</h2>
+            <div style="margin-top: 3rem;">
+                <p style="font-size: 1.3rem; margin-bottom: 1rem;">
+                    한국 | 홍콩 | 인도네시아
+                </p>
+                <p style="font-size: 1.1rem; opacity: 0.8;">
+                    완성된 플랫폼, 검증된 팀, 명확한 수익 모델
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="nav-controls">
+        <button class="nav-btn" onclick="previousSlide()">
+            <i class="fas fa-chevron-left"></i> 이전
+        </button>
+        <button class="nav-btn" onclick="nextSlide()">
+            다음 <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <!-- Slide Counter -->
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">18</span>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                previousSlide();
+            }
+        });
+
+        // Touch navigation for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    previousSlide();
+                }
+            }
+        }
+
+        // Auto-advance slides (optional)
+        // setInterval(nextSlide, 10000); // Advance every 10 seconds
+    </script>
+</body>
+</html>

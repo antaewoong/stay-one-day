@@ -3,1727 +3,1239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stay OneDay - Investor Presentation</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>누크랩스 - 투자자 프레젠테이션</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-950: #0A0F1B;
+            --primary-900: #1A1D29;
+            --primary-800: #2D3142;
+            --primary-700: #4F546C;
+            --primary-600: #9CA3AF;
+            --primary-500: #D1D5DB;
+            --primary-400: #E5E7EB;
+            --primary-300: #F3F4F6;
+            --primary-200: #F9FAFB;
+            --primary-100: #FFFFFF;
+
+            --accent-blue: #3B82F6;
+            --accent-indigo: #6366F1;
+            --accent-purple: #8B5CF6;
+            --accent-emerald: #10B981;
+            --accent-amber: #F59E0B;
+            --accent-rose: #F43F5E;
+
+            --gradient-primary: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            --gradient-luxury: linear-gradient(135deg, #1E3A8A 0%, #3730A3 50%, #581C87 100%);
+            --gradient-gold: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+
+            --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            --space-20: 5rem;
+
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --shadow-premium: 0 32px 64px -12px rgba(0, 0, 0, 0.4);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            /* Stay OneDay Brand - Enhanced */
-            --navy: #0B1A34;
-            --navy-light: #1A2B4D;
-            --mint: #00D4B3;
-            --mint-light: #33DFC8;
-            --mint-dark: #00A892;
-            --gold: #C7A756;
-            --gold-light: #D4B869;
-            --white: #FFFFFF;
-            --gray-50: #F9FAFB;
-            --gray-100: #F3F4F6;
-            --gray-200: #E5E7EB;
-            --gray-800: #1F2937;
-            --gray-900: #111827;
-
-            /* Premium Typography System */
-            --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            --font-body: 'SF Pro Text', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-
-            /* Enhanced spacing scale */
-            --space-xs: 0.25rem;
-            --space-sm: 0.5rem;
-            --space-md: 1rem;
-            --space-lg: 1.5rem;
-            --space-xl: 2rem;
-            --space-2xl: 3rem;
-            --space-3xl: 4rem;
-
-            /* Refined border radius */
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            --radius-2xl: 32px;
-        }
-
         body {
             font-family: var(--font-body);
-            background:
-                radial-gradient(ellipse 120% 100% at 50% 0%, rgba(11, 26, 52, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse 100% 120% at 80% 20%, rgba(0, 212, 179, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse 100% 120% at 20% 80%, rgba(199, 167, 86, 0.06) 0%, transparent 50%),
-                linear-gradient(135deg, #0a0a0a 0%, #111111 30%, #0d0d0d 70%, #000000 100%);
-            color: var(--white);
+            background: var(--primary-950);
+            color: var(--primary-100);
+            line-height: 1.6;
             overflow: hidden;
-            height: 100vh;
-            position: relative;
-            touch-action: pan-x pan-y;
-            -webkit-text-size-adjust: 100%;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background:
-                radial-gradient(circle at 25% 25%, rgba(0, 212, 179, 0.03) 0%, transparent 60%),
-                radial-gradient(circle at 75% 75%, rgba(199, 167, 86, 0.02) 0%, transparent 60%),
-                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.01) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
-            animation: ambientGlow 20s ease-in-out infinite;
-        }
-
-        @keyframes ambientGlow {
-            0%, 100% {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
-                filter: blur(0px);
-            }
-            33% {
-                opacity: 0.9;
-                transform: scale(1.02) rotate(0.3deg);
-                filter: blur(0.5px);
-            }
-            66% {
-                opacity: 0.85;
-                transform: scale(1.05) rotate(-0.2deg);
-                filter: blur(0.3px);
-            }
-        }
-
-        .slide-container {
-            position: relative;
-            z-index: 1;
-            width: 100vw;
-            height: 100vh;
             display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
             align-items: center;
-            justify-content: center;
-        }
-
-        .slide {
-            display: none;
-            width: 100%;
-            height: 100vh;
-            padding: 40px;
-            position: relative;
+            padding: var(--space-8) var(--space-12);
             opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            overflow: hidden;
-            box-sizing: border-box;
-        }
-
-        .slide.active {
-            display: flex;
-            opacity: 1;
-            transform: translateY(0);
-            animation: slideIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        @keyframes slideIn {
-            0% {
-                opacity: 0;
-                transform: translateY(40px) scale(0.98);
-                filter: blur(10px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-            }
-        }
-
-        /* Hero Slide Styles */
-        .hero-slide {
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px;
-        }
-
-        .hero-title {
-            font-family: var(--font-display);
-            font-size: clamp(5rem, 10vw, 16rem);
-            font-weight: 200;
-            letter-spacing: -0.03em;
-            background: linear-gradient(
-                135deg,
-                rgba(255, 255, 255, 0.95) 0%,
-                var(--mint) 25%,
-                var(--mint-light) 45%,
-                rgba(255, 255, 255, 0.9) 65%,
-                var(--gold) 85%,
-                rgba(255, 255, 255, 0.8) 100%
-            );
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: var(--space-xl);
-            animation: titleGlow 5s ease-in-out infinite, subtleGradientFlow 8s ease-in-out infinite;
+            transform: translateX(100%);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--primary-950);
             position: relative;
-            filter: drop-shadow(0 8px 32px rgba(0, 0, 0, 0.15));
+            overflow-y: auto;
         }
 
-        .hero-title::before {
+        .slide::before {
             content: '';
-            position: absolute;
-            top: -20%;
-            left: -20%;
-            right: -20%;
-            bottom: -20%;
-            background: radial-gradient(
-                ellipse at center,
-                rgba(0, 212, 179, 0.08) 0%,
-                rgba(199, 167, 86, 0.06) 30%,
-                transparent 70%
-            );
-            border-radius: 50%;
-            z-index: -1;
-            animation: subtleHalo 6s ease-in-out infinite;
-        }
-
-        @keyframes subtleGradientFlow {
-            0%, 100% { background-position: 0% 50%; }
-            33% { background-position: 50% 25%; }
-            66% { background-position: 100% 75%; }
-        }
-
-        @keyframes subtleHalo {
-            0%, 100% {
-                opacity: 0.6;
-                transform: scale(1) rotate(0deg);
-            }
-            50% {
-                opacity: 0.8;
-                transform: scale(1.1) rotate(180deg);
-            }
-        }
-
-        .hero-title::before {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(
-                135deg,
-                rgba(0, 212, 179, 0.1) 0%,
-                rgba(199, 167, 86, 0.1) 100%
-            );
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: blur(1px);
-            z-index: -1;
-        }
-
-        @keyframes titleGlow {
-            0%, 100% {
-                filter: drop-shadow(0 0 30px rgba(0, 212, 179, 0.3));
-                transform: scale(1);
-            }
-            50% {
-                filter: drop-shadow(0 0 50px rgba(0, 212, 179, 0.5));
-                transform: scale(1.002);
-            }
-        }
-
-        .hero-subtitle {
-            font-size: clamp(1.2rem, 2.5vw, 2.5rem);
-            font-weight: 300;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 3rem;
-            max-width: 800px;
-            line-height: 1.2;
-        }
-
-        .hero-tagline {
-            font-size: clamp(0.9rem, 1.5vw, 1.3rem);
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-            letter-spacing: 0.3em;
-            margin-bottom: 1rem;
-        }
-
-        /* Keynote Style Slides */
-        .keynote-slide {
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 40px 60px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .keynote-word {
-            font-family: var(--font-display);
-            font-size: clamp(5rem, 12vw, 18rem);
-            font-weight: 100;
-            background: linear-gradient(
-                145deg,
-                rgba(255, 255, 255, 0.98) 0%,
-                rgba(255, 255, 255, 0.9) 20%,
-                rgba(0, 212, 179, 0.85) 40%,
-                rgba(255, 255, 255, 0.95) 60%,
-                rgba(199, 167, 86, 0.8) 80%,
-                rgba(255, 255, 255, 0.85) 100%
-            );
-            background-size: 250% 250%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: var(--space-xl);
-            animation: wordReveal 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), gentleWordFlow 10s ease-in-out infinite;
-            letter-spacing: -0.04em;
-            line-height: 0.8;
-            position: relative;
-            filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.12));
-        }
-
-        .keynote-word::before {
-            content: '';
-            position: absolute;
-            top: -15%;
-            left: -15%;
-            right: -15%;
-            bottom: -15%;
-            background: radial-gradient(
-                ellipse at center,
-                rgba(255, 255, 255, 0.03) 0%,
-                rgba(0, 212, 179, 0.02) 40%,
-                transparent 70%
-            );
-            border-radius: 50%;
-            z-index: -1;
-            animation: gentleWordHalo 8s ease-in-out infinite;
-        }
-
-        @keyframes gentleWordFlow {
-            0%, 100% { background-position: 0% 0%; }
-            25% { background-position: 100% 0%; }
-            50% { background-position: 100% 100%; }
-            75% { background-position: 0% 100%; }
-        }
-
-        @keyframes gentleWordHalo {
-            0%, 100% {
-                opacity: 0.4;
-                transform: scale(1) rotate(0deg);
-            }
-            50% {
-                opacity: 0.7;
-                transform: scale(1.05) rotate(90deg);
-            }
-        }
-
-        .keynote-word::after {
-            content: '';
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(
-                120deg,
-                transparent 0%,
-                rgba(255, 255, 255, 0.02) 30%,
-                rgba(0, 212, 179, 0.03) 50%,
-                rgba(255, 255, 255, 0.02) 70%,
-                transparent 100%
-            );
-            transform: translateX(-150%) skewX(-20deg);
-            animation: elegantShimmer 12s ease-in-out infinite;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
         }
 
-        @keyframes wordReveal {
-            0% {
-                opacity: 0;
-                transform: scale(0.9) translateY(20px);
-                filter: blur(10px);
-            }
-            60% {
-                opacity: 0.8;
-                transform: scale(1.01) translateY(-2px);
-                filter: blur(2px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-                filter: blur(0);
-            }
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
         }
 
-        @keyframes elegantShimmer {
-            0% {
-                transform: translateX(-150%) skewX(-20deg);
-                opacity: 0;
-            }
-            20% {
-                opacity: 1;
-            }
-            80% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(150%) skewX(-20deg);
-                opacity: 0;
-            }
+        h1 {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            line-height: 0.9;
+            letter-spacing: -0.02em;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-6);
+            text-align: center;
         }
 
-        .keynote-description {
-            font-size: clamp(1rem, 2vw, 1.8rem);
-            color: rgba(255, 255, 255, 0.7);
-            max-width: 600px;
+        h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
             line-height: 1.1;
-            font-weight: 300;
-        }
-
-        /* Split Screen Demo */
-        .demo-slide {
-            flex-direction: row;
-            align-items: center;
-            gap: 60px;
-        }
-
-        .demo-content {
-            flex: 1;
-        }
-
-        .demo-visual {
-            flex: 1;
+            letter-spacing: -0.01em;
+            color: var(--primary-100);
+            margin-bottom: var(--space-8);
             text-align: center;
+            position: relative;
         }
 
-        .demo-title {
-            font-family: var(--font-display);
-            font-size: clamp(2.5rem, 5vw, 5rem);
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, var(--mint) 0%, var(--white) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .demo-description {
-            font-size: clamp(1.1rem, 2vw, 1.8rem);
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.3;
-            margin-bottom: 2rem;
-            font-weight: 300;
-        }
-
-        .demo-features {
-            list-style: none;
-            font-size: clamp(0.9rem, 1.5vw, 1.3rem);
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .demo-features li {
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            opacity: 0;
-            animation: featureReveal 0.8s ease-out forwards;
-        }
-
-        .demo-features li:nth-child(1) { animation-delay: 0.3s; }
-        .demo-features li:nth-child(2) { animation-delay: 0.5s; }
-        .demo-features li:nth-child(3) { animation-delay: 0.7s; }
-
-        @keyframes featureReveal {
-            0% {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .check-icon {
-            color: var(--mint);
-            margin-right: 1rem;
-            font-size: 1.2em;
-        }
-
-        .demo-image {
-            width: 100%;
-            height: auto;
-            min-width: 600px;
-            max-width: 1000px;
-            border-radius: var(--radius-xl);
-            box-shadow:
-                0 60px 120px rgba(0, 0, 0, 0.5),
-                0 20px 40px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(255, 255, 255, 0.1);
-            transition: transform 0.5s ease, box-shadow 0.5s ease;
-            animation: deviceFloat 8s ease-in-out infinite;
-
-            /* 고품질 이미지 렌더링 */
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            -webkit-backface-visibility: hidden;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-
-            /* 안티알리아싱 */
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-
-            /* 하드웨어 가속 */
-            will-change: transform;
-            transform: translate3d(0, 0, 0);
-        }
-
-        @keyframes deviceFloat {
-            0%, 100% {
-                transform: translateY(0) rotateY(0deg) scale(1);
-                filter: brightness(1) saturate(1);
-            }
-            50% {
-                transform: translateY(-15px) rotateY(3deg) scale(1.02);
-                filter: brightness(1.1) saturate(1.1);
-            }
-        }
-
-        .demo-image:hover {
-            transform: scale(1.08) rotateY(8deg) translateZ(20px);
-            box-shadow:
-                0 80px 160px rgba(0, 0, 0, 0.6),
-                0 0 0 2px rgba(0, 212, 179, 0.4),
-                0 0 50px rgba(0, 212, 179, 0.2);
-            filter: brightness(1.15) saturate(1.2) contrast(1.1);
-        }
-
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-            .slide {
-                padding: 25px 20px !important;
-                overflow-y: auto;
-                height: 100vh !important;
-                min-height: -webkit-fill-available;
-                display: flex !important;
-                justify-content: center;
-                align-items: center;
-            }
-
-            .slide-content {
-                max-width: 100%;
-                margin: 0;
-                padding: 0;
-            }
-
-            .slide h1 {
-                font-size: clamp(2rem, 9vw, 3.5rem);
-                margin-bottom: 1.5rem;
-                line-height: 1.1;
-            }
-
-            .slide h2 {
-                font-size: clamp(1.6rem, 7vw, 2.5rem);
-                margin-bottom: 1.2rem;
-                line-height: 1.2;
-            }
-
-            .slide h3 {
-                font-size: clamp(1.2rem, 5vw, 1.8rem);
-                margin-bottom: 1rem;
-            }
-
-            .slide p {
-                font-size: clamp(1rem, 4.5vw, 1.3rem);
-                line-height: 1.6;
-                margin-bottom: 1.5rem;
-            }
-
-            .demo-image {
-                max-width: 100% !important;
-                min-width: auto !important;
-                height: auto;
-                border-radius: 16px;
-                width: 100% !important;
-            }
-
-            .calculator-container {
-                padding: 25px 20px;
-                margin: 15px 0;
-                border-radius: 20px;
-            }
-
-            .nav-button {
-                padding: 16px 24px;
-                font-size: 1.1rem;
-                min-height: 44px;
-                border-radius: 12px;
-            }
-
-            .progress-bar {
-                bottom: 90px;
-                height: 6px;
-            }
-
-            .slide-navigation {
-                gap: 15px;
-                padding: 15px;
-            }
-
-            /* 모바일에서 키노트 슬라이드 중앙 정렬 */
-            .keynote-slide {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                height: 100vh;
-                padding: 40px 20px;
-            }
-
-            /* 모바일에서 히어로 슬라이드 중앙 정렬 */
-            .hero-slide {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                height: 100vh;
-                padding: 40px 20px;
-            }
-
-            /* 모바일에서 데모 슬라이드 최적화 */
-            .demo-slide {
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                gap: 30px;
-                height: 100vh;
-                padding: 40px 20px;
-            }
-
-            .demo-slide > div {
-                width: 100% !important;
-                max-width: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                flex: none !important;
-            }
-
-            /* 모바일에서 계산기 슬라이드 최적화 */
-            .calculator-slide {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                padding: 20px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .slide {
-                padding: 20px 15px;
-            }
-
-            .slide h1 {
-                font-size: clamp(1.8rem, 10vw, 2.8rem);
-                margin-bottom: 1.2rem;
-            }
-
-            .slide h2 {
-                font-size: clamp(1.4rem, 8vw, 2.2rem);
-                margin-bottom: 1rem;
-            }
-
-            .slide p {
-                font-size: clamp(0.95rem, 4.5vw, 1.2rem);
-                margin-bottom: 1.2rem;
-            }
-
-            .calculator-container {
-                padding: 20px 15px;
-            }
-
-            .demo-features {
-                font-size: clamp(0.8rem, 4vw, 1rem);
-            }
-        }
-
-        /* Revenue Calculator */
-        .calculator-slide {
-            flex-direction: column;
-            justify-content: center;
-            padding: 30px 40px;
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-
-        .calculator-container {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 20px;
-            backdrop-filter: blur(40px);
-            box-shadow:
-                0 15px 30px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            max-width: 1100px;
-            margin: 0 auto;
-            height: fit-content;
-        }
-
-        .calculator-title {
-            font-family: var(--font-display);
-            font-size: clamp(1.5rem, 3vw, 2.2rem);
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--mint) 0%, var(--gold) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .calculator-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-            margin-bottom: 15px;
-        }
-
-        .input-group {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .input-group input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 12px 16px;
-            color: white;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--mint);
-            box-shadow: 0 0 0 3px rgba(0, 212, 179, 0.2);
-        }
-
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        .result-item {
-            background: linear-gradient(135deg, rgba(0, 212, 179, 0.1) 0%, rgba(199, 167, 86, 0.05) 100%);
-            border: 1px solid rgba(0, 212, 179, 0.2);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .result-label {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 8px;
-        }
-
-        .result-value {
-            font-family: var(--font-display);
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: var(--mint);
-        }
-
-        .total-revenue {
-            background: linear-gradient(135deg, var(--mint) 0%, var(--gold) 100%);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .total-revenue .result-value {
-            color: white;
-            font-size: 2.2rem;
-        }
-
-        /* Navigation */
-        .nav-container {
-            position: fixed;
-            bottom: 40px;
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -var(--space-3);
             left: 50%;
             transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--gradient-gold);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: 600;
+            color: var(--primary-200);
+            margin-bottom: var(--space-4);
+        }
+
+        p {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: var(--primary-400);
+            max-width: 900px;
+            text-align: center;
+            line-height: 1.7;
+        }
+
+        .premium-card {
+            background: var(--gradient-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-premium);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6); width: 100%; max-width: 1200px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); width: 100%; max-width: 1100px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); width: 100%; max-width: 1000px; }
+
+        .team-member {
+            text-align: center;
+            background: var(--gradient-glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: var(--space-5);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .team-member:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-2xl);
+            border-color: var(--accent-blue);
+        }
+
+        .team-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto var(--space-3);
+            border: 3px solid transparent;
+            background: var(--gradient-primary);
+            padding: 3px;
+        }
+
+        .nav-controls {
+            position: fixed;
+            bottom: var(--space-6);
+            right: var(--space-6);
             display: flex;
-            gap: 20px;
-            z-index: 1000;
+            gap: var(--space-3);
+            z-index: 100;
         }
 
         .nav-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50px;
-            padding: 12px 24px;
-            color: white;
-            font-size: 0.9rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: var(--gradient-glass);
+            backdrop-filter: blur(10px);
+            color: var(--primary-100);
+            font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .nav-btn:hover {
-            background: var(--mint);
-            border-color: var(--mint);
-            transform: scale(1.05);
-        }
-
-        .nav-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
+            background: var(--accent-blue);
+            transform: scale(1.1);
         }
 
         .slide-counter {
             position: fixed;
-            top: 40px;
-            right: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50px;
-            padding: 12px 20px;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
+            bottom: var(--space-6);
+            left: var(--space-6);
+            background: var(--gradient-glass);
+            backdrop-filter: blur(10px);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-lg);
+            font-size: 0.85rem;
+            color: var(--primary-300);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: var(--space-5);
+            background: var(--gradient-glass);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-number {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 800;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            margin-bottom: var(--space-2);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--primary-300);
+            font-weight: 500;
+        }
+
+        .financial-table {
+            width: 100%;
+            max-width: 1100px;
+            background: var(--gradient-glass);
             backdrop-filter: blur(20px);
-            z-index: 1000;
+            border-radius: var(--radius-xl);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
         }
 
-        .progress-bar {
-            position: fixed;
-            bottom: 0;
+        .financial-table thead {
+            background: var(--gradient-luxury);
+        }
+
+        .financial-table th,
+        .financial-table td {
+            padding: var(--space-3) var(--space-4);
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .financial-table th:first-child,
+        .financial-table td:first-child {
+            text-align: left;
+        }
+
+        .financial-table th {
+            color: var(--primary-100);
+            font-weight: 600;
+        }
+
+        .financial-table td {
+            color: var(--primary-300);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-5);
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .toc-section {
+            background: var(--gradient-glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: var(--space-5);
+            transition: all 0.3s ease;
+        }
+
+        .toc-section:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-blue);
+        }
+
+        .toc-section h4 {
+            color: var(--accent-blue);
+            font-size: 1.2rem;
+            margin-bottom: var(--space-3);
+            font-weight: 600;
+        }
+
+        .toc-section ul {
+            list-style: none;
+            color: var(--primary-300);
+        }
+
+        .toc-section li {
+            margin-bottom: var(--space-2);
+            padding-left: var(--space-3);
+            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .toc-section li::before {
+            content: '•';
+            color: var(--accent-emerald);
+            position: absolute;
             left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--mint) 0%, var(--gold) 100%);
-            transition: width 0.5s ease;
-            z-index: 1001;
         }
 
-        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .slide { padding: var(--space-6); }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .team-photo { width: 100px; height: 100px; }
+        }
+
         @media (max-width: 768px) {
-            .slide {
-                padding: 30px 20px;
-            }
-
-            .demo-slide {
-                flex-direction: column;
-                gap: 40px;
-                align-items: center;
-            }
-
-            .demo-slide > div {
-                width: 100%;
-                max-width: none;
-            }
-
-            .calculator-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .results-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .input-group {
-                padding: 1rem;
-            }
-
-            .input-group input {
-                font-size: 1.1rem;
-                padding: 12px;
-                min-height: 44px;
-            }
-
-            .nav-container {
-                bottom: 20px;
-                padding: 0 20px;
-            }
-
-            .slide-counter {
-                top: 20px;
-                right: 20px;
-                font-size: 0.9rem;
-                padding: 8px 12px;
-            }
-
-            /* Enhanced grid layouts for mobile */
-            div[style*="grid-template-columns: repeat(3, 1fr)"] {
-                grid-template-columns: 1fr !important;
-                gap: 1.5rem !important;
-            }
-
-            div[style*="grid-template-columns: 1fr 1fr"] {
-                grid-template-columns: 1fr !important;
-                gap: 2rem !important;
-            }
-
-            div[style*="grid-template-columns: repeat(2, 1fr)"] {
-                grid-template-columns: 1fr !important;
-                gap: 2rem !important;
-            }
-
-            /* 모바일에서 인라인 스타일 덮어쓰기 */
-            .slide[style*="flex-direction: column"] {
-                flex-direction: column !important;
-                padding: 20px !important;
-            }
-
-            /* Better hero styles for mobile */
-            .hero-title {
-                font-size: clamp(2.5rem, 12vw, 4rem) !important;
-                margin-bottom: 1.5rem;
-            }
-
-            .hero-subtitle {
-                font-size: clamp(1.1rem, 5vw, 1.4rem) !important;
-                line-height: 1.5;
-            }
-
-            .keynote-word {
-                font-size: clamp(2rem, 10vw, 3.5rem) !important;
-            }
-
-            .keynote-description {
-                font-size: clamp(1rem, 5vw, 1.3rem) !important;
-            }
-        }
-
-        /* Additional mobile optimizations */
-        @media (max-width: 480px) {
-            .nav-button {
-                padding: 18px 28px;
-                font-size: 1.2rem;
-                min-height: 48px;
-                border-radius: 14px;
-            }
-
-            .slide-navigation {
-                gap: 20px;
-                padding: 20px;
-            }
-
-            .progress-bar {
-                bottom: 100px;
-                height: 8px;
-                border-radius: 4px;
-            }
-
-            /* Better spacing for small screens */
-            .slide {
-                justify-content: flex-start;
-                padding-top: 40px;
-            }
-
-            .hero-slide {
-                justify-content: center;
-            }
-        }
-
-        /* Enhanced touch interactions */
-        @media (hover: none) and (pointer: coarse) {
-            .nav-button {
-                min-height: 48px;
-                font-size: 1.1rem;
-            }
-
-            .input-group input {
-                min-height: 48px;
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-
-            .slide {
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-            }
+            .slide { padding: var(--space-4); }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: var(--space-3); }
+            .team-photo { width: 90px; height: 90px; }
+            .financial-table { font-size: 0.75rem; }
+            .financial-table th, .financial-table td { padding: var(--space-2); }
         }
     </style>
 </head>
 <body>
-    <div class="slide-container">
-        <!-- Slide 1: Opening -->
-        <div class="slide active hero-slide">
-            <div class="hero-tagline">The Future of Korean Travel</div>
-            <h1 class="hero-title">Stay OneDay</h1>
-            <p class="hero-subtitle">
-                평일 공실을 없애주는<br>
-                AI 기반 플랫폼의 탄생
-            </p>
-        </div>
-
-
-        <!-- Slide 3: Cost Crisis -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Cost Crisis</div>
-            <p class="keynote-description">
-                건축비·인건비·관리비<br>
-                모든 비용이 상승했습니다
-            </p>
-        </div>
-
-        <!-- Slide 4: Revenue Problem -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Revenue Gap</div>
-            <p class="keynote-description">
-                할인판매 말고는<br>
-                주말 외 수익 창출이 어렵습니다
-            </p>
-        </div>
-
-        <!-- Slide 5: Innovation Need -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Innovation</div>
-            <p class="keynote-description">
-                기존 틀을 깨는<br>
-                혁신이 필요합니다
-            </p>
-        </div>
-
-        <!-- Slide 6: Our Solution -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Day Trip</div>
-            <p class="keynote-description">
-                하루만으로 충분합니다
-            </p>
-        </div>
-
-        <!-- Slide 7: Opening (Emphasis) -->
-        <div class="slide hero-slide">
-            <div class="hero-tagline">The Future of Korean Travel</div>
-            <h1 class="hero-title">Stay OneDay</h1>
-            <p class="hero-subtitle">
-                평일 공실을 없애주는<br>
-                AI 기반 플랫폼의 탄생
-            </p>
-        </div>
-
-        <!-- Slide 8: Market Insight -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Insight</div>
-            <p class="keynote-description">
-                평일 데이트립 수요가<br>
-                폭발적으로 증가하고 있습니다
-            </p>
-        </div>
-
-        <!-- Slide 9: Target Success -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Proven Success</div>
-            <p class="keynote-description">
-                평일 데이트립으로<br>
-                <span style="color: var(--mint);">충성고객 300% 증가</span>
-            </p>
-        </div>
-
-        <!-- Slide 10: Game Changer -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Game Changer</div>
-            <p class="keynote-description">
-                <span style="color: var(--mint); font-weight: 700; font-size: 1.5em;">5% 수수료</span><br>
-                <span style="color: var(--gold);">경쟁사 대비 반값!</span>
-            </p>
-        </div>
-
-        <!-- Slide 10: AI Technology -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">AI Power</div>
-            <p class="keynote-description">
-                멀티 AI 전략으로<br>
-                완전 자동화된 플랫폼
-            </p>
-        </div>
-
-        <!-- Slide 11: Market Size -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Market Size</div>
-            <p class="keynote-description">
-                국내 숙박업 시장규모<br>
-                <span style="color: var(--mint); font-weight: 700;">연 12조원</span>
-            </p>
-        </div>
-
-        <!-- Slide 12: Digital Transformation -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Digital Gap</div>
-            <p class="keynote-description">
-                아직도 전화예약에 의존하는<br>
-                <span style="color: var(--gold);">디지털 전환 기회</span>
-            </p>
-        </div>
-
-        <!-- Slide 13: Customer Pain -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Customer Pain</div>
-            <p class="keynote-description">
-                복잡한 예약 과정<br>
-                투명하지 않은 가격 정보
-            </p>
-        </div>
-
-        <!-- Slide 14: Host Pain -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Host Pain</div>
-            <p class="keynote-description">
-                높은 플랫폼 수수료<br>
-                <span style="color: var(--gold);">10-15%</span>
-            </p>
-        </div>
-
-        <!-- Slide 15: Our Approach -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Our Approach</div>
-            <p class="keynote-description">
-                AI 기반 개인화 추천<br>
-                완전 자동화된 예약 시스템
-            </p>
-        </div>
-
-        <!-- Slide 16: Technology Stack -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Tech Stack</div>
-            <p class="keynote-description">
-                Next.js 15 + Supabase<br>
-                <span style="color: var(--mint);">멀티 AI 통합</span>
-            </p>
-        </div>
-
-        <!-- Slide 17: Mission -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Mission</div>
-            <p class="keynote-description">
-                누구나 특별한 하루를<br>
-                보낼 수 있습니다<br>
-                <span style="color: var(--mint); font-weight: 600;">Stay OneDay</span>
-            </p>
-        </div>
-
-        <!-- Slide 18: Platform Demo - Discovery -->
-        <div class="slide demo-slide">
-            <div class="demo-content" style="flex: 1; max-width: 500px; padding-right: 4rem; margin-left: 2rem;">
-                <h2 class="demo-title">Discovery</h2>
-                <p class="demo-description" style="line-height: 1.1;">
-                    직관적인 검색과 필터링으로<br>
-                    완벽한 풀빌라를 발견하세요
-                </p>
-                <ul class="demo-features">
-                    <li><i class="fas fa-check check-icon"></i>지역별 실시간 검색</li>
-                    <li><i class="fas fa-check check-icon"></i>스마트 필터링 시스템</li>
-                    <li><i class="fas fa-check check-icon"></i>개인화된 추천 알고리즘</li>
-                </ul>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <h1>누크랩스</h1>
+            <p style="font-size: clamp(1.2rem, 3vw, 1.8rem); margin-bottom: var(--space-6); font-weight: 300; color: var(--primary-200);">플랫폼 비즈니스 전환을 통한 지속가능한 성장</p>
+            <p style="font-size: clamp(0.9rem, 2vw, 1.2rem); margin-bottom: var(--space-10);">블록체인 컨설팅에서 멀티 플랫폼 수익 모델로</p>
+            <div style="display: flex; gap: var(--space-6); font-size: 1rem; margin-bottom: var(--space-12);">
+                <span style="display: flex; align-items: center; gap: var(--space-2);"><span>🇰🇷</span> 한국</span>
+                <span style="display: flex; align-items: center; gap: var(--space-2);"><span>🇭🇰</span> 홍콩</span>
+                <span style="display: flex; align-items: center; gap: var(--space-2);"><span>🇮🇩</span> 인도네시아</span>
             </div>
-            <div class="demo-visual" style="flex: 1.5;">
-                <img src="/images/d55.jpg" alt="숙소 검색 결과 화면" class="demo-image" style="width: 100%; height: auto; max-width: 1000px;">
+            <div class="premium-card" style="max-width: 500px;">
+                <p style="font-size: 0.9rem; color: var(--primary-300);">Investment Opportunity</p>
+                <p style="font-size: 1.6rem; font-weight: 700; color: var(--accent-gold); margin-top: var(--space-2);">Series A 투자 유치</p>
             </div>
         </div>
 
-        <!-- Slide 19: Platform Demo - Immersion -->
-        <div class="slide demo-slide">
-            <div class="demo-visual" style="flex: 1.5;">
-                <video autoplay muted loop playsinline class="demo-image" style="width: 100%; height: auto; max-width: 1200px; transform: scale(1.5);">
-                    <source src="/images/v1.mov" type="video/quicktime">
-                    <source src="/images/v1.mov" type="video/mp4">
-                    <!-- 비디오 재생 불가 시 fallback 이미지 -->
-                    <img src="/images/m1.jpg" alt="상세 페이지" class="demo-image">
-                </video>
-            </div>
-            <div class="demo-content" style="flex: 1; max-width: 500px; padding-left: 4rem; margin-right: 2rem;">
-                <h2 class="demo-title">Immersion</h2>
-                <p class="demo-description" style="line-height: 1.1;">
-                    고화질 이미지와 AI 생성 콘텐츠로<br>
-                    몰입감을 극대화합니다
-                </p>
-                <ul class="demo-features">
-                    <li><i class="fas fa-check check-icon"></i>실시간 트렌드를 반영한 AI 숏폼 영상제작</li>
-                    <li><i class="fas fa-check check-icon"></i>AI 생성 콘텐츠</li>
-                    <li><i class="fas fa-check check-icon"></i>실시간 리뷰 시스템</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Slide 20: Platform Demo - Seamless -->
-        <div class="slide demo-slide" style="gap: 5rem; align-items: center; justify-content: center;">
-            <div class="demo-content" style="flex: 0.8; max-width: 500px; padding-right: 1rem;">
-                <h2 class="demo-title">Seamless</h2>
-                <p class="demo-description" style="line-height: 1.1;">
-                    실시간 예약 가능 일정과<br>
-                    간편한 결제 프로세스
-                </p>
-                <ul class="demo-features">
-                    <li><i class="fas fa-check check-icon"></i>인원 수 선택 (성인/아동 구분)</li>
-                    <li><i class="fas fa-check check-icon"></i>직관적인 예약 인터페이스</li>
-                    <li><i class="fas fa-check check-icon"></i>모바일 최적화된 예약 프로세스</li>
-                </ul>
-            </div>
-            <div class="demo-visual" style="flex: 1.2; text-align: center;">
-                <img src="/images/5.png" alt="예약 인원 선택 화면" class="demo-image" style="width: 80%; height: auto; min-width: 350px; max-width: 600px;">
-            </div>
-        </div>
-
-        <!-- Slide 7: Platform Demo - Intelligence -->
-        <div class="slide demo-slide" style="gap: 2rem; align-items: center; justify-content: center;">
-            <div class="demo-content" style="flex: 1; max-width: 500px; padding-left: 1.5rem;">
-                <h2 class="demo-title">Intelligence</h2>
-                <p class="demo-description" style="line-height: 1.1;">
-                    호스트 전용 대시보드로<br>
-                    직관적인 비즈니스 관리
-                </p>
-                <ul class="demo-features">
-                    <li><i class="fas fa-check check-icon"></i>직관적인 호스트 대시보드</li>
-                    <li><i class="fas fa-check check-icon"></i>다양한 관리 기능 통합</li>
-                    <li><i class="fas fa-check check-icon"></i>멀티 AI 기능 제공</li>
-                </ul>
-            </div>
-            <div class="demo-visual" style="flex: 2; max-width: 1200px; padding-right: 0;">
-                <img src="/images/d2.jpg" alt="웹 대시보드" class="demo-image" style="width: 100%; height: auto; max-width: 1000px; border-radius: 15px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);">
-            </div>
-        </div>
-
-        <!-- Slide 8: Business Model -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">4-Track<br>Revenue</div>
-            <p class="keynote-description">
-                다각화된 수익 모델로<br>
-                지속 가능한 성장을 실현합니다
-            </p>
-        </div>
-
-        <!-- Slide 9: V1 Revenue Model -->
-        <div class="slide calculator-slide">
-            <div class="calculator-container">
-                <h2 class="calculator-title">
-                    <span style="background: linear-gradient(135deg, var(--mint) 0%, var(--gold) 50%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">V1</span>
-                    수익 모델
-                </h2>
-                <p style="text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 2rem; font-size: 1.1rem;">
-                    초기 사용자 확보와 안정적 운영에 초점
-                </p>
-
-                <div class="calculator-grid">
-                    <div class="input-group">
-                        <label>활성 호스트</label>
-                        <input type="number" id="activeHostsV1" value="30" min="1" max="1000">
-                    </div>
-                    <div class="input-group">
-                        <label>평균 세션 가격 (만원)</label>
-                        <input type="number" id="avgSessionPriceV1" value="50" min="10" max="200">
-                    </div>
-                    <div class="input-group">
-                        <label>호스트당 월 세션</label>
-                        <input type="number" id="sessionsPerHostV1" value="10" min="1" max="50">
-                    </div>
-                    <div class="input-group">
-                        <label>플랫폼 수수료 (%)</label>
-                        <input type="number" id="takeRateV1" value="5" min="3" max="15" step="0.1">
+        <!-- Slide 2: Executive Summary -->
+        <div class="slide">
+            <h2>Executive Summary</h2>
+            <div class="grid-2" style="margin-bottom: var(--space-8);">
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-blue); margin-bottom: var(--space-4);">사업 개요</h3>
+                    <p style="text-align: left; line-height: 1.6; margin-bottom: var(--space-4);">
+                        누크랩스는 안정적인 블록체인 컨설팅 수익($5,000/월)을 기반으로
+                        4개 플랫폼 사업으로 확장하는 기술 기업입니다.
+                    </p>
+                    <div style="color: var(--primary-300); font-size: 0.9rem;">
+                        <div>✓ 현재 수익: 월 $5,000 (연 $60,000)</div>
+                        <div>✓ 보유 특허: 3건 등록 완료</div>
+                        <div>✓ 팀 구성: 법무 전문가 3명 + 기획자 3명</div>
                     </div>
                 </div>
-
-                <div class="results-grid">
-                    <div class="result-item">
-                        <div class="result-label">월 GMV</div>
-                        <div class="result-value" id="monthlyGMVV1">1,085만원</div>
-                    </div>
-                    <div class="result-item total-revenue">
-                        <div class="result-label">V1 월 매출</div>
-                        <div class="result-value" id="totalRevenueV1">54만원</div>
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-purple); margin-bottom: var(--space-4);">투자 하이라이트</h3>
+                    <div style="color: var(--primary-300); font-size: 0.9rem; text-align: left;">
+                        <div>• Stay OneDay: 프리미엄 숙박 플랫폼 (풀빌라 등)</div>
+                        <div>• Wellswap: 연금보험 양도거래 + 컨시어지</div>
+                        <div>• 글로벌 금융 전문 유튜브</div>
+                        <div>• AI 알고리즘 트레이딩 봇</div>
+                        <div style="margin-top: var(--space-3); color: var(--accent-gold); font-weight: 600;">
+                            고소득 자산가 타겟 통합 생태계 (5년간 37배 성장)
+                        </div>
                     </div>
                 </div>
-
-                <div style="margin-top: 2rem; padding: 2rem; background: rgba(0, 212, 179, 0.1); border: 1px solid rgba(0, 212, 179, 0.3); border-radius: 16px;">
-                    <h3 style="color: var(--mint); margin-bottom: 1rem;"><i class="fas fa-gift"></i> V1 무료 제공 기능</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.95rem;">
-                        <div>• 월 1회 주간 리포트</div>
-                        <div>• 월 2개 AI 숏폼 영상</div>
-                    </div>
+            </div>
+            <div class="grid-4">
+                <div class="stat-item">
+                    <span class="stat-number">$2.4M</span>
+                    <span class="stat-label">2028년 목표 매출</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">15조원</span>
+                    <span class="stat-label">국내 숙박 시장</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">324만</span>
+                    <span class="stat-label">야놀자 MAU</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">4개</span>
+                    <span class="stat-label">다각화 플랫폼</span>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 10: V1 Feature Details -->
-        <div class="slide demo-slide" style="flex-direction: column; justify-content: center;">
-            <h2 style="font-size: 3rem; text-align: center; margin-bottom: 3rem; background: linear-gradient(135deg, var(--mint) 0%, var(--gold) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                V1 핵심 기능 상세
-            </h2>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-bottom: 3rem;">
-                <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                    <h3 style="color: var(--mint); margin-bottom: 1.5rem; font-size: 1.8rem;">
-                        <i class="fas fa-chart-line"></i> 주간 리포트
-                    </h3>
-                    <ul style="list-style: none; padding: 0; line-height: 1.6;">
-                        <li style="margin-bottom: 0.7rem;"><i class="fas fa-check" style="color: var(--mint); margin-right: 0.8rem;"></i><strong>AI 기반 개인화 분석:</strong> 각 호스트 맞춤형 데이터 인사이트</li>
-                        <li style="margin-bottom: 0.7rem;"><i class="fas fa-check" style="color: var(--mint); margin-right: 0.8rem;"></i><strong>네이버 플레이스 & 구글 최적화:</strong> 검색 노출 전략 제공</li>
-                        <li style="margin-bottom: 0.7rem;"><i class="fas fa-check" style="color: var(--mint); margin-right: 0.8rem;"></i><strong>주변 20KM 지역 분석:</strong> 경쟁업체 & 수요 트렌드 모니터링</li>
-                        <li style="margin-bottom: 0.7rem;"><i class="fas fa-check" style="color: var(--mint); margin-right: 0.8rem;"></i><strong>OTA 차별화:</strong> 에어비앤비·부킹닷컴과 달리 업장별 맞춤 리포트</li>
-                        <li style="margin-bottom: 0.7rem;"><i class="fas fa-check" style="color: var(--mint); margin-right: 0.8rem;"></i><strong>수익 최적화 AI 제안:</strong> 가격·프로모션 전략 자동 생성</li>
+        <!-- Slide 3: Table of Contents -->
+        <div class="slide">
+            <h2>목차</h2>
+            <div class="toc-grid">
+                <div class="toc-section">
+                    <h4>1. 회사 개요</h4>
+                    <ul>
+                        <li>누크랩스 소개</li>
+                        <li>비전 및 미션</li>
+                        <li>사업 전환 배경</li>
                     </ul>
                 </div>
-
-                <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                    <h3 style="color: var(--gold); margin-bottom: 1.5rem; font-size: 1.8rem;">
-                        <i class="fas fa-video"></i> AI 숏폼 영상 제작
-                    </h3>
-                    <ul style="list-style: none; padding: 0; line-height: 1.6;">
-                        <li style="margin-bottom: 0.7rem;"><i class="fas fa-check" style="color: var(--gold); margin-right: 0.8rem;"></i><strong>사진 구도만 첨부:</strong> 자동으로 트렌드 맞춤 영상 제작</li>
-                        <li style="margin-bottom: 0.7rem;"><i class="fas fa-check" style="color: var(--gold); margin-right: 0.8rem;"></i><strong>AI 프롬프트 엔지니어링:</strong> 유료툴 대비 높은 퀄리티</li>
-                        <li style="margin-bottom: 0.7rem;"><i class="fas fa-check" style="color: var(--gold); margin-right: 0.8rem;"></i><strong>완전 무상 제공:</strong> 월 2개 고품질 숏폼 영상</li>
-                        <li style="margin-bottom: 0.7rem;"><i class="fas fa-check" style="color: var(--gold); margin-right: 0.8rem;"></i><strong>플랫폼 최적화:</strong> 인스타그램·틱톡·유튜브 쇼츠 맞춤</li>
-                        <li style="margin-bottom: 0.7rem;"><i class="fas fa-check" style="color: var(--gold); margin-right: 0.8rem;"></i><strong>자동 마케팅 소재:</strong> 해시태그·캡션·썸네일 생성</li>
+                <div class="toc-section">
+                    <h4>2. 팀 & 조직</h4>
+                    <ul>
+                        <li>CEO 프로필</li>
+                        <li>핵심 인력</li>
+                        <li>조직 역량</li>
+                    </ul>
+                </div>
+                <div class="toc-section">
+                    <h4>3. 현재 사업</h4>
+                    <ul>
+                        <li>수익 구조</li>
+                        <li>특허 포트폴리오</li>
+                        <li>기술 역량</li>
+                    </ul>
+                </div>
+                <div class="toc-section">
+                    <h4>4. Stay OneDay</h4>
+                    <ul>
+                        <li>플랫폼 개요</li>
+                        <li>시장 기회</li>
+                        <li>경쟁 전략</li>
+                    </ul>
+                </div>
+                <div class="toc-section">
+                    <h4>5. Wellswap</h4>
+                    <ul>
+                        <li>연금보험 양도거래 플랫폼</li>
+                        <li>블록체인 기반 투명성</li>
+                        <li>가치 평가 시스템</li>
+                    </ul>
+                </div>
+                <div class="toc-section">
+                    <h4>6. 콘텐츠 사업</h4>
+                    <ul>
+                        <li>유튜브 채널</li>
+                        <li>알고리즘 트레이딩</li>
+                        <li>수익 모델</li>
+                    </ul>
+                </div>
+                <div class="toc-section">
+                    <h4>7. 시장 분석</h4>
+                    <ul>
+                        <li>TAM/SAM 분석</li>
+                        <li>경쟁사 현황</li>
+                        <li>시장 트렌드</li>
+                    </ul>
+                </div>
+                <div class="toc-section">
+                    <h4>8. 재무 계획</h4>
+                    <ul>
+                        <li>5개년 전망</li>
+                        <li>수익성 분석</li>
+                        <li>투자 계획</li>
                     </ul>
                 </div>
             </div>
-
-            <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, rgba(0,212,179,0.1) 0%, rgba(199,167,86,0.1) 100%); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                <h3 style="font-size: 1.5rem; margin-bottom: 1rem;"><i class="fas fa-magnet" style="color: var(--mint); margin-right: 0.5rem;"></i> Lock-in 전략</h3>
-                <p style="font-size: 1.1rem; color: rgba(255,255,255,0.8);">
-                    무료 기능으로 사용자 확보 → 가치 경험 → V2 SaaS 전환 유도
-                </p>
-            </div>
         </div>
 
-        <!-- Slide 11: V2 Strategy -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">V2 Strategy</div>
-            <p class="keynote-description">
-                개별 웹사이트 + 촬영 + 영상을<br>
-                일원화 패키지로 제공
-            </p>
-        </div>
-
-        <!-- Slide 12: V2 Package Details -->
-        <div class="slide demo-slide" style="gap: 3rem; align-items: center; justify-content: center;">
-            <div class="demo-content" style="flex: 1; max-width: 550px; padding-left: 2rem;">
-                <h2 class="demo-title" style="font-size: 2.8rem; margin-bottom: 1.5rem; line-height: 1.1;">All-in-One<br><span style="color: var(--gold);">Package</span></h2>
-                <p class="demo-description" style="font-size: 1.3rem; margin-bottom: 2rem; line-height: 1.1;">
-                    웹사이트 + 촬영 + 영상을<br>
-                    <span style="color: var(--mint); font-weight: 700; font-size: 1.4em;">100만원</span>에 원스톱 제공
-                </p>
-
-                <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
-                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1.5rem; background: rgba(0,212,179,0.1); border-radius: 16px; border: 1px solid var(--mint);">
-                        <div><i class="fas fa-globe" style="font-size: 2rem; color: var(--mint);"></i></div>
-                        <div>
-                            <h4 style="color: var(--mint); margin-bottom: 0.5rem; font-size: 1.1rem;">개별 웹사이트</h4>
-                            <p style="font-size: 0.9rem; margin: 0; opacity: 0.8;">반응형 디자인 · SEO 최적화 · 예약 연동</p>
+        <!-- Slide 4: Company Introduction -->
+        <div class="slide">
+            <h2>회사 개요</h2>
+            <div class="grid-2" style="align-items: center; margin-bottom: var(--space-10);">
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-blue); margin-bottom: var(--space-4);">누크랩스란?</h3>
+                    <p style="text-align: left; line-height: 1.7; color: var(--primary-300); margin-bottom: var(--space-4);">
+                        누크랩스는 블록체인 기술과 법률 전문성을 바탕으로 시작된 기술 기업입니다.
+                        현재 안정적인 컨설팅 수익을 기반으로 지속가능한 플랫폼 비즈니스로의 전환을
+                        추진하고 있습니다.
+                    </p>
+                    <div style="padding-top: var(--space-3); border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                            <span style="color: var(--primary-400);">설립일</span>
+                            <span style="color: var(--primary-200); font-weight: 600;">2022년</span>
                         </div>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1.5rem; background: rgba(199,167,86,0.1); border-radius: 16px; border: 1px solid var(--gold);">
-                        <div><i class="fas fa-camera" style="font-size: 2rem; color: var(--gold);"></i></div>
-                        <div>
-                            <h4 style="color: var(--gold); margin-bottom: 0.5rem; font-size: 1.1rem;">전문 촬영</h4>
-                            <p style="font-size: 0.9rem; margin: 0; opacity: 0.8;">고화질 사진 · 드론 촬영 · 360도 뷰</p>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                            <span style="color: var(--primary-400);">직원 수</span>
+                            <span style="color: var(--primary-200); font-weight: 600;">6명</span>
                         </div>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1.5rem; background: rgba(255,255,255,0.1); border-radius: 16px; border: 1px solid rgba(255,255,255,0.3);">
-                        <div><i class="fas fa-video" style="font-size: 2rem; color: white;"></i></div>
-                        <div>
-                            <h4 style="color: white; margin-bottom: 0.5rem; font-size: 1.1rem;">영상 제작</h4>
-                            <p style="font-size: 0.9rem; margin: 0; opacity: 0.8;">프로모션 영상 · 숏폼 콘텐츠 · 가상 투어</p>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--primary-400);">서비스 지역</span>
+                            <span style="color: var(--primary-200); font-weight: 600;">한국, 홍콩, 인도네시아</span>
                         </div>
                     </div>
                 </div>
+                <div>
+                    <div class="stat-item" style="margin-bottom: var(--space-4);">
+                        <span class="stat-number">$5,000</span>
+                        <span class="stat-label">월간 안정 수익</span>
+                    </div>
+                    <div class="stat-item" style="margin-bottom: var(--space-4);">
+                        <span class="stat-number">3개</span>
+                        <span class="stat-label">보유 특허</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">4개</span>
+                        <span class="stat-label">플랫폼 사업</span>
+                    </div>
+                </div>
             </div>
+            <div class="grid-3">
+                <div class="premium-card">
+                    <h4 style="color: var(--accent-emerald); margin-bottom: var(--space-3);">비전</h4>
+                    <p style="text-align: left; color: var(--primary-300); font-size: 0.9rem;">글로벌 플랫폼 생태계를 구축하여 지속가능한 디지털 경제 발전에 기여</p>
+                </div>
+                <div class="premium-card">
+                    <h4 style="color: var(--accent-purple); margin-bottom: var(--space-3);">미션</h4>
+                    <p style="text-align: left; color: var(--primary-300); font-size: 0.9rem;">기술과 법률 전문성을 결합한 혁신적인 플랫폼 서비스 제공</p>
+                </div>
+                <div class="premium-card">
+                    <h4 style="color: var(--accent-amber); margin-bottom: var(--space-3);">핵심 가치</h4>
+                    <p style="text-align: left; color: var(--primary-300); font-size: 0.9rem;">신뢰성, 전문성, 혁신성을 바탕으로 한 고객 중심 서비스</p>
+                </div>
+            </div>
+        </div>
 
-            <div class="demo-visual" style="flex: 1; max-width: 600px; text-align: center; padding-right: 1rem;">
-                <div style="background: linear-gradient(135deg, var(--mint) 0%, var(--gold) 100%); border-radius: 30px; padding: 4rem 3rem; color: white; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3); position: relative; overflow: hidden;">
-                    <div style="position: absolute; top: -50px; right: -50px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.6;"></div>
-                    <div style="position: absolute; bottom: -30px; left: -30px; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.4;"></div>
-
-                    <div style="margin-bottom: 2rem;"><i class="fas fa-lock" style="font-size: 4rem; opacity: 0.9;"></i></div>
-                    <h3 style="font-size: 2.2rem; margin-bottom: 1.5rem; font-weight: 700;">Lock-in 효과</h3>
-                    <p style="font-size: 1.2rem; line-height: 1.6; opacity: 0.95;">
-                        개별 웹사이트 + 관리비로<br>
-                        <strong style="color: #ffff88;">지속적인 수익 창출</strong>
-                    </p>
-                    <div style="margin-top: 2rem; font-size: 1.4rem; font-weight: 600; background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 12px;">
-                        월 30만원 × 12개월
+        <!-- Slide 5: CEO Profile -->
+        <div class="slide">
+            <h2>CEO 프로필</h2>
+            <div class="grid-2" style="align-items: center; max-width: 900px;">
+                <div style="text-align: center;">
+                    <img src="/images/team/안태웅.jpg" alt="안태웅" style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 4px solid transparent; background: var(--gradient-primary); padding: 4px; box-shadow: var(--shadow-2xl);">
+                    <h3 style="margin-top: var(--space-4); margin-bottom: var(--space-2);">안태웅</h3>
+                    <p style="color: var(--accent-blue); font-size: 1.1rem; font-weight: 600;">CEO & Founder</p>
+                </div>
+                <div style="text-align: left;">
+                    <div class="premium-card" style="margin-bottom: var(--space-4);">
+                        <h3 style="color: var(--accent-emerald); margin-bottom: var(--space-3);">학력</h3>
+                        <div style="color: var(--primary-300); line-height: 1.6; font-size: 0.9rem;">
+                            <div style="font-weight: 600; margin-bottom: var(--space-1);">청주대학교 경영학과 졸업</div>
+                            <div style="font-weight: 600;">동국대학교 경영학 석사</div>
+                        </div>
+                    </div>
+                    <div class="premium-card">
+                        <h3 style="color: var(--accent-blue); margin-bottom: var(--space-3);">주요 경력</h3>
+                        <div style="color: var(--primary-300); line-height: 1.5; font-size: 0.85rem;">
+                            <div style="margin-bottom: var(--space-2);">
+                                <div style="font-weight: 600; color: var(--primary-200);">2018-2019 • 케이스타그룹 마케팅 전략본부 이사</div>
+                                <div style="font-size: 0.8rem; opacity: 0.8; margin-left: var(--space-2);">그룹사 마케팅 전략 수립 및 기획 업무 총괄</div>
+                            </div>
+                            <div style="margin-bottom: var(--space-2);">
+                                <div style="font-weight: 600; color: var(--primary-200);">2020 • 아이스엔브이 마케팅 이사</div>
+                                <div style="font-size: 0.8rem; opacity: 0.8; margin-left: var(--space-2);">O2O 서비스 마케팅 업무 담당</div>
+                            </div>
+                            <div style="margin-bottom: var(--space-2);">
+                                <div style="font-weight: 600; color: var(--primary-200);">2020-2022 • 비트온큐브 대표이사</div>
+                                <div style="font-size: 0.8rem; opacity: 0.8; margin-left: var(--space-2);">블록체인 및 웹서비스 기획 및 마케팅 사업운영</div>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--accent-gold);">2022-현재 • 누크랩스 대표이사</div>
+                                <div style="font-size: 0.8rem; opacity: 0.8; margin-left: var(--space-2);">유튜브 마케팅, MSO, 웹서비스 기획 및 운영</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 13: V2 Revenue Model -->
-        <div class="slide calculator-slide">
-            <div class="calculator-container" style="max-width: 1080px; margin: 0 auto; padding: 1.8rem; transform: scale(1.44); transform-origin: center;">
-                <h2 class="calculator-title" style="font-size: 2.2rem; margin-bottom: 1.2rem;">
-                    <span style="background: linear-gradient(135deg, var(--mint) 0%, var(--gold) 50%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">V2</span>
-                    수익 모델
-                </h2>
-                <p style="text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 1.8rem; font-size: 1.2rem;">
-                    4개 수익 채널의 종합 매출을 계산해보세요
-                </p>
-
-                <div class="calculator-grid" style="grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-                    <div class="input-group" style="padding: 1rem;">
-                        <label style="font-size: 0.85rem;">활성 호스트</label>
-                        <input type="number" id="activeHostsV2" value="80" oninput="calculateRevenueV2()" style="font-size: 0.9rem; padding: 8px;">
-                    </div>
-                    <div class="input-group" style="padding: 1rem;">
-                        <label style="font-size: 0.85rem;">평균 세션가</label>
-                        <input type="number" id="avgSessionPriceV2" value="500000" oninput="calculateRevenueV2()" style="font-size: 0.9rem; padding: 8px;">
-                    </div>
-                    <div class="input-group" style="padding: 1rem;">
-                        <label style="font-size: 0.85rem;">호스트별 월 세션</label>
-                        <input type="number" id="sessionsPerHostV2" value="10" oninput="calculateRevenueV2()" style="font-size: 0.9rem; padding: 8px;">
-                    </div>
-                    <div class="input-group" style="padding: 1rem;">
-                        <label style="font-size: 0.85rem;">수수료율 (%)</label>
-                        <input type="number" id="takeRateV2" value="5" oninput="calculateRevenueV2()" style="font-size: 0.9rem; padding: 8px;">
-                    </div>
-                    <div class="input-group" style="padding: 1rem;">
-                        <label style="font-size: 0.85rem;">SaaS 전환율 (%)</label>
-                        <input type="number" id="saasOptinRateV2" value="20" oninput="calculateRevenueV2()" style="font-size: 0.9rem; padding: 8px;">
-                    </div>
-                    <div class="input-group" style="padding: 1rem;">
-                        <label style="font-size: 0.85rem;">SaaS 월 구독료</label>
-                        <input type="number" id="saasMonthlyFeeV2" value="100000" oninput="calculateRevenueV2()" style="font-size: 0.9rem; padding: 8px;">
-                    </div>
-                    <div class="input-group" style="padding: 1rem;">
-                        <label style="font-size: 0.85rem;">월 신규 웹사이트</label>
-                        <input type="number" id="newWebsitesV2" value="5" oninput="calculateRevenueV2()" style="font-size: 0.9rem; padding: 8px;">
-                    </div>
-                    <div class="input-group" style="padding: 1rem;">
-                        <label style="font-size: 0.85rem;">웹사이트 제작비</label>
-                        <input type="number" id="websiteFeeV2" value="1000000" oninput="calculateRevenueV2()" style="font-size: 0.9rem; padding: 8px;">
-                    </div>
+        <!-- Slide 6: Team Overview -->
+        <div class="slide">
+            <h2>핵심 팀 구성</h2>
+            <div class="grid-3" style="max-width: 1100px;">
+                <div class="team-member">
+                    <img src="/images/team/안태웅.jpg" alt="안태웅" class="team-photo">
+                    <h4 style="color: var(--accent-blue); margin-bottom: var(--space-2);">안태웅</h4>
+                    <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-1); color: var(--primary-200);">CEO & Founder</p>
+                    <p style="font-size: 0.8rem; color: var(--primary-300); margin-bottom: var(--space-2);">동국대 경영학 석사</p>
+                    <p style="font-size: 0.75rem; color: var(--primary-400); line-height: 1.4;">케이스타그룹, 비트온큐브 대표 경력<br>마케팅 전략 및 사업 운영 전문</p>
                 </div>
-
-                <div class="results-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
-                    <div class="result-item" style="padding: 1rem;">
-                        <div class="result-label" style="font-size: 0.8rem;">플랫폼 수수료</div>
-                        <div class="result-value" id="platformRevenueV2" style="font-size: 1.1rem;">300만원</div>
-                    </div>
-                    <div class="result-item" style="padding: 1rem;">
-                        <div class="result-label" style="font-size: 0.8rem;">SaaS 구독료</div>
-                        <div class="result-value" id="saasRevenueV2" style="font-size: 1.1rem;">270만원</div>
-                    </div>
-                    <div class="result-item" style="padding: 1rem;">
-                        <div class="result-label" style="font-size: 0.8rem;">웹사이트 제작</div>
-                        <div class="result-value" id="websiteRevenueV2" style="font-size: 1.1rem;">1000만원</div>
-                    </div>
-                    <div class="result-item total-revenue" style="padding: 1rem;">
-                        <div class="result-label" style="font-size: 0.8rem;">V2 월 매출</div>
-                        <div class="result-value" id="totalRevenueV2" style="font-size: 1.3rem;">1570만원</div>
-                    </div>
+                <div class="team-member">
+                    <img src="/images/team/안태진.jpg" alt="안태진" class="team-photo">
+                    <h4 style="color: var(--accent-emerald); margin-bottom: var(--space-2);">안태진</h4>
+                    <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-1); color: var(--primary-200);">법무 이사</p>
+                    <p style="font-size: 0.8rem; color: var(--primary-300); margin-bottom: var(--space-2);">홍익대 법학과</p>
+                    <p style="font-size: 0.75rem; color: var(--primary-400); line-height: 1.4;">서울가정법원 조사관<br>법무법인 엘케이파트너스</p>
+                </div>
+                <div class="team-member">
+                    <img src="/images/team/한은지.jpg" alt="한은지" class="team-photo">
+                    <h4 style="color: var(--accent-purple); margin-bottom: var(--space-2);">한은지</h4>
+                    <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-1); color: var(--primary-200);">법무팀장</p>
+                    <p style="font-size: 0.8rem; color: var(--primary-300); margin-bottom: var(--space-2);">중앙대 법학과</p>
+                    <p style="font-size: 0.75rem; color: var(--primary-400); line-height: 1.4;">법무법인 지평<br>민사소송 및 기업법무</p>
+                </div>
+                <div class="team-member">
+                    <img src="/images/team/이지응.jpg" alt="이지응" class="team-photo">
+                    <h4 style="color: var(--accent-amber); margin-bottom: var(--space-2);">이지응</h4>
+                    <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-1); color: var(--primary-200);">법무 전문가</p>
+                    <p style="font-size: 0.8rem; color: var(--primary-300); margin-bottom: var(--space-2);">원광대 법학과</p>
+                    <p style="font-size: 0.75rem; color: var(--primary-400); line-height: 1.4;">법무법인 삼경<br>지적재산권 및 계약법무</p>
+                </div>
+                <div class="team-member">
+                    <img src="/images/team/박재우.jpg" alt="박재우" class="team-photo">
+                    <h4 style="color: var(--accent-rose); margin-bottom: var(--space-2);">박재우</h4>
+                    <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-1); color: var(--primary-200);">기획팀장</p>
+                    <p style="font-size: 0.8rem; color: var(--primary-300); margin-bottom: var(--space-2);">서강대 경영학과</p>
+                    <p style="font-size: 0.75rem; color: var(--primary-400); line-height: 1.4;">삼성전자 마케팅<br>서비스 기획 및 전략 수립</p>
+                </div>
+                <div class="team-member">
+                    <img src="/images/team/최승우.jpg" alt="최승우" class="team-photo">
+                    <h4 style="color: var(--accent-indigo); margin-bottom: var(--space-2);">최승우</h4>
+                    <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-1); color: var(--primary-200);">기획 전문가</p>
+                    <p style="font-size: 0.8rem; color: var(--primary-300); margin-bottom: var(--space-2);">한양대 경영학과</p>
+                    <p style="font-size: 0.75rem; color: var(--primary-400); line-height: 1.4;">LG유플러스 전략기획<br>사업개발 및 시장분석</p>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 10: Market Validation -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Validated</div>
-            <p class="keynote-description">
-                25개 파트너사와 함께<br>
-                이미 증명된 비즈니스 모델
-            </p>
-        </div>
-
-        <!-- Slide 11: Growth Metrics -->
-        <div class="slide demo-slide" style="align-items: center; justify-content: center; gap: 5rem;">
-            <div class="demo-content" style="flex: 1; max-width: 550px; text-align: left; padding-left: 3rem;">
-                <h2 class="demo-title" style="font-size: 3.5rem; margin-bottom: 2rem;">Growth</h2>
-                <p class="demo-description" style="font-size: 1.4rem; margin-bottom: 2.5rem; line-height: 1.5;">
-                    실제 데이터로 증명된<br>
-                    플랫폼의 성장 잠재력
-                </p>
-                <ul class="demo-features" style="font-size: 1.2rem;">
-                    <li style="margin-bottom: 1.2rem;"><i class="fas fa-chart-line check-icon"></i>평일 가동률 12% → 38%</li>
-                    <li style="margin-bottom: 1.2rem;"><i class="fas fa-chart-line check-icon"></i>프라임 매출 85만 → 212만원/주</li>
-                    <li style="margin-bottom: 1.2rem;"><i class="fas fa-chart-line check-icon"></i>네이버 노출 +34% 증가</li>
-                </ul>
+        <!-- Slide 7: Current Business Revenue -->
+        <div class="slide">
+            <h2>현재 수익 구조</h2>
+            <div class="grid-2" style="align-items: center; margin-bottom: var(--space-8);">
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-emerald); margin-bottom: var(--space-4);">안정적인 수익원</h3>
+                    <div style="text-align: center; margin-bottom: var(--space-4);">
+                        <div style="font-size: 2.5rem; font-weight: 800; color: var(--accent-gold); margin-bottom: var(--space-2);">$5,000</div>
+                        <div style="color: var(--primary-300); font-size: 1.1rem;">월간 컨설팅 수익</div>
+                    </div>
+                    <div style="color: var(--primary-300); font-size: 0.9rem; text-align: left; line-height: 1.6;">
+                        <div style="margin-bottom: var(--space-2);">✓ 블록체인 기술 컨설팅</div>
+                        <div style="margin-bottom: var(--space-2);">✓ 연금보험 양도거래 플랫폼</div>
+                        <div style="margin-bottom: var(--space-2);">✓ DeFi 프로젝트 기획</div>
+                        <div>✓ 스마트 컨트랙트 감사</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="financial-table" style="font-size: 0.9rem;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left;">구분</th>
+                                <th>2022</th>
+                                <th>2023</th>
+                                <th>2024</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 600; color: var(--primary-200);">컨설팅 수익</td>
+                                <td style="color: var(--accent-gold);">$36,000</td>
+                                <td style="color: var(--accent-gold);">$48,000</td>
+                                <td style="color: var(--accent-gold);">$60,000</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600; color: var(--primary-200);">영업이익률</td>
+                                <td>45%</td>
+                                <td>52%</td>
+                                <td>58%</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600; color: var(--primary-200);">고객사 수</td>
+                                <td>8</td>
+                                <td>12</td>
+                                <td>15</td>
+                            </tr>
+                        </tbody>
+                    </div>
+                </div>
             </div>
-            <div class="demo-visual" style="flex: 0 0 400px; text-align: center;">
-                <div style="background: linear-gradient(135deg, var(--mint) 0%, var(--gold) 100%); border-radius: 25px; padding: 3rem 2.5rem; text-align: center; max-width: 380px; margin: 0 auto;">
-                    <div style="font-size: 3.5rem; font-weight: 600; margin-bottom: 1rem;">250%</div>
-                    <div style="font-size: 1.3rem; opacity: 0.9; margin-bottom: 0.5rem;">매출 증가율</div>
-                    <div style="font-size: 1rem; opacity: 0.8; margin-top: 0.5rem;">구공스테이 청주 케이스</div>
+            <div class="grid-3">
+                <div class="stat-item">
+                    <span class="stat-number">$60K</span>
+                    <span class="stat-label">2024년 연간 수익</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">58%</span>
+                    <span class="stat-label">영업이익률</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">15개</span>
+                    <span class="stat-label">컨설팅 고객사</span>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 12: The Ask -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Investment</div>
-            <p class="keynote-description">
-                저희가 만들어가는 혁신에<br>
-                함께 해주시겠습니까?
-            </p>
-        </div>
-
-        <!-- Slide: Company Overview -->
-        <div class="slide demo-slide" style="gap: 4rem; align-items: center; justify-content: center;">
-            <div class="demo-content" style="flex: 1; max-width: 600px;">
-                <h2 class="demo-title" style="font-size: 3rem; margin-bottom: 2rem;">Company<br><span style="color: var(--mint);">Overview</span></h2>
-                <p class="demo-description" style="font-size: 1.3rem; margin-bottom: 2rem; line-height: 1.4;">
-                    3개국에 걸친 글로벌 기업으로<br>
-                    혁신적인 디지털 플랫폼을 운영합니다
-                </p>
-                <ul class="demo-features" style="font-size: 1.1rem;">
-                    <li><i class="fas fa-building check-icon"></i><strong>주식회사 누클랩스</strong> - 본사 (한국)</li>
-                    <li><i class="fas fa-globe check-icon"></i><strong>BMO Limited</strong> - 홍콩 법인</li>
-                    <li><i class="fas fa-map-marker-alt check-icon"></i><strong>PT. MORFO</strong> - 인도네시아 법인</li>
-                </ul>
-            </div>
-            <div class="demo-visual" style="flex: 1; max-width: 700px;">
-                <img src="/images/회사소개/회사소개.png" alt="회사 소개" class="demo-image" style="width: 100%; height: auto; max-width: 700px; border-radius: 20px;">
-            </div>
-        </div>
-
-        <!-- Slide: Global Presence -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Global Presence</div>
-            <p class="keynote-description">
-                <span style="color: var(--mint); font-weight: 700;">3개국</span> 진출로<br>
-                아시아 시장을 선도합니다
-            </p>
-        </div>
-
-        <!-- Slide: Business Portfolio -->
-        <div class="slide demo-slide" style="flex-direction: column; justify-content: center; padding: 40px;">
-            <h2 style="font-size: 3.5rem; text-align: center; margin-bottom: 3rem; background: linear-gradient(135deg, var(--mint) 0%, var(--gold) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                Business Portfolio
-            </h2>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; max-width: 1200px; margin: 0 auto;">
-                <!-- Stay OneDay -->
-                <div style="background: rgba(0,212,179,0.1); padding: 3rem 2rem; border-radius: 24px; border: 2px solid var(--mint); text-align: center;">
-                    <div style="margin-bottom: 2rem;">
-                        <i class="fas fa-home" style="font-size: 4rem; color: var(--mint);"></i>
+        <!-- Slide 8: Patent Portfolio -->
+        <div class="slide">
+            <h2>특허 포트폴리오</h2>
+            <div class="grid-2" style="margin-bottom: var(--space-8);">
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-blue); margin-bottom: var(--space-4);">보유 특허 현황</h3>
+                    <div style="text-align: center; margin-bottom: var(--space-4);">
+                        <div style="font-size: 3rem; font-weight: 800; color: var(--accent-gold);">3건</div>
+                        <div style="color: var(--primary-300);">등록 완료된 특허</div>
                     </div>
-                    <h3 style="color: var(--mint); margin-bottom: 1.5rem; font-size: 2rem; font-weight: 700;">Stay OneDay</h3>
-                    <p style="font-size: 1.2rem; line-height: 1.5; margin-bottom: 2rem; color: rgba(255,255,255,0.9);">
-                        평일 데이트립 전문<br>
-                        AI 기반 숙박 플랫폼
-                    </p>
-                    <div style="background: rgba(0,212,179,0.2); padding: 1rem; border-radius: 12px;">
-                        <p style="font-size: 1rem; color: var(--mint); font-weight: 600;">
-                            <i class="fas fa-users"></i> 25개 파트너사 운영 중
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Wellswap -->
-                <div style="background: rgba(199,167,86,0.1); padding: 3rem 2rem; border-radius: 24px; border: 2px solid var(--gold); text-align: center;">
-                    <div style="margin-bottom: 2rem;">
-                        <i class="fas fa-exchange-alt" style="font-size: 4rem; color: var(--gold);"></i>
-                    </div>
-                    <h3 style="color: var(--gold); margin-bottom: 1.5rem; font-size: 2rem; font-weight: 700;">Wellswap</h3>
-                    <p style="font-size: 1.2rem; line-height: 1.5; margin-bottom: 2rem; color: rgba(255,255,255,0.9);">
-                        글로벌 저축상 연금보험<br>
-                        매매 플랫폼
-                    </p>
-                    <div style="background: rgba(199,167,86,0.2); padding: 1rem; border-radius: 12px;">
-                        <p style="font-size: 1rem; color: var(--gold); font-weight: 600;">
-                            <i class="fas fa-globe-asia"></i> 아시아 3개국 서비스
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: rgba(255,255,255,0.05); border-radius: 20px; max-width: 800px; margin-left: auto; margin-right: auto;">
-                <h4 style="color: var(--mint); margin-bottom: 1rem; font-size: 1.4rem;">
-                    <i class="fas fa-chart-line"></i> 다각화된 포트폴리오
-                </h4>
-                <p style="font-size: 1.1rem; color: rgba(255,255,255,0.8);">
-                    여행·숙박업과 핀테크 분야에서 동시에 혁신을 이끌어가는 글로벌 기업
-                </p>
-            </div>
-        </div>
-
-        <!-- Slide: Wellswap Technology Stack -->
-        <div class="slide demo-slide" style="flex-direction: column; justify-content: center; padding: 40px;">
-            <h2 style="font-size: 3.5rem; text-align: center; margin-bottom: 3rem; background: linear-gradient(135deg, var(--gold) 0%, var(--mint) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                Wellswap Technology
-            </h2>
-
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 3rem; max-width: 1200px; margin: 0 auto;">
-                <!-- AI Value Assessment -->
-                <div style="background: rgba(199,167,86,0.1); padding: 2.5rem; border-radius: 24px; border: 2px solid var(--gold); text-align: center;">
-                    <div style="margin-bottom: 2rem;">
-                        <i class="fas fa-brain" style="font-size: 3.5rem; color: var(--gold);"></i>
-                    </div>
-                    <h3 style="color: var(--gold); margin-bottom: 1.5rem; font-size: 1.8rem; font-weight: 700;">AI 가치평가 시스템</h3>
-                    <p style="font-size: 1.1rem; line-height: 1.5; color: rgba(255,255,255,0.9);">
-                        머신러닝 알고리즘 기반<br>
-                        정확한 보험 자산 가치 평가
+                    <p style="text-align: left; color: var(--primary-300); line-height: 1.6; font-size: 0.9rem;">
+                        블록체인 기술과 플랫폼 서비스에 특화된 핵심 특허들로 구성되어 있으며,
+                        각 사업 영역에서 기술적 경쟁우위를 확보하고 있습니다.
                     </p>
                 </div>
-
-                <!-- OCR Technology -->
-                <div style="background: rgba(0,212,179,0.1); padding: 2.5rem; border-radius: 24px; border: 2px solid var(--mint); text-align: center;">
-                    <div style="margin-bottom: 2rem;">
-                        <i class="fas fa-file-text" style="font-size: 3.5rem; color: var(--mint);"></i>
+                <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                    <div class="premium-card" style="padding: var(--space-4);">
+                        <h4 style="color: var(--accent-emerald); font-size: 1rem; margin-bottom: var(--space-2);">특허 1호</h4>
+                        <p style="font-size: 0.85rem; color: var(--primary-200); font-weight: 600; margin-bottom: var(--space-1);">블록체인 기반 스마트 컨트랙트 최적화 시스템</p>
+                        <p style="font-size: 0.75rem; color: var(--primary-400);">가스비 절감 및 실행 속도 향상 기술</p>
                     </div>
-                    <h3 style="color: var(--mint); margin-bottom: 1.5rem; font-size: 1.8rem; font-weight: 700;">OCR 기술</h3>
-                    <p style="font-size: 1.1rem; line-height: 1.5; color: rgba(255,255,255,0.9);">
-                        보험 문서 자동 인식<br>
-                        및 데이터 추출 시스템
-                    </p>
-                </div>
-
-                <!-- Data Crawling -->
-                <div style="background: rgba(0,212,179,0.1); padding: 2.5rem; border-radius: 24px; border: 2px solid var(--mint); text-align: center;">
-                    <div style="margin-bottom: 2rem;">
-                        <i class="fas fa-spider" style="font-size: 3.5rem; color: var(--mint);"></i>
+                    <div class="premium-card" style="padding: var(--space-4);">
+                        <h4 style="color: var(--accent-purple); font-size: 1rem; margin-bottom: var(--space-2);">특허 2호</h4>
+                        <p style="font-size: 0.85rem; color: var(--primary-200); font-weight: 600; margin-bottom: var(--space-1);">분산형 거래소 보안 강화 프로토콜</p>
+                        <p style="font-size: 0.75rem; color: var(--primary-400);">멀티시그 및 타임락 보안 시스템</p>
                     </div>
-                    <h3 style="color: var(--mint); margin-bottom: 1.5rem; font-size: 1.8rem; font-weight: 700;">데이터 크롤링</h3>
-                    <p style="font-size: 1.1rem; line-height: 1.5; color: rgba(255,255,255,0.9);">
-                        실시간 이행률 확인<br>
-                        및 시장 데이터 수집
-                    </p>
-                </div>
-
-                <!-- Blockchain -->
-                <div style="background: rgba(199,167,86,0.1); padding: 2.5rem; border-radius: 24px; border: 2px solid var(--gold); text-align: center;">
-                    <div style="margin-bottom: 2rem;">
-                        <i class="fas fa-cubes" style="font-size: 3.5rem; color: var(--gold);"></i>
+                    <div class="premium-card" style="padding: var(--space-4);">
+                        <h4 style="color: var(--accent-amber); font-size: 1rem; margin-bottom: var(--space-2);">특허 3호</h4>
+                        <p style="font-size: 0.85rem; color: var(--primary-200); font-weight: 600; margin-bottom: var(--space-1);">AI 기반 알고리즘 트레이딩 엔진</p>
+                        <p style="font-size: 0.75rem; color: var(--primary-400);">머신러닝 기반 시장 예측 및 자동 거래</p>
                     </div>
-                    <h3 style="color: var(--gold); margin-bottom: 1.5rem; font-size: 1.8rem; font-weight: 700;">블록체인</h3>
-                    <p style="font-size: 1.1rem; line-height: 1.5; color: rgba(255,255,255,0.9);">
-                        폴리곤 메인넷 배포<br>
-                        스마트 컨트랙트 운영
-                    </p>
                 </div>
             </div>
+        </div>
 
-            <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, rgba(199,167,86,0.1) 0%, rgba(0,212,179,0.1) 100%); border-radius: 20px; max-width: 900px; margin-left: auto; margin-right: auto;">
-                <h4 style="color: var(--gold); margin-bottom: 1rem; font-size: 1.5rem;">
-                    <i class="fas fa-rocket"></i> 완성된 기술 스택
-                </h4>
-                <p style="font-size: 1.2rem; color: rgba(255,255,255,0.9); line-height: 1.4;">
-                    AI • OCR • 크롤링 • 블록체인이 통합된<br>
-                    <span style="color: var(--mint); font-weight: 700;">혁신적인 핀테크 플랫폼</span>
+        <!-- Slide 9: Stay OneDay Platform Overview -->
+        <div class="slide">
+            <h2>Stay OneDay 플랫폼</h2>
+            <div class="grid-2" style="align-items: center; margin-bottom: var(--space-8);">
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-blue); margin-bottom: var(--space-4);">당일 숙박 예약 플랫폼</h3>
+                    <p style="text-align: left; color: var(--primary-300); line-height: 1.7; margin-bottom: var(--space-4);">
+                        Stay OneDay는 당일 숙박에 특화된 플랫폼으로, 기존 숙박 예약 서비스의
+                        빈틈을 공략하여 새로운 시장을 창출합니다. 즉석 예약과 할인된 가격으로
+                        고객과 호텔 모두에게 가치를 제공합니다.
+                    </p>
+                    <div style="color: var(--primary-300); font-size: 0.9rem; text-align: left;">
+                        <div style="margin-bottom: var(--space-2);">🎯 타겟: 당일 숙박 수요층</div>
+                        <div style="margin-bottom: var(--space-2);">⚡ 특징: 즉시 예약 확정</div>
+                        <div style="margin-bottom: var(--space-2);">💰 혜택: 최대 40% 할인</div>
+                        <div>📱 플랫폼: 웹 + 모바일 앱</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="grid-2" style="gap: var(--space-3);">
+                        <div class="stat-item">
+                            <span class="stat-number">15조원</span>
+                            <span class="stat-label">국내 숙박시장</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">324만</span>
+                            <span class="stat-label">야놀자 MAU</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">309만</span>
+                            <span class="stat-label">여기어때 MAU</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">25%</span>
+                            <span class="stat-label">당일예약 비중</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="premium-card">
+                <h3 style="color: var(--accent-emerald); margin-bottom: var(--space-4);">핵심 경쟁우위</h3>
+                <div class="grid-3">
+                    <div style="text-align: center; padding: var(--space-4);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">🚀</div>
+                        <h4 style="color: var(--primary-200); margin-bottom: var(--space-2);">즉시 확정</h4>
+                        <p style="font-size: 0.8rem; color: var(--primary-400);">대기시간 없는<br>실시간 예약 시스템</p>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-4);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">💎</div>
+                        <h4 style="color: var(--primary-200); margin-bottom: var(--space-2);">프리미엄 할인</h4>
+                        <p style="font-size: 0.8rem; color: var(--primary-400);">빈방 활용을 통한<br>윈-윈 가격 정책</p>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-4);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">🎯</div>
+                        <h4 style="color: var(--primary-200); margin-bottom: var(--space-2);">니치 마켓</h4>
+                        <p style="font-size: 0.8rem; color: var(--primary-400);">당일 숙박 전문<br>차별화된 포지셔닝</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Stay OneDay Market Analysis -->
+        <div class="slide">
+            <h2>숙박업계 시장 분석</h2>
+            <div class="grid-2" style="margin-bottom: var(--space-8);">
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-blue); margin-bottom: var(--space-4);">시장 규모 및 성장성</h3>
+                    <div class="financial-table" style="font-size: 0.85rem;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left;">구분</th>
+                                <th>2023</th>
+                                <th>2024</th>
+                                <th>2025E</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 600;">국내 숙박시장</td>
+                                <td style="color: var(--accent-gold);">14.2조원</td>
+                                <td style="color: var(--accent-gold);">15.0조원</td>
+                                <td style="color: var(--accent-gold);">15.8조원</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">온라인 예약률</td>
+                                <td>68%</td>
+                                <td>72%</td>
+                                <td>76%</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">당일 예약 비중</td>
+                                <td>22%</td>
+                                <td>25%</td>
+                                <td>28%</td>
+                            </tr>
+                            <tr style="border-bottom: 2px solid var(--accent-gold);">
+                                <td style="font-weight: 700; color: var(--primary-100);">타겟시장(TAM)</td>
+                                <td style="color: var(--accent-gold); font-weight: 700;">3.1조원</td>
+                                <td style="color: var(--accent-gold); font-weight: 700;">3.75조원</td>
+                                <td style="color: var(--accent-gold); font-weight: 700;">4.4조원</td>
+                            </tr>
+                        </tbody>
+                    </div>
+                </div>
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-purple); margin-bottom: var(--space-4);">경쟁사 현황</h3>
+                    <div style="margin-bottom: var(--space-4);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3); background: rgba(59, 130, 246, 0.1); border-radius: var(--radius-lg); margin-bottom: var(--space-3);">
+                            <div>
+                                <div style="font-weight: 600; color: var(--primary-100); margin-bottom: var(--space-1);">야놀자</div>
+                                <div style="font-size: 0.8rem; color: var(--primary-400);">324만 MAU • 시장점유율 1위</div>
+                            </div>
+                            <div style="font-size: 1.2rem; color: var(--accent-blue);">👑</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3); background: rgba(139, 92, 246, 0.1); border-radius: var(--radius-lg); margin-bottom: var(--space-3);">
+                            <div>
+                                <div style="font-weight: 600; color: var(--primary-100); margin-bottom: var(--space-1);">여기어때</div>
+                                <div style="font-size: 0.8rem; color: var(--primary-400);">309만 MAU • 시장점유율 2위</div>
+                            </div>
+                            <div style="font-size: 1.2rem; color: var(--accent-purple);">🥈</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3); background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-lg);">
+                            <div>
+                                <div style="font-weight: 600; color: var(--primary-100); margin-bottom: var(--space-1);">Stay OneDay</div>
+                                <div style="font-size: 0.8rem; color: var(--primary-400);">당일 숙박 전문 • 니치 마켓</div>
+                            </div>
+                            <div style="font-size: 1.2rem; color: var(--accent-emerald);">🎯</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-4">
+                <div class="stat-item">
+                    <span class="stat-number">4.4조원</span>
+                    <span class="stat-label">2025년 TAM</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">6.2%</span>
+                    <span class="stat-label">연평균 성장률</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">76%</span>
+                    <span class="stat-label">온라인 예약률</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">28%</span>
+                    <span class="stat-label">당일 예약 비중</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Wellswap Platform -->
+        <div class="slide">
+            <h2>Wellswap 연금보험 양도거래 플랫폼</h2>
+            <div class="grid-2" style="align-items: center; margin-bottom: var(--space-8);">
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-purple); margin-bottom: var(--space-4);">플랫폼 개요</h3>
+                    <p style="text-align: left; color: var(--primary-300); line-height: 1.7; margin-bottom: var(--space-4);">
+                        Wellswap은 저축성 연금보험 상품의 가치를 정확하게 평가하여 양도자와 양수자를
+                        안전하게 연결하는 혁신적인 플랫폼입니다. 블록체인 네트워크를 활용하여
+                        모든 거래 과정을 투명하고 공정하게 관리합니다.
+                    </p>
+                    <div style="color: var(--primary-300); font-size: 0.9rem; text-align: left;">
+                        <div style="margin-bottom: var(--space-2);">📊 평가: AI 기반 정확한 보험가치 산정</div>
+                        <div style="margin-bottom: var(--space-2);">🔗 연결: 양도자-양수자 매칭 시스템</div>
+                        <div style="margin-bottom: var(--space-2);">🛡️ 투명성: 블록체인 기반 거래 기록</div>
+                        <div>⚖️ 공정성: 스마트 컨트랙트 자동 실행</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="grid-2" style="gap: var(--space-3);">
+                        <div class="stat-item">
+                            <span class="stat-number">180조원</span>
+                            <span class="stat-label">국내 연금보험 시장</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">2,400만건</span>
+                            <span class="stat-label">연금보험 가입 건수</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">15%</span>
+                            <span class="stat-label">중도 해지율 (연간)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">8%</span>
+                            <span class="stat-label">연간 시장 성장률</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="premium-card">
+                <h3 style="color: var(--accent-emerald); margin-bottom: var(--space-4);">핵심 가치 제안</h3>
+                <div class="grid-3">
+                    <div style="text-align: center; padding: var(--space-4);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">📈</div>
+                        <h4 style="color: var(--primary-200); margin-bottom: var(--space-2);">정확한 가치평가</h4>
+                        <p style="font-size: 0.8rem; color: var(--primary-400);">AI 알고리즘을 통한<br>객관적이고 정확한 보험가치 산정</p>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-4);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">🔗</div>
+                        <h4 style="color: var(--primary-200); margin-bottom: var(--space-2);">안전한 매칭</h4>
+                        <p style="font-size: 0.8rem; color: var(--primary-400);">블록체인 기반<br>신뢰할 수 있는 거래 환경</p>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-4);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">⚡</div>
+                        <h4 style="color: var(--primary-200); margin-bottom: var(--space-2);">즉시 처리</h4>
+                        <p style="font-size: 0.8rem; color: var(--primary-400);">스마트 컨트랙트로<br>자동화된 거래 체결</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: YouTube Marketing Channel -->
+        <div class="slide">
+            <h2>유튜브 마케팅 채널</h2>
+            <div class="grid-2" style="align-items: center; margin-bottom: var(--space-8);">
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-rose); margin-bottom: var(--space-4);">콘텐츠 마케팅 전략</h3>
+                    <p style="text-align: left; color: var(--primary-300); line-height: 1.7; margin-bottom: var(--space-4);">
+                        연금보험, 블록체인, 핀테크 분야의 전문 콘텐츠를 제작하여 브랜드 인지도를
+                        높이고 잠재 고객층을 확보합니다. 교육용 콘텐츠와 실용적 가이드를 통해
+                        신뢰할 수 있는 정보원으로 포지셔닝합니다.
+                    </p>
+                    <div style="color: var(--primary-300); font-size: 0.9rem; text-align: left;">
+                        <div style="margin-bottom: var(--space-2);">📚 교육: 블록체인 기초부터 고급까지</div>
+                        <div style="margin-bottom: var(--space-2);">📊 분석: 시장 동향 및 투자 인사이트</div>
+                        <div style="margin-bottom: var(--space-2);">🎯 타겟: MZ세대 + 기술 관심층</div>
+                        <div>💰 수익: 광고 + 협찬 + 제휴 마케팅</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="grid-2" style="gap: var(--space-3);">
+                        <div class="stat-item">
+                            <span class="stat-number">26억명</span>
+                            <span class="stat-label">유튜브 월간 사용자</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">89%</span>
+                            <span class="stat-label">MZ세대 유튜브 이용률</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">$28.8B</span>
+                            <span class="stat-label">유튜브 광고 시장</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">45%</span>
+                            <span class="stat-label">연간 크리에이터 수익 증가</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="premium-card">
+                <h3 style="color: var(--accent-amber); margin-bottom: var(--space-4);">콘텐츠 카테고리별 전략</h3>
+                <div class="grid-4">
+                    <div style="text-align: center; padding: var(--space-3); background: rgba(59, 130, 246, 0.1); border-radius: var(--radius-lg);">
+                        <div style="font-size: 1.2rem; margin-bottom: var(--space-2);">🎓</div>
+                        <h4 style="color: var(--primary-200); font-size: 0.9rem; margin-bottom: var(--space-2);">기초 교육</h4>
+                        <p style="font-size: 0.75rem; color: var(--primary-400);">블록체인 101<br>연금보험 가이드</p>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-3); background: rgba(139, 92, 246, 0.1); border-radius: var(--radius-lg);">
+                        <div style="font-size: 1.2rem; margin-bottom: var(--space-2);">📈</div>
+                        <h4 style="color: var(--primary-200); font-size: 0.9rem; margin-bottom: var(--space-2);">시장 분석</h4>
+                        <p style="font-size: 0.75rem; color: var(--primary-400);">트렌드 분석<br>투자 전략</p>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-3); background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-lg);">
+                        <div style="font-size: 1.2rem; margin-bottom: var(--space-2);">🛠️</div>
+                        <h4 style="color: var(--primary-200); font-size: 0.9rem; margin-bottom: var(--space-2);">실용 가이드</h4>
+                        <p style="font-size: 0.75rem; color: var(--primary-400);">거래소 사용법<br>지갑 설정</p>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-3); background: rgba(245, 158, 11, 0.1); border-radius: var(--radius-lg);">
+                        <div style="font-size: 1.2rem; margin-bottom: var(--space-2);">🎤</div>
+                        <h4 style="color: var(--primary-200); font-size: 0.9rem; margin-bottom: var(--space-2);">인터뷰</h4>
+                        <p style="font-size: 0.75rem; color: var(--primary-400);">업계 전문가<br>성공 사례</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: NukeLabs Platform Ecosystem -->
+        <div class="slide">
+            <h2>누크랩스 플랫폼 생태계</h2>
+            <div class="platform-ecosystem" style="width: 100%; max-width: 1200px; margin: 0 auto; position: relative; height: 600px;">
+                <!-- Central Core -->
+                <div class="ecosystem-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 200px; background: conic-gradient(from 45deg, #667EEA, #764BA2, #F093FB, #F5576C, #4FACFE, #00F2FE); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-premium);">
+                    <div style="color: white; text-align: center; font-weight: 800;">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-1);">누크랩스</div>
+                        <div style="font-size: 1rem;">Platform Hub</div>
+                    </div>
+                </div>
+
+                <!-- Stay OneDay Platform -->
+                <div class="platform-node" style="position: absolute; top: 80px; left: 150px; width: 160px; height: 80px; background: var(--gradient-glass); backdrop-filter: blur(15px); border: 2px solid var(--accent-blue); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg);">
+                    <div style="text-align: center; color: var(--primary-100);">
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--accent-blue);">Stay OneDay</div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">당일 숙박 플랫폼</div>
+                    </div>
+                </div>
+
+                <!-- Wellswap Platform -->
+                <div class="platform-node" style="position: absolute; top: 80px; right: 150px; width: 160px; height: 80px; background: var(--gradient-glass); backdrop-filter: blur(15px); border: 2px solid var(--accent-purple); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg);">
+                    <div style="text-align: center; color: var(--primary-100);">
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--accent-purple);">Wellswap</div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">연금보험 양도거래</div>
+                    </div>
+                </div>
+
+                <!-- YouTube Channel -->
+                <div class="platform-node" style="position: absolute; bottom: 80px; left: 150px; width: 160px; height: 80px; background: var(--gradient-glass); backdrop-filter: blur(15px); border: 2px solid var(--accent-rose); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg);">
+                    <div style="text-align: center; color: var(--primary-100);">
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--accent-rose);">YouTube</div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">마케팅 채널</div>
+                    </div>
+                </div>
+
+                <!-- Algorithm Trading -->
+                <div class="platform-node" style="position: absolute; bottom: 80px; right: 150px; width: 160px; height: 80px; background: var(--gradient-glass); backdrop-filter: blur(15px); border: 2px solid var(--accent-emerald); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg);">
+                    <div style="text-align: center; color: var(--primary-100);">
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--accent-emerald);">AI Trading</div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">알고리즘 거래</div>
+                    </div>
+                </div>
+
+                <!-- Support Services -->
+                <div class="support-service" style="position: absolute; top: 200px; left: 50px; width: 120px; height: 50px; background: rgba(139, 92, 246, 0.1); border: 1px solid var(--accent-indigo); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; font-size: 0.8rem; color: var(--accent-indigo); font-weight: 600;">법무 자문</div>
+                </div>
+
+                <div class="support-service" style="position: absolute; top: 200px; right: 50px; width: 120px; height: 50px; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent-amber); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; font-size: 0.8rem; color: var(--accent-amber); font-weight: 600;">블록체인 기술</div>
+                </div>
+
+                <div class="support-service" style="position: absolute; bottom: 200px; left: 50px; width: 120px; height: 50px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-emerald); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; font-size: 0.8rem; color: var(--accent-emerald); font-weight: 600;">데이터 분석</div>
+                </div>
+
+                <div class="support-service" style="position: absolute; bottom: 200px; right: 50px; width: 120px; height: 50px; background: rgba(244, 63, 94, 0.1); border: 1px solid var(--accent-rose); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; font-size: 0.8rem; color: var(--accent-rose); font-weight: 600;">마케팅 전략</div>
+                </div>
+
+                <!-- Connection Lines -->
+                <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1;">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="rgba(255,255,255,0.6)"/>
+                        </marker>
+                    </defs>
+                    <!-- Lines from center to platforms -->
+                    <line x1="600" y1="300" x2="400" y2="170" stroke="rgba(59,130,246,0.8)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <line x1="600" y1="300" x2="800" y2="170" stroke="rgba(139,92,246,0.8)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <line x1="600" y1="300" x2="400" y2="430" stroke="rgba(244,63,94,0.8)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <line x1="600" y1="300" x2="800" y2="430" stroke="rgba(16,185,129,0.8)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <!-- Lines to support services -->
+                    <line x1="520" y1="250" x2="170" y2="225" stroke="rgba(139,92,246,0.6)" stroke-width="1" stroke-dasharray="5,5"/>
+                    <line x1="680" y1="250" x2="1030" y2="225" stroke="rgba(245,158,11,0.6)" stroke-width="1" stroke-dasharray="5,5"/>
+                    <line x1="520" y1="350" x2="170" y2="375" stroke="rgba(16,185,129,0.6)" stroke-width="1" stroke-dasharray="5,5"/>
+                    <line x1="680" y1="350" x2="1030" y2="375" stroke="rgba(244,63,94,0.6)" stroke-width="1" stroke-dasharray="5,5"/>
+                </svg>
+
+                <!-- Data Flow Labels -->
+                <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: var(--gradient-glass); backdrop-filter: blur(10px); padding: var(--space-2) var(--space-4); border-radius: var(--radius-lg); border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="color: var(--primary-200); font-size: 0.9rem; font-weight: 600;">통합 데이터 & 사용자 관리</div>
+                </div>
+
+                <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--gradient-glass); backdrop-filter: blur(10px); padding: var(--space-2) var(--space-4); border-radius: var(--radius-lg); border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="color: var(--primary-200); font-size: 0.9rem; font-weight: 600;">수익 공유 & 시너지 효과</div>
+                </div>
+            </div>
+            <div style="margin-top: var(--space-4); text-align: center;">
+                <p style="font-size: 1rem; color: var(--primary-300); max-width: 900px; margin: 0 auto; margin-bottom: var(--space-4);">
+                    <strong>고소득 자산가층</strong>을 타겟으로 한 유기적 통합 생태계<br>
+                    Wellswap ↔ 유튜브 채널 ↔ Stay OneDay가 고객 데이터와 니즈를 공유하여 시너지 창출
                 </p>
+                <div style="background: var(--gradient-glass); backdrop-filter: blur(10px); padding: var(--space-4); border-radius: var(--radius-xl); border: 1px solid rgba(245, 158, 11, 0.3); max-width: 600px; margin: 0 auto;">
+                    <div style="color: var(--accent-amber); font-weight: 700; margin-bottom: var(--space-2);">🎯 핵심 전략</div>
+                    <div style="color: var(--primary-200); font-size: 0.9rem; line-height: 1.6;">
+                        연금보험 양도거래 고객 → 프리미엄 숙박(풀빌라) 서비스로 자연스러운 확장<br>
+                        <span style="color: var(--accent-gold);">"자산가 맞춤형 토탈 라이프스타일 플랫폼"</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Slide: Wellswap Performance -->
-        <div class="slide demo-slide" style="gap: 4rem; align-items: center; justify-content: center;">
-            <div class="demo-content" style="flex: 1; max-width: 600px;">
-                <h2 class="demo-title" style="font-size: 3rem; margin-bottom: 2rem;">Wellswap<br><span style="color: var(--gold);">Performance</span></h2>
-                <p class="demo-description" style="font-size: 1.3rem; margin-bottom: 2rem; line-height: 1.4;">
-                    폴리곤 메인넷에서 검증된<br>
-                    실제 운영 성과입니다
-                </p>
-                <ul class="demo-features" style="font-size: 1.2rem;">
-                    <li><i class="fas fa-chart-line check-icon"></i><strong>250M+</strong> Trading Volume</li>
-                    <li><i class="fas fa-users check-icon"></i><strong>25K+</strong> Active Users</li>
-                    <li><i class="fas fa-shield-alt check-icon"></i><strong>99%</strong> Success Rate</li>
-                </ul>
+        <!-- Slide 14: Algorithm Trading Platform -->
+        <div class="slide">
+            <h2>알고리즘 트레이딩 플랫폼</h2>
+            <div class="grid-2" style="align-items: center; margin-bottom: var(--space-8);">
+                <div class="premium-card">
+                    <h3 style="color: var(--accent-indigo); margin-bottom: var(--space-4);">AI 기반 자동 거래 시스템</h3>
+                    <p style="text-align: left; color: var(--primary-300); line-height: 1.7; margin-bottom: var(--space-4);">
+                        머신러닝과 딥러닝 기술을 활용한 고도화된 알고리즘 트레이딩 시스템으로,
+                        개인 투자자도 전문가 수준의 자동 거래 전략을 활용할 수 있습니다.
+                        특허받은 AI 엔진이 시장 데이터를 실시간 분석하여 최적의 매매 타이밍을 결정합니다.
+                    </p>
+                    <div style="color: var(--primary-300); font-size: 0.9rem; text-align: left;">
+                        <div style="margin-bottom: var(--space-2);">🤖 AI: 딥러닝 기반 시장 예측 모델</div>
+                        <div style="margin-bottom: var(--space-2);">⚡ 속도: 밀리세컨드 단위 실시간 거래</div>
+                        <div style="margin-bottom: var(--space-2);">📊 전략: 20+ 검증된 트레이딩 알고리즘</div>
+                        <div>🛡️ 리스크: 자동 손절 및 포지션 관리</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="grid-2" style="gap: var(--space-3);">
+                        <div class="stat-item">
+                            <span class="stat-number">$14.2T</span>
+                            <span class="stat-label">글로벌 알고트레이딩 시장</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">75%</span>
+                            <span class="stat-label">기관투자 알고트레이딩 비중</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">23%</span>
+                            <span class="stat-label">연간 시장 성장률</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">85%</span>
+                            <span class="stat-label">백테스팅 승률</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="demo-visual" style="flex: 1; max-width: 700px;">
-                <img src="/images/investor/wel1.jpg" alt="Wellswap 플랫폼" class="demo-image" style="width: 100%; height: auto; max-width: 700px; border-radius: 20px;">
+            <div class="premium-card">
+                <h3 style="color: var(--accent-emerald); margin-bottom: var(--space-4);">핵심 기술 및 특징</h3>
+                <div class="grid-3">
+                    <div style="text-align: center; padding: var(--space-4);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">🧠</div>
+                        <h4 style="color: var(--primary-200); margin-bottom: var(--space-2);">머신러닝 엔진</h4>
+                        <p style="font-size: 0.8rem; color: var(--primary-400);">과거 데이터 학습을 통한<br>미래 가격 예측 모델</p>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-4);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">⚡</div>
+                        <h4 style="color: var(--primary-200); margin-bottom: var(--space-2);">고빈도 거래</h4>
+                        <p style="font-size: 0.8rem; color: var(--primary-400);">1ms 이내 체결로<br>최적 가격 확보</p>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-4);">
+                        <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">📊</div>
+                        <h4 style="color: var(--primary-200); margin-bottom: var(--space-2);">다중 전략</h4>
+                        <p style="font-size: 0.8rem; color: var(--primary-400);">추세추종, 평균회귀,<br>차익거래 등 20+ 전략</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Slide: YouTube Marketing Power -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Marketing Power</div>
-            <p class="keynote-description">
-                유튜브 홍투사 채널을 통한<br>
-                <span style="color: var(--gold); font-weight: 700;">검증된 마케팅 역량</span>
-            </p>
-        </div>
-
-        <!-- Slide: YouTube Channel Performance -->
-        <div class="slide demo-slide" style="gap: 4rem; align-items: center; justify-content: center;">
-            <div class="demo-visual" style="flex: 1; max-width: 700px;">
-                <img src="/images/investor/hk1.jpg" alt="홍투사 유튜브 채널" class="demo-image" style="width: 100%; height: auto; max-width: 700px; border-radius: 20px;">
-            </div>
-            <div class="demo-content" style="flex: 1; max-width: 600px;">
-                <h2 class="demo-title" style="font-size: 3rem; margin-bottom: 2rem;">홍투사<br><span style="color: var(--gold);">YouTube</span></h2>
-                <p class="demo-description" style="font-size: 1.3rem; margin-bottom: 2rem; line-height: 1.4;">
-                    금융·투자 전문 컨텐츠로<br>
-                    강력한 마케팅 영향력을 구축
-                </p>
-                <ul class="demo-features" style="font-size: 1.1rem;">
-                    <li><i class="fas fa-play check-icon"></i>홍콩 은행 계좌 개설의 창점</li>
-                    <li><i class="fas fa-dollar-sign check-icon"></i>홍콩 연금 보험 전문 컨텐츠</li>
-                    <li><i class="fas fa-globe check-icon"></i>국민연금 vs 홍콩연금보험 비교</li>
-                    <li><i class="fas fa-chart-bar check-icon"></i>30대 직장인 홍콩 연금 가입 가이드</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Slide: Leadership & Team (Placeholder) -->
-        <div class="slide keynote-slide">
-            <div class="keynote-word">Leadership</div>
-            <p class="keynote-description">
-                풍부한 경험과 전문성을 갖춘<br>
-                핵심 멤버들이 함께합니다
-            </p>
-        </div>
-
-        <!-- Slide 13: Closing -->
-        <div class="slide hero-slide">
-            <div class="hero-tagline">Thank You</div>
-            <h1 class="hero-title" style="font-size: clamp(3rem, 6vw, 8rem);">Stay OneDay</h1>
-            <p class="hero-subtitle">
-                Questions & Discussion
-            </p>
-            <div style="margin-top: 3rem; padding: 2rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; max-width: 500px;">
-                <h3 style="color: var(--mint); margin-bottom: 1rem; font-size: 1.3rem;">
-                    <i class="fas fa-envelope"></i> 문의
-                </h3>
-                <p style="font-size: 1.1rem; color: rgba(255,255,255,0.8);">
-                    info@nuklabs.com
-                </p>
-            </div>
-        </div>
     </div>
 
     <!-- Navigation -->
-    <div class="nav-container">
-        <button class="nav-btn" onclick="previousSlide()">← 이전</button>
-        <button class="nav-btn" onclick="nextSlide()">다음 →</button>
+    <div class="nav-controls">
+        <button class="nav-btn" onclick="previousSlide()">‹</button>
+        <button class="nav-btn" onclick="nextSlide()">›</button>
     </div>
 
-    <!-- Slide Counter -->
     <div class="slide-counter">
-        <span id="currentSlide">1</span> / <span id="totalSlides">33</span>
+        <span id="currentSlide">1</span> / <span id="totalSlides">50</span>
     </div>
-
-    <!-- Progress Bar -->
-    <div class="progress-bar" id="progressBar"></div>
 
     <script>
         let currentSlideIndex = 0;
@@ -1735,229 +1247,26 @@
         function showSlide(index) {
             slides.forEach(slide => slide.classList.remove('active'));
             slides[index].classList.add('active');
-
             document.getElementById('currentSlide').textContent = index + 1;
-
-            const progress = ((index + 1) / totalSlides) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-
-            // Update navigation buttons
-            const prevBtn = document.querySelector('.nav-container .nav-btn:first-child');
-            const nextBtn = document.querySelector('.nav-container .nav-btn:last-child');
-
-            prevBtn.disabled = index === 0;
-            nextBtn.disabled = index === totalSlides - 1;
         }
 
         function nextSlide() {
-            if (currentSlideIndex < totalSlides - 1) {
-                currentSlideIndex++;
-                showSlide(currentSlideIndex);
-            }
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            showSlide(currentSlideIndex);
         }
 
         function previousSlide() {
-            if (currentSlideIndex > 0) {
-                currentSlideIndex--;
-                showSlide(currentSlideIndex);
-            }
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlideIndex);
         }
 
-        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' || e.key === ' ' || e.key.toLowerCase() === 'd') {
-                e.preventDefault();
+            if (e.key === 'ArrowRight' || e.key === ' ') {
                 nextSlide();
-            } else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
-                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
                 previousSlide();
-            } else if (e.key.toLowerCase() === 'p') {
-                window.print();
             }
-        });
-
-        // V1 Revenue calculator
-        function calculateRevenueV1() {
-            const activeHosts = parseInt(document.getElementById('activeHostsV1')?.value) || 30;
-            const avgSessionPrice = parseInt(document.getElementById('avgSessionPriceV1')?.value) || 50;
-            const sessionsPerHost = parseInt(document.getElementById('sessionsPerHostV1')?.value) || 10;
-            const takeRate = parseFloat(document.getElementById('takeRateV1')?.value) || 5;
-
-            const monthlyGMV = activeHosts * avgSessionPrice * sessionsPerHost;
-            const totalRevenue = monthlyGMV * (takeRate / 100);
-
-            const elements = {
-                'monthlyGMVV1': monthlyGMV.toLocaleString() + '만원',
-                'totalRevenueV1': Math.round(totalRevenue).toLocaleString() + '만원'
-            };
-
-            Object.entries(elements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) element.textContent = value;
-            });
-        }
-
-        // V2 Revenue calculator
-        function calculateRevenueV2() {
-            const activeHosts = parseInt(document.getElementById('activeHostsV2')?.value) || 80;
-            const avgSessionPrice = parseInt(document.getElementById('avgSessionPriceV2')?.value) || 500000;
-            const sessionsPerHost = parseInt(document.getElementById('sessionsPerHostV2')?.value) || 10;
-            const takeRate = parseFloat(document.getElementById('takeRateV2')?.value) || 5;
-            const saasOptinRate = parseFloat(document.getElementById('saasOptinRateV2')?.value) || 20;
-            const saasMonthlyFee = parseInt(document.getElementById('saasMonthlyFeeV2')?.value) || 100000;
-            const websiteFee = parseInt(document.getElementById('websiteFeeV2')?.value) || 1000000;
-            const newWebsites = parseInt(document.getElementById('newWebsitesV2')?.value) || 5;
-            const managedWebsites = parseInt(document.getElementById('managedWebsitesV2')?.value) || 25;
-            const managementFee = parseInt(document.getElementById('managementFeeV2')?.value) || 5;
-
-            const monthlyGMV = activeHosts * avgSessionPrice * sessionsPerHost;
-            const platformRevenue = monthlyGMV * (takeRate / 100);
-            const saasRevenue = activeHosts * (saasOptinRate / 100) * saasMonthlyFee;
-            const websiteRevenue = newWebsites * websiteFee;
-            const managementRevenue = managedWebsites * managementFee;
-            const totalRevenue = platformRevenue + saasRevenue + websiteRevenue + managementRevenue;
-
-            const elements = {
-                'monthlyGMVV2': monthlyGMV.toLocaleString() + '만원',
-                'platformRevenueV2': Math.round(platformRevenue).toLocaleString() + '만원',
-                'saasRevenueV2': Math.round(saasRevenue).toLocaleString() + '만원',
-                'websiteRevenueV2': Math.round(websiteRevenue).toLocaleString() + '만원',
-                'managementRevenueV2': Math.round(managementRevenue).toLocaleString() + '만원',
-                'totalRevenueV2': Math.round(totalRevenue).toLocaleString() + '만원'
-            };
-
-            Object.entries(elements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) element.textContent = value;
-            });
-
-            // Update growth chart
-            drawGrowthChart();
-        }
-
-        // Draw growth chart
-        function drawGrowthChart() {
-            const canvas = document.getElementById('growthChart');
-            if (!canvas) return;
-
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-
-            // Clear canvas
-            ctx.clearRect(0, 0, width, height);
-
-            // Sample data for growth curve
-            const months = 12;
-            const v1Revenue = 54; // Base V1 revenue
-            const maxRevenue = 1319; // V2 max revenue
-
-            // Draw grid
-            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= 4; i++) {
-                const y = (height / 4) * i;
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(width, y);
-                ctx.stroke();
-            }
-
-            // V1 flat line
-            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, height - (v1Revenue / maxRevenue) * height);
-            ctx.lineTo(width * 0.6, height - (v1Revenue / maxRevenue) * height);
-            ctx.stroke();
-
-            // V2 growth curve
-            ctx.strokeStyle = '#C7A756'; // Gold for SaaS
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(width * 0.6, height - (v1Revenue / maxRevenue) * height);
-            for (let i = 0; i <= 40; i++) {
-                const x = width * 0.6 + (width * 0.4 * i / 40);
-                const progress = i / 40;
-                const revenue = v1Revenue + (maxRevenue - v1Revenue) * Math.pow(progress, 0.7);
-                const y = height - (revenue / maxRevenue) * height;
-                ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-
-            // Website package boost
-            ctx.strokeStyle = '#00D4B3'; // Mint for website packages
-            ctx.lineWidth = 3;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(width * 0.7, height * 0.8);
-            ctx.lineTo(width, height * 0.1);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            showSlide(0);
-
-            // V1 calculator inputs
-            const v1Inputs = document.querySelectorAll('#activeHostsV1, #avgSessionPriceV1, #sessionsPerHostV1, #takeRateV1');
-            v1Inputs.forEach(input => {
-                input.addEventListener('input', calculateRevenueV1);
-            });
-
-            // V2 calculator inputs
-            const v2Inputs = document.querySelectorAll('#activeHostsV2, #avgSessionPriceV2, #sessionsPerHostV2, #takeRateV2, #saasOptinRateV2, #saasMonthlyFeeV2, #newWebsitesV2, #websiteFeeV2, #managedWebsitesV2, #managementFeeV2');
-            v2Inputs.forEach(input => {
-                input.addEventListener('input', calculateRevenueV2);
-            });
-
-            // Initial calculations
-            calculateRevenueV1();
-            calculateRevenueV2();
-
-            // Mobile touch gestures
-            let startX = 0;
-            let startY = 0;
-            let isScrolling = false;
-
-            document.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                isScrolling = false;
-            }, { passive: true });
-
-            document.addEventListener('touchmove', (e) => {
-                if (!startX || !startY) return;
-
-                let diffX = startX - e.touches[0].clientX;
-                let diffY = startY - e.touches[0].clientY;
-
-                if (Math.abs(diffY) > Math.abs(diffX)) {
-                    isScrolling = true;
-                }
-            }, { passive: true });
-
-            document.addEventListener('touchend', (e) => {
-                if (isScrolling) return;
-                if (!startX || !startY) return;
-
-                let diffX = startX - e.changedTouches[0].clientX;
-                let diffY = startY - e.changedTouches[0].clientY;
-
-                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-                    if (diffX > 0) {
-                        nextSlide();
-                    } else {
-                        prevSlide();
-                    }
-                }
-
-                startX = 0;
-                startY = 0;
-                isScrolling = false;
-            }, { passive: true });
         });
     </script>
 </body>
-</html>// Force deployment 2025년 9월 18일 목요일 05시 40분 13초 KST
+</html>

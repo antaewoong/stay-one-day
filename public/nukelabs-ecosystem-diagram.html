@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>누크랩스 플랫폼 생태계</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: #ffffff;
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .diagram-container {
+            width: 1400px;
+            height: 900px;
+            position: relative;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .main-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            font-weight: 400;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        .target-info {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #d97706;
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #92400e;
+        }
+
+        /* 중앙 허브 */
+        .central-hub {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            background: conic-gradient(from 45deg, #667EEA, #764BA2, #F093FB, #F5576C, #4FACFE, #00F2FE);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .hub-content {
+            z-index: 2;
+        }
+
+        .hub-title {
+            font-size: 24px;
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+
+        .hub-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        /* 플랫폼 노드들 */
+        .platform-node {
+            position: absolute;
+            width: 200px;
+            height: 120px;
+            background: white;
+            border: 2px solid;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .platform-node:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .youtube-node {
+            top: 80px;
+            left: 100px;
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .wellswap-node {
+            top: 80px;
+            right: 100px;
+            border-color: #8b5cf6;
+            color: #8b5cf6;
+        }
+
+        .stayoneday-node {
+            bottom: 200px;
+            left: 100px;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .ai-trading-node {
+            bottom: 200px;
+            right: 100px;
+            border-color: #10b981;
+            color: #10b981;
+        }
+
+        .platform-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .platform-desc {
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+
+        /* SVG 연결선 */
+        .connections-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 고객 여정 */
+        .customer-journey {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px 32px;
+        }
+
+        .journey-step {
+            text-align: center;
+            font-size: 13px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .journey-number {
+            display: block;
+            width: 32px;
+            height: 32px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            line-height: 32px;
+            margin: 0 auto 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .journey-arrow {
+            color: #cbd5e1;
+            font-size: 20px;
+        }
+
+        /* 시너지 박스 */
+        .synergy-box {
+            position: absolute;
+            top: 280px;
+            right: 60px;
+            width: 240px;
+            background: #f0fdf4;
+            border: 1px solid #22c55e;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .synergy-title {
+            font-weight: 700;
+            color: #15803d;
+            font-size: 16px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .synergy-item {
+            font-size: 13px;
+            color: #166534;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        /* 지원 서비스 */
+        .support-services {
+            position: absolute;
+            top: 280px;
+            left: 60px;
+            width: 240px;
+        }
+
+        .support-service {
+            background: #fafafa;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram-container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1 class="main-title">누크랩스 플랫폼 생태계</h1>
+            <p class="subtitle">What is an Exactly NukeLabs?</p>
+            <div class="target-info">
+                🎯 고소득 자산가층 타겟 통합 서비스
+            </div>
+        </div>
+
+        <!-- 중앙 허브 -->
+        <div class="central-hub">
+            <div class="hub-content">
+                <div class="hub-title">누크랩스</div>
+                <div class="hub-subtitle">Platform Hub</div>
+            </div>
+        </div>
+
+        <!-- 플랫폼 노드들 -->
+        <div class="platform-node youtube-node">
+            <div class="platform-title">Global YouTube</div>
+            <div class="platform-desc">글로벌 금융 전문 채널<br>니즈 파악 & 브랜딩</div>
+        </div>
+
+        <div class="platform-node wellswap-node">
+            <div class="platform-title">Wellswap</div>
+            <div class="platform-desc">연금보험 양도거래<br>+ 컨시어지 서비스</div>
+        </div>
+
+        <div class="platform-node stayoneday-node">
+            <div class="platform-title">Stay OneDay</div>
+            <div class="platform-desc">프리미엄 당일 숙박<br>(풀빌라, 럭셔리 호텔)</div>
+        </div>
+
+        <div class="platform-node ai-trading-node">
+            <div class="platform-title">AI Trading</div>
+            <div class="platform-desc">머신러닝 알고리즘<br>자동 암호화폐 거래</div>
+        </div>
+
+        <!-- SVG 연결선 -->
+        <svg class="connections-svg">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="rgba(100, 116, 139, 0.6)"/>
+                </marker>
+            </defs>
+
+            <!-- 중앙에서 각 플랫폼으로 연결선 -->
+            <line x1="700" y1="350" x2="300" y2="200" stroke="#ef4444" stroke-width="3" opacity="0.7" marker-end="url(#arrowhead)"/>
+            <line x1="700" y1="350" x2="1100" y2="200" stroke="#8b5cf6" stroke-width="3" opacity="0.7" marker-end="url(#arrowhead)"/>
+            <line x1="700" y1="450" x2="300" y2="580" stroke="#3b82f6" stroke-width="3" opacity="0.7" marker-end="url(#arrowhead)"/>
+            <line x1="700" y1="450" x2="1100" y2="580" stroke="#10b981" stroke-width="3" opacity="0.7" marker-end="url(#arrowhead)"/>
+
+            <!-- 플랫폼 간 상호 연결 (점선) -->
+            <line x1="300" y1="260" x2="1100" y2="260" stroke="#94a3b8" stroke-width="2" stroke-dasharray="8,4" opacity="0.4"/>
+            <line x1="300" y1="520" x2="1100" y2="520" stroke="#94a3b8" stroke-width="2" stroke-dasharray="8,4" opacity="0.4"/>
+        </svg>
+
+        <!-- 지원 서비스 -->
+        <div class="support-services">
+            <div class="support-service">법무 자문</div>
+            <div class="support-service">블록체인 기술</div>
+            <div class="support-service">데이터 분석</div>
+            <div class="support-service">마케팅 전략</div>
+        </div>
+
+        <!-- 시너지 효과 -->
+        <div class="synergy-box">
+            <div class="synergy-title">🔄 시너지 효과</div>
+            <div class="synergy-item">• 고객 데이터베이스 통합 관리</div>
+            <div class="synergy-item">• 크로스 플랫폼 마케팅</div>
+            <div class="synergy-item">• 1인 고객 다중 수익원 창출</div>
+            <div class="synergy-item">• 토탈 자산관리 서비스</div>
+        </div>
+
+        <!-- 고객 여정 -->
+        <div class="customer-journey">
+            <div class="journey-step">
+                <span class="journey-number">1</span>
+                <div>글로벌 금융정보<br>유튜브 시청</div>
+            </div>
+            <div class="journey-arrow">→</div>
+            <div class="journey-step">
+                <span class="journey-number">2</span>
+                <div>연금보험<br>양도거래</div>
+            </div>
+            <div class="journey-arrow">→</div>
+            <div class="journey-step">
+                <span class="journey-number">3</span>
+                <div>AI 자동<br>암호화폐 투자</div>
+            </div>
+            <div class="journey-arrow">→</div>
+            <div class="journey-step">
+                <span class="journey-number">4</span>
+                <div>프리미엄<br>라이프스타일</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
