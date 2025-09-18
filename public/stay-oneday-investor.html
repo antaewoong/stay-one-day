@@ -515,10 +515,11 @@
         /* Mobile Responsive Styles */
         @media (max-width: 768px) {
             .slide {
-                padding: 25px 20px;
+                padding: 25px 20px !important;
                 overflow-y: auto;
-                height: 100vh;
+                height: 100vh !important;
                 min-height: -webkit-fill-available;
+                display: flex !important;
                 justify-content: center;
                 align-items: center;
             }
@@ -553,9 +554,11 @@
             }
 
             .demo-image {
-                max-width: 100%;
+                max-width: 100% !important;
+                min-width: auto !important;
                 height: auto;
                 border-radius: 16px;
+                width: 100% !important;
             }
 
             .calculator-container {
@@ -614,10 +617,11 @@
             }
 
             .demo-slide > div {
-                width: 100%;
-                max-width: none;
+                width: 100% !important;
+                max-width: none !important;
                 padding: 0 !important;
                 margin: 0 !important;
+                flex: none !important;
             }
 
             /* 모바일에서 계산기 슬라이드 최적화 */
@@ -890,6 +894,17 @@
             div[style*="grid-template-columns: 1fr 1fr"] {
                 grid-template-columns: 1fr !important;
                 gap: 2rem !important;
+            }
+
+            div[style*="grid-template-columns: repeat(2, 1fr)"] {
+                grid-template-columns: 1fr !important;
+                gap: 2rem !important;
+            }
+
+            /* 모바일에서 인라인 스타일 덮어쓰기 */
+            .slide[style*="flex-direction: column"] {
+                flex-direction: column !important;
+                padding: 20px !important;
             }
 
             /* Better hero styles for mobile */
